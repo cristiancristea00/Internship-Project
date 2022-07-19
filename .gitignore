@@ -131,4 +131,5 @@ $RECYCLE.BIN/
 # MPLABX
 *.mk
 *.properties
+*.production
 .generated_files
