@@ -1,9 +1,9 @@
 /**
- *  @file main.c
+ *  @file uart.c
  *  @author Cristian Cristea - M70957
- *  @date 18 July 2022
+ *  @date July 20, 2022
  *
- *  @brief Main source file for the project
+ *  @brief TODO: Short summary
  *
  *  @copyright (c) 2022 Microchip Technology Inc. and its subsidiaries.
  *
@@ -26,11 +26,5 @@
  *  DIRECTLY TO MICROCHIP FOR THIS SOFTWARE.
  **/
 
-#include <avr/io.h>
 
 #include "uart.h"
-
-void main(void)
-{
-    while (1);
-}
