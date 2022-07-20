@@ -26,11 +26,26 @@
  *  DIRECTLY TO MICROCHIP FOR THIS SOFTWARE.
  **/
 
-#include <avr/io.h>
 
+#include "config.h"
 #include "uart.h"
+
+#include <avr/io.h>
+#include <util/delay.h>
+
+#include <stddef.h>
 
 void main(void)
 {
-    while (1);
+    PORTC.DIRSET = PIN0_bm;
+
+    Uart1Init(UART_BAUD_RATE(115200));
+
+    char const * const message = "Hello from Cristi!\n\r";
+
+    while (1)
+    {
+        Uart1Print(message);
+        _delay_ms(1000);
+    }
 }

@@ -1,5 +1,5 @@
 /**
- *  @file uart.h
+ *  @file config.h
  *  @author Cristian Cristea - M70957
  *  @date July 20, 2022
  *
@@ -27,39 +27,11 @@
  **/
 
 
-#ifndef UART_H
-#define	UART_H
+#ifndef CONFIG_H
+#define	CONFIG_H
 
-#include "config.h"
+#define F_CPU 4000000UL
+// #define UART_PRINTF
 
-#include <avr/io.h>
-
-#include <stddef.h>
-#include <stdbool.h>
-#include <stdio.h>
-
-
-#define UART_BAUD_RATE(x) ((uint16_t) ((4UL * F_CPU) / x ## UL))
-
-
-typedef void (* uart_callback_t) (uint8_t);
-
-
-void Uart1Init(uint16_t const baudRate);
-
-void Uart1RegisterCallback(uart_callback_t const callback);
-
-void Uart1Print(char const * string);
-
-static void Uart1SendByte(uint8_t const dataByte);
-
-static bool Uart1TxBusy(void);
-
-#ifdef UART_PRINTF
-
-static int8_t Uart1PrintChar(char const character, FILE * const stream);
-
-#endif // UART_PRINTF
-
-#endif // UART_H
+#endif // CONFIG_H
 

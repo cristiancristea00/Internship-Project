@@ -28,3 +28,76 @@
 
 
 #include "uart.h"
+
+static uart_callback_t uartCallback = NULL;
+
+#ifdef UART_PRINTF
+
+static int8_t Uart1PrintChar(char const character, FILE * const stream)
+{
+    Uart1SendByte((uint8_t) character);
+
+    return 0;
+}
+
+FILE uart1Stream = FDEV_SETUP_STREAM(Uart1PrintChar, NULL, _FDEV_SETUP_WRITE);
+
+#endif // UART_PRINTF
+
+void Uart1Init(uint16_t const baudRate)
+{
+#ifdef UART_PRINTF
+
+    stdout = &uart1Stream;
+
+#endif // UART_PRINTF
+
+    uartCallback = NULL;
+
+    USART1.BAUD = baudRate;
+
+    USART1.CTRLA = USART_RXCIE_bm;
+    USART1.CTRLB = USART_TXEN_bm | USART_RXEN_bm;
+
+    return;
+}
+
+void Uart1RegisterCallback(uart_callback_t const callback)
+{
+    uartCallback = callback;
+
+    return;
+}
+
+void Uart1Print(char const * string)
+{
+    char character = '\0';
+
+    while (1)
+    {
+        character = *string++;
+
+        if (character == '\0')
+        {
+            break;
+        }
+
+        Uart1SendByte((uint8_t) character);
+    }
+
+    return;
+}
+
+static inline void Uart1SendByte(uint8_t const dataByte)
+{
+    while (Uart1TxBusy());
+
+    USART1.TXDATAL = dataByte;
+
+    return;
+}
+
+static inline bool Uart1TxBusy(void)
+{
+    return !(USART1.STATUS & USART_DREIF_bm);
+}
