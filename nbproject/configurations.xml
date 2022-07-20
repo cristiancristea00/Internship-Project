@@ -52,7 +52,7 @@
         </archiverTool>
         <loading>
           <useAlternateLoadableFile>false</useAlternateLoadableFile>
-          <parseOnProdLoad>false</parseOnProdLoad>
+          <parseOnProdLoad>true</parseOnProdLoad>
           <alternateLoadableFile></alternateLoadableFile>
         </loading>
         <subordinates>
@@ -109,7 +109,7 @@
         <property key="syntax-only" value="false"/>
         <property key="undefined-identifier" value="true"/>
         <property key="verbose" value="false"/>
-        <appendMe value="-Wall -Wextra -Wpedantic -Wunused -Wfatal-errors -Wconversion -mrelax -mstrict-X -fno-builtin -Winline -Wshadow -Wunreachable-code -Wwrite-strings -Wredundant-decls -Wmissing-prototypes -fwhole-program"/>
+        <appendMe value="-Wall -Wextra -Wpedantic -Wunused -Wfatal-errors -Wconversion -mrelax -mstrict-X -fno-builtin -Winline -Wshadow -Wunreachable-code -Wwrite-strings -Wredundant-decls -Wmissing-prototypes"/>
       </AVR-CPP>
       <AVR-GCC>
         <property key="additional-warnings" value="true"/>
@@ -137,7 +137,7 @@
         <property key="syntax-only" value="false"/>
         <property key="undefined-identifier" value="true"/>
         <property key="verbose" value="false"/>
-        <appendMe value="-Wall -Wextra -Wpedantic -Wunused -Wfatal-errors -Wconversion -mrelax -mstrict-X -fno-builtin -Winline -Wshadow -Wunreachable-code -Wwrite-strings -Wredundant-decls -Wmissing-prototypes -fwhole-program"/>
+        <appendMe value="-Wall -Wextra -Wpedantic -Wunused -Wfatal-errors -Wconversion -mrelax -mstrict-X -fno-builtin -Winline -Wshadow -Wunreachable-code -Wwrite-strings -Wredundant-decls -Wmissing-prototypes"/>
       </AVR-GCC>
       <AVR-Global>
         <property key="common-include-directories" value=""/>
@@ -151,7 +151,7 @@
         <property key="user-pack-device-support" value=""/>
         <property key="user-pack-include" value=""/>
         <property key="usersig" value="false"/>
-        <appendMe value="-Wall -Wextra -Wpedantic -Wunused -Wfatal-errors -Wconversion -mrelax -mstrict-X -fno-builtin -Winline -Wshadow -Wunreachable-code -Wwrite-strings -Wredundant-decls -Wmissing-prototypes -fwhole-program"/>
+        <appendMe value="-Wall -Wextra -Wpedantic -Wunused -Wfatal-errors -Wconversion -mrelax -mstrict-X -fno-builtin -Winline -Wshadow -Wunreachable-code -Wwrite-strings -Wredundant-decls -Wmissing-prototypes"/>
       </AVR-Global>
       <AVR-LD>
         <property key="eeprom-segment" value=""/>
@@ -204,7 +204,7 @@
         <property key="verbose" value="false"/>
         <property key="warning-level" value="-3"/>
         <property key="what-to-do" value="ignore"/>
-        <appendMe value="-Wall -Wextra -Wpedantic -Wunused -Wfatal-errors -Wconversion -mrelax -mstrict-X -fno-builtin -Winline -Wshadow -Wunreachable-code -Wwrite-strings -Wredundant-decls -Wmissing-prototypes -fwhole-program"/>
+        <appendMe value="-Wall -Wextra -Wpedantic -Wunused -Wfatal-errors -Wconversion -mrelax -mstrict-X -fno-builtin -Winline -Wshadow -Wunreachable-code -Wwrite-strings -Wredundant-decls -Wmissing-prototypes"/>
       </HI-TECH-COMP>
       <HI-TECH-LINK>
         <property key="additional-options-checksum" value=""/>
