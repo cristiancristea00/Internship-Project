@@ -1,9 +1,9 @@
 /**
- *  @file main.c
+ *  @file config.h
  *  @author Cristian Cristea - M70957
- *  @date 18 July 2022
+ *  @date July 20, 2022
  *
- *  @brief Main source file for the project
+ *  @brief Configuration file for the project that contains definitions
  *
  *  @copyright (c) 2022 Microchip Technology Inc. and its subsidiaries.
  *
@@ -27,12 +27,10 @@
  **/
 
 
-#include "config.h"
-#include "uart.h"
+#ifndef CONFIG_H
+#define	CONFIG_H
 
-#include <avr/io.h>
+#define F_CPU 4000000UL     // The CPU frequency. To be set manuallly.
+// #define UART_PRINTF      // Uncomment to enable printf functionality on UART.
 
-void main(void)
-{
-    while (1);
-}
+#endif // CONFIG_H
