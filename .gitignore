@@ -132,4 +132,5 @@ $RECYCLE.BIN/
 *.mk
 *.properties
 *.production
+*.debug
 .generated_files

@@ -3,7 +3,7 @@
  *  @author Cristian Cristea - M70957
  *  @date July 20, 2022
  *
- *  @brief TODO: Short summary
+ *  @brief Configuration file for the project that contains definitions
  *
  *  @copyright (c) 2022 Microchip Technology Inc. and its subsidiaries.
  *
@@ -30,8 +30,7 @@
 #ifndef CONFIG_H
 #define	CONFIG_H
 
-#define F_CPU 4000000UL
-// #define UART_PRINTF
+#define F_CPU 4000000UL     // The CPU frequency. To be set manuallly.
+// #define UART_PRINTF      // Uncomment to enable printf functionality on UART.
 
 #endif // CONFIG_H
-

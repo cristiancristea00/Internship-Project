@@ -3,7 +3,7 @@
  *  @author Cristian Cristea - M70957
  *  @date July 20, 2022
  *
- *  @brief TODO: Short summary
+ *  @brief Source file for the UART module
  *
  *  @copyright (c) 2022 Microchip Technology Inc. and its subsidiaries.
  *
