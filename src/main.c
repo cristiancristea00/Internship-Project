@@ -31,8 +31,21 @@
 #include "uart.h"
 
 #include <avr/io.h>
+#include <util/delay.h>
 
 void main(void)
 {
-    while (1);
+    PORTC.DIRSET = PIN0_bm;
+
+    SetClockFrequency(CLKCTRL_FRQSEL_24M_gc, PRESCALE_DISABLED);
+
+    Uart1Init(UART_BAUD_RATE(460800));
+
+    char const * const message = "Hello from Curiosity Nano!\n\r";
+
+    while (1)
+    {
+        Uart1Print(message);
+        _delay_ms(1000);
+    }
 }

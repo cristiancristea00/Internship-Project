@@ -1,9 +1,9 @@
 /**
- *  @file config.h
+ *  @file config.c
  *  @author Cristian Cristea - M70957
- *  @date July 20, 2022
+ *  @date 21 July 2022
  *
- *  @brief Configuration file for the project that contains definitions
+ *  @brief TODO: Short summary
  *
  *  @copyright (c) 2022 Microchip Technology Inc. and its subsidiaries.
  *
@@ -27,27 +27,34 @@
  **/
 
 
-#ifndef CONFIG_H
-#define	CONFIG_H
+#include "config.h"
 
-#include <avr/io.h>
+void SetClockFrequency(uint8_t const frequency, uint8_t const prescalerEnabled, ...)
+{
+    // Enable external crystal oscillator
+    _PROTECTED_WRITE(CLKCTRL.XOSC32KCTRLA, CLKCTRL_ENABLE_bm);
 
-#include <stdarg.h>
+    // Set OSCHF as the main clock
+    _PROTECTED_WRITE(CLKCTRL.MCLKCTRLA, CLKCTRL_CLKSEL_OSCHF_gc);
 
-#define F_CPU 24000000UL           // The CPU frequency. To be set manuallly.
+    // Set OSCHF clock to the specified frequency and enable auto-tune
+    _PROTECTED_WRITE(CLKCTRL.OSCHFCTRLA, frequency | CLKCTRL_AUTOTUNE_bm);
 
-// #define UART_PRINTF             // Uncomment to enable printf functionality on UART.
+    if (prescalerEnabled)
+    {
+        va_list argument;
+        va_start(argument, prescalerEnabled);
 
-#define PRESCALE_ENABLED true      // Enable the CPU prescaler
-#define PRESCALE_DISABLED false    // Disable the CPU prescaler
+        uint8_t prescaler = (uint8_t) va_arg(argument, int);
 
-/**
- * @brief Sets the CPU's clock frequency and optionally the prescale factor.
- *
- * @param frequency The desired frequency of the CPU's clock
- * @param prescalerEnabled The prescaler status
- * @param ... Optional desired prescaler value of the CPU's clock
- **/
-void SetClockFrequency(uint8_t const frequency, uint8_t const prescalerEnabled, ...);
+        // Enable the prescaler and set it to the specified value
+        _PROTECTED_WRITE(CLKCTRL.MCLKCTRLB, CLKCTRL_PEN_bm | prescaler);
 
-#endif // CONFIG_H
+        va_end(argument);
+    }
+
+    // Lock the frequency and prescaler from changing
+    _PROTECTED_WRITE(CLKCTRL.MCLKLOCK, CLKCTRL_LOCKEN_bm);
+
+    return;
+}
