@@ -1,9 +1,9 @@
 /**
- *  @file main.c
+ *  @file config.c
  *  @author Cristian Cristea - M70957
- *  @date 18 July 2022
+ *  @date 21 July 2022
  *
- *  @brief Main source file for the project
+ *  @brief Source file for the Config module
  *
  *  @copyright (c) 2022 Microchip Technology Inc. and its subsidiaries.
  *
@@ -28,24 +28,33 @@
 
 
 #include "config.h"
-#include "uart.h"
 
-#include <avr/io.h>
-#include <util/delay.h>
-
-void main(void)
+void SetClockFrequency(uint8_t const frequency, uint8_t const prescalerEnabled, ...)
 {
-    PORTC.DIRSET = PIN0_bm;
+    // Enable external crystal oscillator
+    _PROTECTED_WRITE(CLKCTRL.XOSC32KCTRLA, CLKCTRL_ENABLE_bm);
 
-    SetClockFrequency(CLKCTRL_FRQSEL_24M_gc, PRESCALE_DISABLED);
+    // Set OSCHF as the main clock
+    _PROTECTED_WRITE(CLKCTRL.MCLKCTRLA, CLKCTRL_CLKSEL_OSCHF_gc);
 
-    Uart1Init(UART_BAUD_RATE(460800));
+    // Set OSCHF clock to the specified frequency and enable auto-tune
+    _PROTECTED_WRITE(CLKCTRL.OSCHFCTRLA, frequency | CLKCTRL_AUTOTUNE_bm);
 
-    char const * const message = "Hello from Curiosity Nano!\n\r";
-
-    while (1)
+    if (prescalerEnabled)
     {
-        Uart1Print(message);
-        _delay_ms(1000);
+        va_list argument;
+        va_start(argument, prescalerEnabled);
+
+        uint8_t prescaler = (uint8_t) va_arg(argument, int);
+
+        // Enable the prescaler and set it to the specified value
+        _PROTECTED_WRITE(CLKCTRL.MCLKCTRLB, CLKCTRL_PEN_bm | prescaler);
+
+        va_end(argument);
     }
+
+    // Lock the frequency and prescaler from changing
+    _PROTECTED_WRITE(CLKCTRL.MCLKLOCK, CLKCTRL_LOCKEN_bm);
+
+    return;
 }

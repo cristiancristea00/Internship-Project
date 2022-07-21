@@ -1,9 +1,9 @@
 /**
- *  @file main.c
+ *  @file uart.c
  *  @author Cristian Cristea - M70957
- *  @date 18 July 2022
+ *  @date July 20, 2022
  *
- *  @brief Main source file for the project
+ *  @brief Source file for the UART module
  *
  *  @copyright (c) 2022 Microchip Technology Inc. and its subsidiaries.
  *
@@ -27,25 +27,77 @@
  **/
 
 
-#include "config.h"
 #include "uart.h"
 
-#include <avr/io.h>
-#include <util/delay.h>
+static uart_callback_t uartCallback = NULL;
 
-void main(void)
+#ifdef UART_PRINTF
+
+static int8_t Uart1PrintChar(char const character, FILE * const stream)
 {
-    PORTC.DIRSET = PIN0_bm;
+    Uart1SendByte((uint8_t) character);
 
-    SetClockFrequency(CLKCTRL_FRQSEL_24M_gc, PRESCALE_DISABLED);
+    return 0;
+}
 
-    Uart1Init(UART_BAUD_RATE(460800));
+FILE uart1Stream = FDEV_SETUP_STREAM(Uart1PrintChar, NULL, _FDEV_SETUP_WRITE);
 
-    char const * const message = "Hello from Curiosity Nano!\n\r";
+#endif // UART_PRINTF
+
+void Uart1Init(uint16_t const baudRate)
+{
+#ifdef UART_PRINTF
+
+    stdout = &uart1Stream;
+
+#endif // UART_PRINTF
+
+    uartCallback = NULL;
+
+    USART1.BAUD = baudRate;
+
+    USART1.CTRLA = USART_RXCIE_bm;
+    USART1.CTRLB = USART_TXEN_bm | USART_RXEN_bm;
+
+    return;
+}
+
+void Uart1RegisterCallback(uart_callback_t const callback)
+{
+    uartCallback = callback;
+
+    return;
+}
+
+void Uart1Print(char const * string)
+{
+    char character = '\0';
 
     while (1)
     {
-        Uart1Print(message);
-        _delay_ms(1000);
+        character = *string++;
+
+        if (character == '\0')
+        {
+            break;
+        }
+
+        Uart1SendByte((uint8_t) character);
     }
+
+    return;
+}
+
+static inline void Uart1SendByte(uint8_t const dataByte)
+{
+    while (Uart1TxBusy());
+
+    USART1.TXDATAL = dataByte;
+
+    return;
+}
+
+static inline bool Uart1TxBusy(void)
+{
+    return !(USART1.STATUS & USART_DREIF_bm);
 }

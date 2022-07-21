@@ -1,9 +1,9 @@
 /**
- *  @file main.c
+ *  @file config.h
  *  @author Cristian Cristea - M70957
- *  @date 18 July 2022
+ *  @date July 20, 2022
  *
- *  @brief Main source file for the project
+ *  @brief Configuration file for the project that contains definitions
  *
  *  @copyright (c) 2022 Microchip Technology Inc. and its subsidiaries.
  *
@@ -27,25 +27,27 @@
  **/
 
 
-#include "config.h"
-#include "uart.h"
+#ifndef CONFIG_H
+#define	CONFIG_H
 
 #include <avr/io.h>
-#include <util/delay.h>
 
-void main(void)
-{
-    PORTC.DIRSET = PIN0_bm;
+#include <stdarg.h>
 
-    SetClockFrequency(CLKCTRL_FRQSEL_24M_gc, PRESCALE_DISABLED);
+#define F_CPU 24000000UL           // The CPU frequency. To be set manuallly.
 
-    Uart1Init(UART_BAUD_RATE(460800));
+// #define UART_PRINTF             // Uncomment to enable printf functionality on UART.
 
-    char const * const message = "Hello from Curiosity Nano!\n\r";
+#define PRESCALE_ENABLED true      // Enable the CPU prescaler
+#define PRESCALE_DISABLED false    // Disable the CPU prescaler
 
-    while (1)
-    {
-        Uart1Print(message);
-        _delay_ms(1000);
-    }
-}
+/**
+ * @brief Sets the CPU's clock frequency and optionally the prescale factor.
+ *
+ * @param frequency The desired frequency of the CPU's clock
+ * @param prescalerEnabled The prescaler status
+ * @param ... Optional desired prescaler value of the CPU's clock
+ **/
+void SetClockFrequency(uint8_t const frequency, uint8_t const prescalerEnabled, ...);
+
+#endif // CONFIG_H
