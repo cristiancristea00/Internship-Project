@@ -29,5 +29,40 @@
 
 #ifndef I2C_H
 #define	I2C_H
-#endif // I2C_H
 
+#include <avr/io.h>
+
+#include <stddef.h>
+
+#define I2C_NACK_ADDRESS -1
+
+#define I2C_DATA_bm 0x01
+
+enum I2C_STATE
+{
+    I2C_INIT   = 0,
+    I2C_ACKED  = 1,
+    I2C_NACKED = 2,
+    I2C_READY  = 3,
+    I2C_ERROR  = 4
+};
+
+typedef enum I2C_DATA_DIRECTION
+{
+    I2C_DATA_SEND    = 0,
+    I2C_DATA_RECEIVE = 1
+} i2c_data_direction_t;
+
+void I2c0Init(uint8_t const baudRate);
+
+static uint8_t I2c0SetAdress(uint8_t const deviceAddress, i2c_data_direction_t const dataDirection);
+
+static uint8_t I2c0WaitWrite(void);
+
+static uint8_t I2c0WaitRead(void);
+
+int8_t I2c0SendData(uint8_t const address, uint8_t const * dataForSend, uint8_t const length);
+
+int8_t I2c0ReceiveData(uint8_t const address, uint8_t * dataForReceive, uint8_t const length);
+
+#endif // I2C_H
