@@ -60,6 +60,10 @@ static uint8_t I2c0SetAdress(uint8_t const deviceAddress, i2c_data_direction_t c
     {
         return (uint8_t) (deviceAddress << 1) | I2C_DATA_bm;
     }
+    else
+    {
+        return I2C_INVALID_ADDRESS;
+    }
 }
 
 static uint8_t I2c0WaitWrite(void)
@@ -115,7 +119,7 @@ static uint8_t I2c0WaitRead(void)
 
 int8_t I2c0SendData(uint8_t const address, uint8_t const * dataForSend, uint8_t const length)
 {
-    int8_t bytesSent = I2C_NACK_ADDRESS;
+    int8_t bytesSent = I2C_NACK_OF_ADDRESS;
 
     TWI0.MADDR = I2c0SetAdress(address, I2C_DATA_SEND);
 
@@ -153,7 +157,7 @@ int8_t I2c0SendData(uint8_t const address, uint8_t const * dataForSend, uint8_t 
 
 int8_t I2c0ReceiveData(uint8_t const address, uint8_t * dataForReceive, uint8_t const length)
 {
-    int8_t bytesReceived = I2C_NACK_ADDRESS;
+    int8_t bytesReceived = I2C_NACK_OF_ADDRESS;
 
     TWI0.MADDR = I2c0SetAdress(address, I2C_DATA_RECEIVE);
 
@@ -194,4 +198,13 @@ int8_t I2c0ReceiveData(uint8_t const address, uint8_t * dataForReceive, uint8_t 
 void I2c0EndSession(void)
 {
     TWI0.MCTRLB = TWI_MCMD_STOP_gc;
+
+    return;
+}
+
+bool I2c0ClientAvailable(uint8_t const address)
+{
+    uint8_t returnValue = I2c0SendData(address, NULL, 0);
+    I2c0EndSession();
+    return returnValue != I2C_NACK_OF_ADDRESS;
 }

@@ -33,8 +33,11 @@
 #include <avr/io.h>
 
 #include <stddef.h>
+#include <stdbool.h>
 
-#define I2C_NACK_ADDRESS -1
+#define I2C_NACK_OF_ADDRESS -1
+
+#define I2C_INVALID_ADDRESS 0xFF
 
 #define I2C_DATA_bm 0x01
 
@@ -64,5 +67,9 @@ static uint8_t I2c0WaitRead(void);
 int8_t I2c0SendData(uint8_t const address, uint8_t const * dataForSend, uint8_t const length);
 
 int8_t I2c0ReceiveData(uint8_t const address, uint8_t * dataForReceive, uint8_t const length);
+
+void I2c0EndSession(void);
+
+bool I2c0ClientAvailable(uint8_t const address);
 
 #endif // I2C_H
