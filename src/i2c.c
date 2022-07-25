@@ -54,6 +54,8 @@ void I2c0Init(i2c_mode_baud_t const modeBaud)
 
     // Set the bus state to idle
     TWI0.MSTATUS = TWI_BUSSTATE_IDLE_gc;
+
+    return;
 }
 
 static uint8_t I2c0SetAdress(uint8_t const deviceAddress, i2c_data_direction_t const dataDirection)
