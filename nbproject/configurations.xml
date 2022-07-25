@@ -106,7 +106,7 @@
         <property key="verbose" value="false"/>
         <property key="warning-level" value="-3"/>
         <property key="what-to-do" value="ignore"/>
-        <appendMe value="-Wall -Wextra -Wpedantic -Wunused -Wfatal-errors -Wconversion -Winline -Wshadow -Wunreachable-code -Wwrite-strings -Wredundant-decls -Wmissing-prototypes -Wno-unused-function"/>
+        <appendMe value="-Wall -Wextra -Wpedantic -Wunused -Wfatal-errors -Wconversion -Winline -Wshadow -Wunreachable-code -Wwrite-strings -Wredundant-decls -Wmissing-prototypes -Wno-unused-function -Winline"/>
       </HI-TECH-COMP>
       <HI-TECH-LINK>
         <property key="additional-options-checksum" value=""/>
@@ -247,8 +247,6 @@
         <property key="memories.programmemory" value="true"/>
         <property key="memories.programmemory.ranges" value="0-ffff"/>
         <property key="poweroptions.powerenable" value="false"/>
-        <property key="programmerToGoFilePath"
-                  value="C:/Users/M70957/Documents/InternProject.X/debug/default/InternProject_ptg"/>
         <property key="programoptions.eraseb4program" value="true"/>
         <property key="programoptions.preservedataflash" value="false"/>
         <property key="programoptions.preservedataflash.ranges"

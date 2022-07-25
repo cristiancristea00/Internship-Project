@@ -29,9 +29,13 @@
 
 #include "config.h"
 #include "uart.h"
+#include "i2c.h"
 
 #include <avr/io.h>
 #include <util/delay.h>
+#include <avr/cpufunc.h>
+
+void BusScan(void);
 
 void main(void)
 {
@@ -41,11 +45,28 @@ void main(void)
 
     Uart1Init(UART_BAUD_RATE(460800));
 
-    char const * const message = "Hello from Curiosity Nano!\n\r";
+    I2c0Init(I2C_FAST_MODE_PLUS);
 
-    while (1)
+    _delay_ms(5000);
+
+    BusScan();
+
+    while (1);
+}
+
+void BusScan(void)
+{
+    printf("\n\rI2C Scan started from 0x%02X to 0x%02X", I2C_ADRESS_MIN, I2C_ADRESS_MAX);
+
+    for (uint8_t clientAddress = I2C_ADRESS_MIN; clientAddress <= I2C_ADRESS_MAX; ++clientAddress)
     {
-        Uart1Print(message);
-        _delay_ms(1000);
+        printf("\n\rScanning client address: 0x%02X", clientAddress);
+        if (I2c0ClientAvailable(clientAddress))
+        {
+            printf(" --> client ACKED");
+        }
     }
+    printf("\n\rI2C Scan ended\n\r");
+
+    return;
 }

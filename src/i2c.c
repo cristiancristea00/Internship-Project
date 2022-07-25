@@ -29,13 +29,19 @@
 
 #include "i2c.h"
 
-void I2c0Init(uint8_t const baudRate)
+void I2c0Init(i2c_mode_baud_t const modeBaud)
 {
     // Select I2C pins to PC2 - SDA and PC3 - SCL
     PORTMUX.TWIROUTEA = PORTMUX_TWI0_ALT2_gc;
 
     // Host baud rate control
-    TWI0.MBAUD = baudRate;
+    TWI0.MBAUD = modeBaud;
+
+    // Enable Fast Mode Plus
+    if (modeBaud == I2C_FAST_MODE_PLUS)
+    {
+        TWI0.CTRLA = TWI_FMPEN_ON_gc;
+    }
 
     // Enable I2C as host
     TWI0.MCTRLA = TWI_ENABLE_bm;
@@ -204,7 +210,7 @@ void I2c0EndSession(void)
 
 bool I2c0ClientAvailable(uint8_t const address)
 {
-    uint8_t returnValue = I2c0SendData(address, NULL, 0);
+    int8_t returnValue = I2c0SendData(address, NULL, 0);
     I2c0EndSession();
     return returnValue != I2C_NACK_OF_ADDRESS;
 }

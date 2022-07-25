@@ -36,9 +36,9 @@
 
 #define F_CPU 24000000UL           // The CPU frequency. To be set manuallly.
 
-// #define UART_PRINTF             // Uncomment to enable printf functionality on UART.
+#define UART_PRINTF                // Uncomment to enable printf functionality on UART.
 
-#define PRESCALE_ENABLED true      // Enable the CPU prescaler
+#define PRESCALE_ENABLED  true     // Enable the CPU prescaler
 #define PRESCALE_DISABLED false    // Disable the CPU prescaler
 
 /**

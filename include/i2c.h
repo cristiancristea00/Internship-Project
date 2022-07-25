@@ -41,6 +41,9 @@
 
 #define I2C_DATA_bm 0x01
 
+#define I2C_ADRESS_MIN 0x00
+#define I2C_ADRESS_MAX 0x7F
+
 enum I2C_STATE
 {
     I2C_INIT   = 0,
@@ -50,13 +53,20 @@ enum I2C_STATE
     I2C_ERROR  = 4
 };
 
+typedef enum I2C_MODE_BAUD
+{
+    I2C_STANDARD_MODE  = 115,
+    I2C_FAST_MODE      = 25,
+    I2C_FAST_MODE_PLUS = 7
+} i2c_mode_baud_t;
+
 typedef enum I2C_DATA_DIRECTION
 {
     I2C_DATA_SEND    = 0,
     I2C_DATA_RECEIVE = 1
 } i2c_data_direction_t;
 
-void I2c0Init(uint8_t const baudRate);
+void I2c0Init(i2c_mode_baud_t const modeBaud);
 
 static uint8_t I2c0SetAdress(uint8_t const deviceAddress, i2c_data_direction_t const dataDirection);
 
