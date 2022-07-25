@@ -42,13 +42,13 @@ FILE uart1Stream = FDEV_SETUP_STREAM(Uart1PrintChar, NULL, _FDEV_SETUP_WRITE);
 
 #endif // UART_PRINTF
 
-uart_t const uart1 = {
+uart_t const uart_1 = {
     .Init = Uart1Init,
     .Print = Uart1Print,
     .PrintChar = Uart1PrintChar,
 };
 
-void Uart1Init(uint16_t const baudRate)
+static void Uart1Init(uint16_t const baudRate)
 {
 #ifdef UART_PRINTF
 
@@ -64,7 +64,7 @@ void Uart1Init(uint16_t const baudRate)
     return;
 }
 
-void Uart1Print(char const * string)
+static void Uart1Print(char const * string)
 {
     char character = '\0';
 
@@ -83,7 +83,7 @@ void Uart1Print(char const * string)
     return;
 }
 
-void Uart1PrintChar(char const character)
+static void Uart1PrintChar(char const character)
 {
     Uart1SendByte((char) character);
 }

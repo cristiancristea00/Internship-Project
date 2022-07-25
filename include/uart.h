@@ -67,6 +67,7 @@ typedef void (* uart_print_char_t) (char const);
  * @brief
  * TODO
  **/
+
 typedef struct UART
 {
     uart_init_t Init;
@@ -82,21 +83,21 @@ typedef struct UART
  *
  * @param baudRate The baud rate register value
  **/
-void Uart1Init(uint16_t const baudRate);
+static void Uart1Init(uint16_t const baudRate);
 
 /**
  * @brief Sends a null-terminated string over UART.
  *
  * @param string The null-terminated string to be sent
  **/
-void Uart1Print(char const * string);
+static void Uart1Print(char const * string);
 
 /**
  * @brief Send a single character over UART.
  *
  * @param character The character to be sent
  */
-void Uart1PrintChar(char const character);
+static void Uart1PrintChar(char const character);
 
 /**
  * @brief Sends a byte over UART.
