@@ -29,5 +29,92 @@
 
 #ifndef BME280_H
 #define	BME280_H
-#endif // BME280_H
 
+#include "i2c.h"
+
+typedef struct BME280_CALIBRATION_DATA
+{
+    // Calibration coefficients for the temperature sensor
+
+    uint16_t coefTemperature1;
+    int16_t coefTemperature2;
+    int16_t coefTemperature3;
+
+    // Calibration coefficients for the pressure sensor
+
+    uint16_t coefPressure1;
+    int16_t coefPressure2;
+    int16_t coefPressure3;
+    int16_t coefPressure4;
+    int16_t coefPressure5;
+    int16_t coefPressure6;
+    int16_t coefPressure7;
+    int16_t coefPressure8;
+    int16_t coefPressure9;
+
+    // Calibration coefficients for the humidity sensor
+
+    uint8_t coefHumidity1;
+    int16_t coefHumidity2;
+    uint8_t coefHumidity3;
+    int16_t coefHumidity4;
+    int16_t coefHumidity5;
+    int8_t coefHumidity6;
+} bme280_calibration_data_t;
+
+
+typedef struct BME280_UNCOMPENSATED_DATA
+{
+    // Uncompensated data for the temperature sensor
+    uint32_t temperature;
+
+    // Uncompensated data for the pressure sensor
+    uint32_t pressure;
+
+    // Uncompensated data for the humidity sensor
+    uint32_t humidity;
+} bme280_uncompensated_data_t;
+
+
+typedef struct BME280_DATA
+{
+    // Compensated data for the temperature sensor
+    int32_t temperature;
+
+    // Compensated data for the pressure sensor
+    uint32_t  pressure;
+
+    // Compensated data for the humidity sensor
+    uint32_t humidity;
+} bme280_data_t;
+
+
+typedef struct BME280_SETTINGS
+{
+    // Temperature oversampling
+    uint8_t temperatureOversampling;
+
+    // Pressure oversampling
+    uint8_t pressureOversampling;
+
+    // Humidity oversampling
+    uint8_t humidityOversampling;
+
+    // IIR filter coefficient
+    uint8_t iirFilterCoefficient;
+
+    // Standby time
+    uint8_t standbyTime;
+} bme280_settings_t;
+
+
+typedef struct BME280_DEVICE
+{
+    // Sensor setings
+    bme280_settings_t settings;
+
+    // Calibration data
+    bme280_calibration_data_t calibrationData;
+} bme280_device_t;
+
+#endif // BME280_H
