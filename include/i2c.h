@@ -69,12 +69,31 @@ typedef enum I2C_DATA_DIRECTION
 } i2c_data_direction_t;
 
 
+typedef void (* i2c_init_t) (i2c_mode_baud_t const);
+typedef int8_t (* i2c_send_data_t) (uint8_t const, uint8_t const *, uint8_t const);
+typedef int8_t (* i2c_receive_data_t) (uint8_t const, uint8_t *, uint8_t const);
+typedef void (*i2c_end_session_t) (void);
+typedef bool (* i2c_client_available_t) (uint8_t const);
+
+/**
+ * @brief Object struct for the I2C module
+ *
+ **/
+typedef struct I2C
+{
+    i2c_init_t Init;
+    i2c_send_data_t SendData;
+    i2c_receive_data_t ReceiveData;
+    i2c_end_session_t EndSession;
+    i2c_client_available_t ClientAvailable;
+} i2c_t;
+
 /**
  * @brief Initialize the I2C module on the TWI0 bus with the given mode.
  *
  * @param modeBaud The mode of the I2C bus: Standard, Fast or Fast Plus
  **/
-void I2c0Init(i2c_mode_baud_t const modeBaud);
+static void I2c0Init(i2c_mode_baud_t const modeBaud);
 
 /**
  * @brief Sets the I2C bus address of the device based on the given chip address
@@ -108,7 +127,7 @@ static uint8_t I2c0WaitRead(void);
  * @param length The length of the data to be sent
  * @return int8_t Number of bytes sent or I2C_NACK_OF_ADDRESS
  **/
-int8_t I2c0SendData(uint8_t const address, uint8_t const * dataForSend, uint8_t const length);
+static int8_t I2c0SendData(uint8_t const address, uint8_t const * dataForSend, uint8_t const length);
 
 /**
  * @brief Receives a specific number of bytes from the device using the I2C bus.
@@ -118,13 +137,13 @@ int8_t I2c0SendData(uint8_t const address, uint8_t const * dataForSend, uint8_t 
  * @param length The length of the data to be received
  * @return int8_t Number of bytes received or I2C_NACK_OF_ADDRESS
  **/
-int8_t I2c0ReceiveData(uint8_t const address, uint8_t * dataForReceive, uint8_t const length);
+static int8_t I2c0ReceiveData(uint8_t const address, uint8_t * dataForReceive, uint8_t const length);
 
 /**
  * @brief Ends the I2C communication by sending a stop condition.
  *
  **/
-void I2c0EndSession(void);
+static void I2c0EndSession(void);
 
 /**
  * @brief Checks if a device is available on the I2C bus.
@@ -133,6 +152,6 @@ void I2c0EndSession(void);
  * @return true If the device is available
  * @return false If the device is not available
  **/
-bool I2c0ClientAvailable(uint8_t const address);
+static bool I2c0ClientAvailable(uint8_t const address);
 
 #endif // I2C_H

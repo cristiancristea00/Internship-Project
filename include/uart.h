@@ -45,11 +45,20 @@
  **/
 #define UART_BAUD_RATE(x) ((uint16_t) ((4UL * F_CPU) / x ## UL))
 
+typedef void (* uart_init_t) (uint16_t const);
+typedef void (* uart_print_t) (char const *);
+typedef void (* uart_print_char_t) (char const);
+
 /**
- * @brief Callback type for the UART interrupt.
+ * @brief Object struct for the UART module
  *
  **/
-typedef void (* uart_callback_t) (uint8_t);
+typedef struct UART
+{
+    uart_init_t Init;
+    uart_print_t Print;
+    uart_print_char_t PrintChar;
+} uart_t;
 
 /**
  * @brief Initialize the UART module by setting the baud rate and enabling the
@@ -59,28 +68,21 @@ typedef void (* uart_callback_t) (uint8_t);
  *
  * @param baudRate The baud rate register value
  **/
-void Uart1Init(uint16_t const baudRate);
-
-/**
- * @brief Register a callback function.
- *
- * @param callback The callback function to be called when an interrupt occurs
- **/
-void Uart1RegisterCallback(uart_callback_t const callback);
+static void Uart1Init(uint16_t const baudRate);
 
 /**
  * @brief Sends a null-terminated string over UART.
  *
  * @param string The null-terminated string to be sent
  **/
-void Uart1Print(char const * string);
+static void Uart1Print(char const * string);
 
 /**
  * @brief Send a single character over UART.
  *
  * @param character The character to be sent
  */
-void Uart1PrintChar(char const character);
+static void Uart1PrintChar(char const character);
 
 /**
  * @brief Sends a byte over UART.

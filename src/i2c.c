@@ -29,7 +29,20 @@
 
 #include "i2c.h"
 
-void I2c0Init(i2c_mode_baud_t const modeBaud)
+
+/**
+ * @brief Module for I2C0
+ *
+ **/
+i2c_t const i2c_0 = {
+    .Init = I2c0Init,
+    .SendData = I2c0SendData,
+    .ReceiveData = I2c0ReceiveData,
+    .EndSession = I2c0EndSession,
+    .ClientAvailable = I2c0ClientAvailable
+};
+
+static void I2c0Init(i2c_mode_baud_t const modeBaud)
 {
     // Select I2C pins to PC2 - SDA and PC3 - SCL
     PORTMUX.TWIROUTEA = PORTMUX_TWI0_ALT2_gc;
@@ -125,7 +138,7 @@ static uint8_t I2c0WaitRead(void)
     return state;
 }
 
-int8_t I2c0SendData(uint8_t const address, uint8_t const * dataForSend, uint8_t const length)
+static int8_t I2c0SendData(uint8_t const address, uint8_t const * dataForSend, uint8_t const length)
 {
     int8_t bytesSent = I2C_NACK_OF_ADDRESS;
 
@@ -163,7 +176,7 @@ int8_t I2c0SendData(uint8_t const address, uint8_t const * dataForSend, uint8_t 
     return bytesSent;
 }
 
-int8_t I2c0ReceiveData(uint8_t const address, uint8_t * dataForReceive, uint8_t const length)
+static int8_t I2c0ReceiveData(uint8_t const address, uint8_t * dataForReceive, uint8_t const length)
 {
     int8_t bytesReceived = I2C_NACK_OF_ADDRESS;
 
@@ -203,14 +216,14 @@ int8_t I2c0ReceiveData(uint8_t const address, uint8_t * dataForReceive, uint8_t 
     return bytesReceived;
 }
 
-void I2c0EndSession(void)
+static void I2c0EndSession(void)
 {
     TWI0.MCTRLB = TWI_MCMD_STOP_gc;
 
     return;
 }
 
-bool I2c0ClientAvailable(uint8_t const address)
+static bool I2c0ClientAvailable(uint8_t const address)
 {
     int8_t returnValue = I2c0SendData(address, NULL, 0);
     I2c0EndSession();
