@@ -35,6 +35,8 @@
 #include <util/delay.h>
 #include <avr/cpufunc.h>
 
+extern uart_t const uart1;
+
 void BusScan(void);
 
 void main(void)
@@ -43,7 +45,7 @@ void main(void)
 
     SetClockFrequency(CLKCTRL_FRQSEL_24M_gc, PRESCALE_DISABLED);
 
-    Uart1Init(UART_BAUD_RATE(460800));
+    uart1.Init(UART_BAUD_RATE(460800));
 
     I2c0Init(I2C_FAST_MODE_PLUS);
 

@@ -29,8 +29,6 @@
 
 #include "uart.h"
 
-static uart_callback_t uartCallback = NULL;
-
 #ifdef UART_PRINTF
 
 static int8_t Uart1SendChar(char const character, FILE * const stream)
@@ -44,6 +42,12 @@ FILE uart1Stream = FDEV_SETUP_STREAM(Uart1PrintChar, NULL, _FDEV_SETUP_WRITE);
 
 #endif // UART_PRINTF
 
+uart_t const uart1 = {
+    .Init = Uart1Init,
+    .Print = Uart1Print,
+    .PrintChar = Uart1PrintChar,
+};
+
 void Uart1Init(uint16_t const baudRate)
 {
 #ifdef UART_PRINTF
@@ -52,19 +56,10 @@ void Uart1Init(uint16_t const baudRate)
 
 #endif // UART_PRINTF
 
-    uartCallback = NULL;
-
     USART1.BAUD = baudRate;
 
     USART1.CTRLA = USART_RXCIE_bm;
     USART1.CTRLB = USART_TXEN_bm | USART_RXEN_bm;
-
-    return;
-}
-
-void Uart1RegisterCallback(uart_callback_t const callback)
-{
-    uartCallback = callback;
 
     return;
 }
