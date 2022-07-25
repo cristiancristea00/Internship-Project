@@ -76,6 +76,13 @@ void Uart1RegisterCallback(uart_callback_t const callback);
 void Uart1Print(char const * string);
 
 /**
+ * @brief Send a single character over UART.
+ *
+ * @param character The character to be sent
+ */
+void Uart1PrintChar(char const character);
+
+/**
  * @brief Sends a byte over UART.
  *
  * @param dataByte The byte to be sent

@@ -88,6 +88,11 @@ void Uart1Print(char const * string)
     return;
 }
 
+void Uart1PrintChar(char const character)
+{
+    Uart1SendByte((char) character);
+}
+
 static inline void Uart1SendByte(uint8_t const dataByte)
 {
     while (Uart1TxBusy());
