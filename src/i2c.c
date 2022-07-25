@@ -29,6 +29,11 @@
 
 #include "i2c.h"
 
+
+/**
+ * @brief Module for I2C0
+ *
+ **/
 i2c_t const i2c_0 = {
     .Init = I2c0Init,
     .SendData = I2c0SendData,

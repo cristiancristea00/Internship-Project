@@ -29,6 +29,16 @@
 
 #include "uart.h"
 
+/**
+ * @brief  Module for UART1
+ *
+ **/
+uart_t const uart_1 = {
+    .Init = Uart1Init,
+    .Print = Uart1Print,
+    .PrintChar = Uart1PrintChar,
+};
+
 #ifdef UART_PRINTF
 
 static int8_t Uart1SendChar(char const character, FILE * const stream)
@@ -41,12 +51,6 @@ static int8_t Uart1SendChar(char const character, FILE * const stream)
 FILE uart1Stream = FDEV_SETUP_STREAM(Uart1PrintChar, NULL, _FDEV_SETUP_WRITE);
 
 #endif // UART_PRINTF
-
-uart_t const uart_1 = {
-    .Init = Uart1Init,
-    .Print = Uart1Print,
-    .PrintChar = Uart1PrintChar,
-};
 
 static void Uart1Init(uint16_t const baudRate)
 {

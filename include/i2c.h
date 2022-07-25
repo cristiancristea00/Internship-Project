@@ -69,40 +69,15 @@ typedef enum I2C_DATA_DIRECTION
 } i2c_data_direction_t;
 
 
-/**
- * @brief
- * TODO
- **/
 typedef void (* i2c_init_t) (i2c_mode_baud_t const);
-
-/**
- * @brief
- * TODO
- **/
 typedef int8_t (* i2c_send_data_t) (uint8_t const, uint8_t const *, uint8_t const);
-
-/**
- * @brief
- * TODO
- **/
 typedef int8_t (* i2c_receive_data_t) (uint8_t const, uint8_t *, uint8_t const);
-
-/**
- * @brief
- * TODO
- **/
 typedef void (*i2c_end_session_t) (void);
-
-/**
- * @brief
- * TODO
- **/
 typedef bool (* i2c_client_available_t) (uint8_t const);
 
-
 /**
- * @brief
- * TODO
+ * @brief Object struct for the I2C module
+ *
  **/
 typedef struct I2C
 {
