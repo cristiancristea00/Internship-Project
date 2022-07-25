@@ -33,9 +33,9 @@ static uart_callback_t uartCallback = NULL;
 
 #ifdef UART_PRINTF
 
-static int8_t Uart1PrintChar(char const character, FILE * const stream)
+static int8_t Uart1SendChar(char const character, FILE * const stream)
 {
-    Uart1SendByte((uint8_t) character);
+    Uart1PrintChar(character);
 
     return 0;
 }
@@ -86,6 +86,11 @@ void Uart1Print(char const * string)
     }
 
     return;
+}
+
+void Uart1PrintChar(char const character)
+{
+    Uart1SendByte((char) character);
 }
 
 static inline void Uart1SendByte(uint8_t const dataByte)

@@ -36,9 +36,9 @@
 
 #define F_CPU 24000000UL           // The CPU frequency. To be set manuallly.
 
-// #define UART_PRINTF             // Uncomment to enable printf functionality on UART.
+#define UART_PRINTF                // Uncomment to enable printf functionality on UART.
 
-#define PRESCALE_ENABLED true      // Enable the CPU prescaler
+#define PRESCALE_ENABLED  true     // Enable the CPU prescaler
 #define PRESCALE_DISABLED false    // Disable the CPU prescaler
 
 /**
@@ -49,5 +49,11 @@
  * @param ... Optional desired prescaler value of the CPU's clock
  **/
 void SetClockFrequency(uint8_t const frequency, uint8_t const prescalerEnabled, ...);
+
+/**
+ * @brief Empty function that should be used in loops for better readability.
+ *
+ **/
+void TightLoopContents(void);
 
 #endif // CONFIG_H
