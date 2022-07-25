@@ -50,4 +50,10 @@
  **/
 void SetClockFrequency(uint8_t const frequency, uint8_t const prescalerEnabled, ...);
 
+/**
+ * @brief Empty function that should be used in loops for better readability.
+ *
+ **/
+void TightLoopContents(void);
+
 #endif // CONFIG_H

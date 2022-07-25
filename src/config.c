@@ -58,3 +58,8 @@ void SetClockFrequency(uint8_t const frequency, uint8_t const prescalerEnabled, 
 
     return;
 }
+
+void TightLoopContents(void)
+{
+    return;
+}
