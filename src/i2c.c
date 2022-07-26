@@ -87,9 +87,9 @@ static uint8_t I2c0SetAdress(uint8_t const deviceAddress, i2c_data_direction_t c
     }
 }
 
-static uint8_t I2c0WaitWrite(void)
+static i2c_state_t I2c0WaitWrite(void)
 {
-    uint8_t state = I2C_INIT;
+    i2c_state_t state = I2C_INIT;
 
     do
     {
@@ -117,9 +117,9 @@ static uint8_t I2c0WaitWrite(void)
     return state;
 }
 
-static uint8_t I2c0WaitRead(void)
+static i2c_state_t I2c0WaitRead(void)
 {
-    uint8_t state = I2C_INIT;
+    i2c_state_t state = I2C_INIT;
 
     do
     {
@@ -138,23 +138,28 @@ static uint8_t I2c0WaitRead(void)
     return state;
 }
 
-static int8_t I2c0SendData(uint8_t const address, uint8_t const * dataForSend, uint8_t const length)
+static void I2c0EndSession(void)
 {
-    int8_t bytesSent = I2C_NACK_OF_ADDRESS;
+    TWI0.MCTRLB = TWI_MCMD_STOP_gc;
 
+    return;
+}
+
+static i2c_error_code_t I2c0SendData(uint8_t const address, uint8_t const * dataForSend, uint8_t const length)
+{
     TWI0.MADDR = I2c0SetAdress(address, I2C_DATA_SEND);
 
     if (I2c0WaitWrite() != I2C_ACKED)
     {
-        return bytesSent;
+        return I2C_NACK_OF_ADDRESS;
     }
-
-    bytesSent = 0;
 
     if (dataForSend == NULL)
     {
-        return bytesSent;
+        return I2C_NULL_POINTER;
     }
+
+    uint8_t bytesSent = 0;
 
     while (length != 0)
     {
@@ -173,26 +178,31 @@ static int8_t I2c0SendData(uint8_t const address, uint8_t const * dataForSend, u
         }
     }
 
-    return bytesSent;
+    if (bytesSent == length)
+    {
+        return I2C_OK;
+    }
+    else
+    {
+        return I2C_COMMUNICATION_ERROR;
+    }
 }
 
-static int8_t I2c0ReceiveData(uint8_t const address, uint8_t * dataForReceive, uint8_t const length)
+static i2c_error_code_t I2c0ReceiveData(uint8_t const address, uint8_t * dataForReceive, uint8_t const length)
 {
-    int8_t bytesReceived = I2C_NACK_OF_ADDRESS;
-
     TWI0.MADDR = I2c0SetAdress(address, I2C_DATA_RECEIVE);
 
     if (I2c0WaitWrite() != I2C_ACKED)
     {
-        return bytesReceived;
+        return I2C_NACK_OF_ADDRESS;
     }
-
-    bytesReceived = 0;
 
     if (dataForReceive == NULL)
     {
-        return bytesReceived;
+        return I2C_NULL_POINTER;
     }
+
+    uint8_t bytesReceived = 0;
 
     while (length != 0)
     {
@@ -213,19 +223,19 @@ static int8_t I2c0ReceiveData(uint8_t const address, uint8_t * dataForReceive, u
         }
     }
 
-    return bytesReceived;
-}
-
-static void I2c0EndSession(void)
-{
-    TWI0.MCTRLB = TWI_MCMD_STOP_gc;
-
-    return;
+    if (bytesReceived == length)
+    {
+        return I2C_OK;
+    }
+    else
+    {
+        return I2C_COMMUNICATION_ERROR;
+    }
 }
 
 static bool I2c0ClientAvailable(uint8_t const address)
 {
     int8_t returnValue = I2c0SendData(address, NULL, 0);
     I2c0EndSession();
-    return returnValue != I2C_NACK_OF_ADDRESS;
+    return (returnValue != I2C_NACK_OF_ADDRESS);
 }

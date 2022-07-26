@@ -35,23 +35,28 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-#define I2C_NACK_OF_ADDRESS -1
-
-#define I2C_INVALID_ADDRESS 0xFF
-
 #define I2C_DATA_bm 0x01
 
 #define I2C_ADRESS_MIN 0x00
 #define I2C_ADRESS_MAX 0x7F
 
-enum I2C_STATE
+typedef enum I2C_ERROR_CODE
+{
+    I2C_OK                  = 0,
+    I2C_NULL_POINTER        = 1,
+    I2C_INVALID_ADDRESS     = 2,
+    I2C_NACK_OF_ADDRESS     = 3,
+    I2C_COMMUNICATION_ERROR = 4
+} i2c_error_code_t;
+
+typedef enum I2C_STATE
 {
     I2C_INIT   = 0,
     I2C_ACKED  = 1,
     I2C_NACKED = 2,
     I2C_READY  = 3,
     I2C_ERROR  = 4
-};
+} i2c_state_t;
 
 
 typedef enum I2C_MODE_BAUD
@@ -72,7 +77,7 @@ typedef enum I2C_DATA_DIRECTION
 typedef void (* i2c_init_t) (i2c_mode_baud_t const);
 typedef int8_t (* i2c_send_data_t) (uint8_t const, uint8_t const *, uint8_t const);
 typedef int8_t (* i2c_receive_data_t) (uint8_t const, uint8_t *, uint8_t const);
-typedef void (*i2c_end_session_t) (void);
+typedef void (* i2c_end_session_t) (void);
 typedef bool (* i2c_client_available_t) (uint8_t const);
 
 /**
@@ -101,23 +106,23 @@ static void I2c0Init(i2c_mode_baud_t const modeBaud);
  *
  * @param deviceAddress The chip address of the device
  * @param dataDirection The direction of the data: send or receive
- * @return uint8_t The computed address or I2C_INVALID_ADDRESS
+ * @return i2c_error_code_t The error code of the operation
  **/
-static uint8_t I2c0SetAdress(uint8_t const deviceAddress, i2c_data_direction_t const dataDirection);
+static i2c_error_code_t I2c0SetAdress(uint8_t const deviceAddress, i2c_data_direction_t const dataDirection);
 
 /**
  * @brief Waits for the I2C bus to be ready after write operation.
  *
- * @return uint8_t The response of the device: ACK, NACK or ERROR
+ * @return i2c_state_t The response of the device: ACK, NACK or ERROR
  **/
-static uint8_t I2c0WaitWrite(void);
+static i2c_state_t I2c0WaitWrite(void);
 
 /**
  * @brief Waits for the I2C bus to be ready after read operation.
  *
- * @return uint8_t The response of the device: ACK, NACK or ERROR
+ * @return i2c_state_t The response of the device: ACK, NACK or ERROR
  **/
-static uint8_t I2c0WaitRead(void);
+static i2c_state_t I2c0WaitRead(void);
 
 /**
  * @brief Sends a specific number of bytes to the device using the I2C bus.
@@ -125,9 +130,9 @@ static uint8_t I2c0WaitRead(void);
  * @param address The address of the device
  * @param dataForSend Pointer to the data to be sent
  * @param length The length of the data to be sent
- * @return int8_t Number of bytes sent or I2C_NACK_OF_ADDRESS
+ * @return i2c_error_code_t The error code of the operation
  **/
-static int8_t I2c0SendData(uint8_t const address, uint8_t const * dataForSend, uint8_t const length);
+static i2c_error_code_t I2c0SendData(uint8_t const address, uint8_t const * dataForSend, uint8_t const length);
 
 /**
  * @brief Receives a specific number of bytes from the device using the I2C bus.
@@ -135,9 +140,9 @@ static int8_t I2c0SendData(uint8_t const address, uint8_t const * dataForSend, u
  * @param address The address of the device
  * @param dataForReceive Pointer to the data to be received
  * @param length The length of the data to be received
- * @return int8_t Number of bytes received or I2C_NACK_OF_ADDRESS
+ * @return i2c_error_code_t The error code of the operation
  **/
-static int8_t I2c0ReceiveData(uint8_t const address, uint8_t * dataForReceive, uint8_t const length);
+static i2c_error_code_t I2c0ReceiveData(uint8_t const address, uint8_t * dataForReceive, uint8_t const length);
 
 /**
  * @brief Ends the I2C communication by sending a stop condition.

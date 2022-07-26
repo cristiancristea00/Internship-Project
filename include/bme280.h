@@ -31,6 +31,25 @@
 #define	BME280_H
 
 #include "i2c.h"
+#include "config.h"
+
+#include <util/delay.h>
+
+#include <stddef.h>
+
+#define BME280_I2C_ADDRESS 0x76
+
+#define BME280_CHIP_ID_ADDRESS 0xD0
+
+#define BME280_CHIP_ID 0x60
+
+typedef enum BME280_ERROR_CODE
+{
+    BME280_OK                  = 0,
+    BME280_DEVICE_NOT_FOUND    = 1,
+    BME280_NULL_POINTER        = 2,
+    BME280_COMMUNICATION_ERROR = 3
+} bme280_error_code_t;
 
 typedef struct BME280_CALIBRATION_DATA
 {
@@ -107,14 +126,42 @@ typedef struct BME280_SETTINGS
     uint8_t standbyTime;
 } bme280_settings_t;
 
+typedef bme280_error_code_t (* bme280_read_t) (i2c_t const * const, uint8_t const, uint8_t const, uint8_t * const, uint8_t const);
+typedef bme280_error_code_t (* bme280_write_t) (i2c_t const * const, uint8_t const, uint8_t const, uint8_t const * const);
+
+typedef struct BME280_HANDLER
+{
+    bme280_read_t Read;
+    bme280_write_t Write;
+} bme280_handler_t;
 
 typedef struct BME280_DEVICE
 {
-    // Sensor setings
+    // I2C address of the device
+    uint8_t i2cAddress;
+
+    // Sensor settings
     bme280_settings_t settings;
 
     // Calibration data
     bme280_calibration_data_t calibrationData;
+
+    // I2C device
+    i2c_t const * i2cDevice;
+
+    // Handler
+    bme280_handler_t * handler;
+
 } bme280_device_t;
+
+static bme280_error_code_t Bme280CheckNull(bme280_device_t const * const device);
+
+static bme280_error_code_t Bm280ReadRegisters(i2c_t * const device, uint8_t const address, uint8_t const registerAddress, uint8_t * const data, uint8_t const length);
+
+static bme280_error_code_t Bm280WriteRegister(i2c_t * const device, uint8_t const address, uint8_t const registerAddress, uint8_t const * const data);
+
+bme280_error_code_t Bme280Init(bme280_device_t * const device, i2c_t const * const handle, bme280_handler_t * const handler, uint8_t const i2cAddress);
+
+bme280_error_code_t Bme280GetRegisters(bme280_device_t * const device, uint8_t const registerAddress, uint8_t * data, uint8_t const length);
 
 #endif // BME280_H
