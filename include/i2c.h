@@ -75,8 +75,8 @@ typedef enum I2C_DATA_DIRECTION
 
 
 typedef void (* i2c_init_t) (i2c_mode_baud_t const);
-typedef int8_t (* i2c_send_data_t) (uint8_t const, uint8_t const *, uint8_t const);
-typedef int8_t (* i2c_receive_data_t) (uint8_t const, uint8_t *, uint8_t const);
+typedef int8_t (* i2c_send_data_t) (uint8_t const, uint8_t const *, uint8_t);
+typedef int8_t (* i2c_receive_data_t) (uint8_t const, uint8_t *, uint8_t);
 typedef void (* i2c_end_session_t) (void);
 typedef bool (* i2c_client_available_t) (uint8_t const);
 
@@ -132,7 +132,7 @@ static i2c_state_t I2c0WaitRead(void);
  * @param length The length of the data to be sent
  * @return i2c_error_code_t The error code of the operation
  **/
-static i2c_error_code_t I2c0SendData(uint8_t const address, uint8_t const * dataForSend, uint8_t const length);
+static i2c_error_code_t I2c0SendData(uint8_t const address, uint8_t const * dataForSend, uint8_t length);
 
 /**
  * @brief Receives a specific number of bytes from the device using the I2C bus.
@@ -142,7 +142,7 @@ static i2c_error_code_t I2c0SendData(uint8_t const address, uint8_t const * data
  * @param length The length of the data to be received
  * @return i2c_error_code_t The error code of the operation
  **/
-static i2c_error_code_t I2c0ReceiveData(uint8_t const address, uint8_t * dataForReceive, uint8_t const length);
+static i2c_error_code_t I2c0ReceiveData(uint8_t const address, uint8_t * dataForReceive, uint8_t length);
 
 /**
  * @brief Ends the I2C communication by sending a stop condition.

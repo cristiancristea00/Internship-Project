@@ -37,7 +37,7 @@ bme280_handler_t const defaultHandler = {
 
 static bme280_error_code_t Bme280CheckNull(bme280_device_t const * const device)
 {
-    if (device == NULL || device->i2cDevice == NULL)
+    if (device == NULL || device->handler == NULL)
     {
         return BME280_NULL_POINTER;
     }
@@ -47,39 +47,44 @@ static bme280_error_code_t Bme280CheckNull(bme280_device_t const * const device)
     }
 }
 
-static bme280_error_code_t Bm280ReadRegisters(i2c_t * const device, uint8_t const address, uint8_t const registerAddress, uint8_t * const data, uint8_t const length)
+static bme280_error_code_t Bm280ReadRegisters(i2c_t * const i2c, uint8_t const address, uint8_t const registerAddress, uint8_t * const data, uint8_t const length)
 {
     bme280_error_code_t readResult = BME280_OK;
 
-    if (device->SendData(address, &registerAddress, 1) != I2C_OK)
+    if (i2c->SendData(address, &registerAddress, 1) != I2C_OK)
     {
         readResult = BME280_COMMUNICATION_ERROR;
     }
-    if (device->ReceiveData(address, data, length) != I2C_OK)
+
+    if (i2c->ReceiveData(address, data, length) != I2C_OK)
     {
         readResult = BME280_COMMUNICATION_ERROR;
     }
+
+    i2c->EndSession();
 
     return readResult;
 }
 
-static bme280_error_code_t Bm280WriteRegister(i2c_t * const device, uint8_t const address, uint8_t const registerAddress, uint8_t const * const data)
+static bme280_error_code_t Bm280WriteRegister(i2c_t * const i2c, uint8_t const address, uint8_t const registerAddress, uint8_t const * const data)
 {
     bme280_error_code_t writeResult = BME280_OK;
 
-    if (device->SendData(address, &registerAddress, 1) != I2C_OK)
+    if (i2c->SendData(address, &registerAddress, 1) != I2C_OK)
     {
         writeResult = BME280_COMMUNICATION_ERROR;
     }
-    if (device->SendData(address, data, 1) != I2C_OK)
+    if (i2c->SendData(address, data, 1) != I2C_OK)
     {
         writeResult = BME280_COMMUNICATION_ERROR;
     }
+
+    i2c->EndSession();
 
     return writeResult;
 }
 
-bme280_error_code_t Bme280Init(bme280_device_t * const device, i2c_t const * const i2cDevice, bme280_handler_t * const handler, uint8_t const i2cAddress)
+bme280_error_code_t Bme280Init(bme280_device_t * const device, bme280_handler_t const * const handler, i2c_t const * const i2cDevice, uint8_t const i2cAddress)
 {
     device->i2cDevice = NULL;
     device->i2cAddress = i2cAddress;
@@ -100,13 +105,21 @@ bme280_error_code_t Bme280Init(bme280_device_t * const device, i2c_t const * con
         {
             initResult = Bme280GetRegisters(device, BME280_CHIP_ID_ADDRESS, &chipId, 1);
 
+            printf("Chip ID: 0x%x", chipId);
+
             if (initResult == BME280_OK && chipId == BME280_CHIP_ID)
             {
+                /*
+                TODO
                 initResult = Bme280SoftReset(device);
+                 */
 
                 if (initResult == BME280_OK)
                 {
+                    /*
+                    TODO
                     initResult = Bm280GetCalibrationData(device);
+                     */
                 }
 
                 break;
@@ -133,7 +146,7 @@ bme280_error_code_t Bme280GetRegisters(bme280_device_t * const device, uint8_t c
 
     if (readResult == BME280_OK && data != NULL)
     {
-        if (device->handler->Read(device->i2cDevice, device->i2cAddress, registerAddress, length) != BME280_OK)
+        if (device->handler->Read(device->i2cDevice, device->i2cAddress, registerAddress, data, length) != BME280_OK)
         {
             readResult = BME280_COMMUNICATION_ERROR;
         }

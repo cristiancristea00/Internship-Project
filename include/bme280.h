@@ -150,18 +150,18 @@ typedef struct BME280_DEVICE
     i2c_t const * i2cDevice;
 
     // Handler
-    bme280_handler_t * handler;
+    bme280_handler_t const * handler;
 
 } bme280_device_t;
 
 static bme280_error_code_t Bme280CheckNull(bme280_device_t const * const device);
 
-static bme280_error_code_t Bm280ReadRegisters(i2c_t * const device, uint8_t const address, uint8_t const registerAddress, uint8_t * const data, uint8_t const length);
+static bme280_error_code_t Bm280ReadRegisters(i2c_t * const i2c, uint8_t const address, uint8_t const registerAddress, uint8_t * const data, uint8_t const length);
 
-static bme280_error_code_t Bm280WriteRegister(i2c_t * const device, uint8_t const address, uint8_t const registerAddress, uint8_t const * const data);
+static bme280_error_code_t Bm280WriteRegister(i2c_t * const i2c, uint8_t const address, uint8_t const registerAddress, uint8_t const * const data);
 
-bme280_error_code_t Bme280Init(bme280_device_t * const device, i2c_t const * const handle, bme280_handler_t * const handler, uint8_t const i2cAddress);
+static bme280_error_code_t Bme280GetRegisters(bme280_device_t * const device, uint8_t const registerAddress, uint8_t * data, uint8_t const length);
 
-bme280_error_code_t Bme280GetRegisters(bme280_device_t * const device, uint8_t const registerAddress, uint8_t * data, uint8_t const length);
+bme280_error_code_t Bme280Init(bme280_device_t * const device, bme280_handler_t const * const handler, i2c_t const * const handle, uint8_t const i2cAddress);
 
 #endif // BME280_H

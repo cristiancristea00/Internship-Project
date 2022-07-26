@@ -30,13 +30,14 @@
 #include "config.h"
 #include "uart.h"
 #include "i2c.h"
+#include "bme280.h"
 
 #include <avr/io.h>
-#include <util/delay.h>
 #include <avr/cpufunc.h>
 
 extern uart_t const uart_1;
 extern i2c_t const i2c_0;
+extern bme280_handler_t const defaultHandler;
 
 void BusScan(void);
 
@@ -50,9 +51,11 @@ void main(void)
 
     i2c_0.Init(I2C_FAST_MODE_PLUS);
 
-    _delay_ms(5000);
+    // BusScan();
 
-    BusScan();
+    bme280_device_t weatherClick;
+
+    Bme280Init(&weatherClick, &defaultHandler, &i2c_0, BME280_I2C_ADDRESS);
 
     while (1)
     {
