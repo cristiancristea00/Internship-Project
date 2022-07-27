@@ -71,7 +71,7 @@ static bme280_error_code_t Bm280WriteRegisters(i2c_t * const i2c, uint8_t const 
 {
     bme280_error_code_t writeResult = BME280_OK;
 
-    uint8_t const bufferLength = 2U * length;
+    uint8_t const bufferLength = 2 * length;
     uint8_t dataBuffer[bufferLength];
 
     for (uint8_t registerIdx = 0; registerIdx < length; ++registerIdx)
@@ -221,7 +221,25 @@ static void Bme280ParseHumidityCalibration(bme280_calibration_data_t * const cal
 
 static bme280_error_code_t Bm280GetCalibrationData(bme280_device_t * const device)
 {
-    // TODO
+    bme280_error_code_t calibrationResult = BME280_OK;
+
+    uint8_t calibrationData[BME280_TEMP_PRESS_CALIB_LENGTH] = { 0 };
+
+    calibrationResult = Bme280GetRegisters(device, BME280_TEMP_PRESS_CALIB_ADDRESS, calibrationData, BME280_TEMP_PRESS_CALIB_LENGTH);
+
+    if (calibrationResult == BME280_OK)
+    {
+        Bme280ParseTemperatureAndPressureCalibration(&device->calibrationData, calibrationData);
+
+        calibrationResult = Bme280GetRegisters(device, BME280_HUMIDITY_CALIB_ADDRESS, calibrationData, BME280_HUMIDITY_CALIB_LENGTH);
+
+        if (calibrationResult == BME280_OK)
+        {
+            Bme280ParseHumidityCalibration(&device->calibrationData, calibrationData);
+        }
+    }
+
+    return calibrationResult;
 }
 
 bme280_error_code_t Bme280Init(bme280_device_t * const device, bme280_handler_t const * const handler, i2c_t const * const i2cDevice, uint8_t const i2cAddress)

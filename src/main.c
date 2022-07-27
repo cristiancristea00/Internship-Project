@@ -57,6 +57,8 @@ void main(void)
 
     Bme280Init(&weatherClick, &defaultHandler, &i2c_0, BME280_I2C_ADDRESS);
 
+    asm volatile ("nop");
+
     while (1)
     {
         TightLoopContents();
