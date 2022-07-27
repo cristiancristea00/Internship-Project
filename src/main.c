@@ -53,6 +53,11 @@ void main(void)
 
     // BusScan();
 
+    while (1)
+    {
+        LOG_DEBUG("%d", 15);
+    }
+
     bme280_device_t weatherClick;
 
     Bme280Init(&weatherClick, &defaultHandler, &i2c_0, BME280_I2C_ADDRESS);

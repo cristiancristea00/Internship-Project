@@ -32,7 +32,7 @@
 
 bme280_handler_t const defaultHandler = {
     .Read = Bm280ReadRegisters,
-    .Write = Bm280WriteRegister,
+    .Write = Bm280WriteRegisters,
 };
 
 static bme280_error_code_t Bme280CheckNull(bme280_device_t const * const device)
@@ -66,15 +66,20 @@ static bme280_error_code_t Bm280ReadRegisters(i2c_t * const i2c, uint8_t const a
     return readResult;
 }
 
-static bme280_error_code_t Bm280WriteRegister(i2c_t * const i2c, uint8_t const address, uint8_t const registerAddress, uint8_t const * const data)
+static bme280_error_code_t Bm280WriteRegisters(i2c_t * const i2c, uint8_t const address, uint8_t const * const registerAddresses, uint8_t const * const data, uint8_t const length)
 {
     bme280_error_code_t writeResult = BME280_OK;
 
-    if (i2c->SendData(address, &registerAddress, 1) != I2C_OK)
+    uint8_t const bufferLength = 2U * length;
+    uint8_t dataBuffer[bufferLength];
+
+    for (uint8_t registerIdx = 0; registerIdx < length; ++registerIdx)
     {
-        writeResult = BME280_COMMUNICATION_ERROR;
+        dataBuffer[2 * registerIdx] = registerAddresses[registerIdx];
+        dataBuffer[2 * registerIdx + 1] = data[registerIdx];
     }
-    if (i2c->SendData(address, data, 1) != I2C_OK)
+
+    if (i2c->SendData(address, &dataBuffer, bufferLength) != I2C_OK)
     {
         writeResult = BME280_COMMUNICATION_ERROR;
     }
@@ -82,6 +87,56 @@ static bme280_error_code_t Bm280WriteRegister(i2c_t * const i2c, uint8_t const a
     i2c->EndSession();
 
     return writeResult;
+}
+
+static bme280_error_code_t Bme280GetRegisters(bme280_device_t * const device, uint8_t const registerAddress, uint8_t * const data, uint8_t const length)
+{
+    bme280_error_code_t getResult = BME280_OK;
+
+    getResult = Bme280CheckNull(device);
+
+    if (getResult == BME280_OK && data != NULL)
+    {
+        if (device->handler->Read(device->i2cDevice, device->i2cAddress, registerAddress, data, length) != BME280_OK)
+        {
+            getResult = BME280_COMMUNICATION_ERROR;
+        }
+    }
+    else
+    {
+        getResult = BME280_NULL_POINTER;
+    }
+
+    return getResult;
+}
+
+static bme280_error_code_t Bme280SetRegisters(bme280_device_t * const device, uint8_t const * const registerAddresses, uint8_t const * const data, uint8_t const length)
+{
+    bme280_error_code_t setResult = BME280_OK;
+
+    setResult = Bme280CheckNull(device);
+
+    if (setResult == BME280_OK && data != NULL && registerAddresses != NULL)
+    {
+        if (length != 0)
+        {
+            if (device->handler->Write(device->i2cDevice, device->i2cAddress, registerAddresses, data, length) != BME280_OK)
+            {
+                setResult = BME280_COMMUNICATION_ERROR;
+            }
+        }
+        else
+        {
+            setResult = BME280_INVALID_LENGTH;
+        }
+    }
+    else
+    {
+
+        setResult = BME280_NULL_POINTER;
+    }
+
+    return setResult;
 }
 
 bme280_error_code_t Bme280Init(bme280_device_t * const device, bme280_handler_t const * const handler, i2c_t const * const i2cDevice, uint8_t const i2cAddress)
@@ -105,7 +160,7 @@ bme280_error_code_t Bme280Init(bme280_device_t * const device, bme280_handler_t 
         {
             initResult = Bme280GetRegisters(device, BME280_CHIP_ID_ADDRESS, &chipId, 1);
 
-            printf("Chip ID: 0x%x", chipId);
+            LOG_INFO("Chip ID = 0x%02X", chipId);
 
             if (initResult == BME280_OK && chipId == BME280_CHIP_ID)
             {
@@ -136,25 +191,4 @@ bme280_error_code_t Bme280Init(bme280_device_t * const device, bme280_handler_t 
     }
 
     return initResult;
-}
-
-bme280_error_code_t Bme280GetRegisters(bme280_device_t * const device, uint8_t const registerAddress, uint8_t * data, uint8_t const length)
-{
-    bme280_error_code_t readResult = BME280_OK;
-
-    readResult = Bme280CheckNull(device);
-
-    if (readResult == BME280_OK && data != NULL)
-    {
-        if (device->handler->Read(device->i2cDevice, device->i2cAddress, registerAddress, data, length) != BME280_OK)
-        {
-            readResult = BME280_COMMUNICATION_ERROR;
-        }
-    }
-    else
-    {
-        readResult = BME280_NULL_POINTER;
-    }
-
-    return readResult;
 }

@@ -46,6 +46,8 @@
 
 #ifdef LOGGING
 
+#include <stdio.h>
+
 #define LOG_DEBUG(STRING, ...) printf("[DEBUG]: " STRING "\n\r", ##__VA_ARGS__)
 #define LOG_INFO(STRING, ...) printf("[INFO]: " STRING "\n\r", ##__VA_ARGS__)
 #define LOG_WARNING(STRING, ...) printf("[WARNING]: " STRING "\n\r", ##__VA_ARGS__)
