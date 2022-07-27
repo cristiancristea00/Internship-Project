@@ -42,8 +42,6 @@
 #define PRESCALE_ENABLED  true     // Enable the CPU prescaler
 #define PRESCALE_DISABLED false    // Disable the CPU prescaler
 
-
-
 #ifdef LOGGING
 
 #include <stdio.h>

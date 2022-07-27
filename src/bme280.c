@@ -39,6 +39,7 @@ static bme280_error_code_t Bme280CheckNull(bme280_device_t const * const device)
 {
     if (device == NULL || device->handler == NULL)
     {
+        LOG_ERROR("Found NULL pointer");
         return BME280_NULL_POINTER;
     }
     else
@@ -139,6 +140,90 @@ static bme280_error_code_t Bme280SetRegisters(bme280_device_t * const device, ui
     return setResult;
 }
 
+static bme280_error_code_t Bme280SoftReset(bme280_device_t * const device)
+{
+    bme280_error_code_t resetResult = BME280_OK;
+
+    resetResult = Bme280CheckNull(device);
+
+    if (resetResult == BME280_OK)
+    {
+        uint8_t const registerAdress = BME280_RESET_ADDRESS;
+        uint8_t const resetCommand = BME280_SOFT_RESET_COMMAND;
+
+        resetResult = Bme280SetRegisters(device, &registerAdress, &resetCommand, 1);
+
+        if (resetResult == BME280_OK)
+        {
+            uint8_t tryCount = 10;
+            uint8_t statusRegister = 0;
+
+            do
+            {
+                _delay_ms(2);
+                resetResult = Bme280GetRegisters(device, BME280_STATUS_REGISTER_ADDRESS, &statusRegister, 1);
+                --tryCount;
+            }
+            while ((resetResult == BME280_OK) && (tryCount != 0) && (statusRegister & BME280_STATUS_UPDATE));
+
+            if (statusRegister & BME280_STATUS_UPDATE)
+            {
+                resetResult = BME280_NVM_COPY_FAILED;
+            }
+        }
+    }
+
+    return resetResult;
+}
+
+static void Bme280ParseTemperatureAndPressureCalibration(bme280_calibration_data_t * const calibrationData, uint8_t const * const rawData)
+{
+    // Temperature
+
+    calibrationData->coefTemperature1 = (uint16_t) BME280_CONCAT_BYTES(rawData[1], rawData[0]);
+    calibrationData->coefTemperature2 = (int16_t) BME280_CONCAT_BYTES(rawData[3], rawData[2]);
+    calibrationData->coefTemperature3 = (int16_t) BME280_CONCAT_BYTES(rawData[5], rawData[4]);
+
+    //Pressure
+
+    calibrationData->coefPressure1 = (uint16_t) BME280_CONCAT_BYTES(rawData[7], rawData[6]);
+    calibrationData->coefPressure2 = (int16_t) BME280_CONCAT_BYTES(rawData[9], rawData[8]);
+    calibrationData->coefPressure3 = (int16_t) BME280_CONCAT_BYTES(rawData[11], rawData[10]);
+    calibrationData->coefPressure4 = (int16_t) BME280_CONCAT_BYTES(rawData[13], rawData[12]);
+    calibrationData->coefPressure5 = (int16_t) BME280_CONCAT_BYTES(rawData[15], rawData[14]);
+    calibrationData->coefPressure6 = (int16_t) BME280_CONCAT_BYTES(rawData[17], rawData[16]);
+    calibrationData->coefPressure7 = (int16_t) BME280_CONCAT_BYTES(rawData[19], rawData[18]);
+    calibrationData->coefPressure8 = (int16_t) BME280_CONCAT_BYTES(rawData[21], rawData[20]);
+    calibrationData->coefPressure9 = (int16_t) BME280_CONCAT_BYTES(rawData[23], rawData[22]);
+
+    // One lonely humidity coefficient
+
+    calibrationData->coefHumidity1 = (uint8_t) rawData[25];
+}
+
+static void Bme280ParseHumidityCalibration(bme280_calibration_data_t * const calibrationData, uint8_t const * const rawData)
+{
+    // Humidity
+
+    calibrationData->coefHumidity2 = (int16_t) BME280_CONCAT_BYTES(rawData[1], rawData[0]);
+    calibrationData->coefHumidity3 = (uint8_t) rawData[2];
+
+    int16_t coefHumidity4_msb = (int16_t) ((int8_t) rawData[3] * 16);
+    int16_t coefHumidity4_lsb = (int16_t) (rawData[4] & 0x0F);
+    calibrationData->coefHumidity4 = (int16_t) (coefHumidity4_msb | coefHumidity4_lsb);
+
+    int16_t coefHumidity5_msb = (int16_t) ((int8_t) rawData[5] * 16);
+    int16_t coefHumidity5_lsb = (int16_t) (rawData[4] >> 4);
+    calibrationData->coefHumidity5 = (int16_t) (coefHumidity5_msb | coefHumidity5_lsb);
+
+    calibrationData->coefHumidity6 = (int8_t) rawData[6];
+}
+
+static bme280_error_code_t Bm280GetCalibrationData(bme280_device_t * const device)
+{
+    // TODO
+}
+
 bme280_error_code_t Bme280Init(bme280_device_t * const device, bme280_handler_t const * const handler, i2c_t const * const i2cDevice, uint8_t const i2cAddress)
 {
     device->i2cDevice = NULL;
@@ -164,17 +249,12 @@ bme280_error_code_t Bme280Init(bme280_device_t * const device, bme280_handler_t 
 
             if (initResult == BME280_OK && chipId == BME280_CHIP_ID)
             {
-                /*
-                TODO
+
                 initResult = Bme280SoftReset(device);
-                 */
 
                 if (initResult == BME280_OK)
                 {
-                    /*
-                    TODO
                     initResult = Bm280GetCalibrationData(device);
-                     */
                 }
 
                 break;
