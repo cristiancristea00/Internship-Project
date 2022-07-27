@@ -37,9 +37,28 @@
 #define F_CPU 24000000UL           // The CPU frequency. To be set manuallly.
 
 #define UART_PRINTF                // Uncomment to enable printf functionality on UART.
+#define LOGGING                    // Uncommment to enable logging
 
 #define PRESCALE_ENABLED  true     // Enable the CPU prescaler
 #define PRESCALE_DISABLED false    // Disable the CPU prescaler
+
+
+
+#ifdef LOGGING
+
+#define LOG_DEBUG(STRING, ...) printf("[DEBUG]: " STRING "\n\r", ##__VA_ARGS__)
+#define LOG_INFO(STRING, ...) printf("[INFO]: " STRING "\n\r", ##__VA_ARGS__)
+#define LOG_WARNING(STRING, ...) printf("[WARNING]: " STRING "\n\r", ##__VA_ARGS__)
+#define LOG_ERROR(STRING, ...) printf("[ERROR]: " STRING "\n\r", ##__VA_ARGS__)
+
+#else
+
+#define LOG_DEBUG
+#define LOG_INFO
+#define LOG_WARNING
+#define LOG_ERROR
+
+#endif // LOGGING
 
 /**
  * @brief Sets the CPU's clock frequency and optionally the prescale factor.
