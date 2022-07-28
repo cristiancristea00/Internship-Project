@@ -253,10 +253,10 @@ static int32_t Bme280CompensateTemperature(bme280_uncompensated_data_t * const u
 {
     int32_t temperature = 0;
 
-    int32_t temp1 = (int32_t) ((uncompensatedData->temperature >> 3) - ((int32_t) calibrationData->temperatureCoef1 << 2));
+    int32_t temp1 = ((int32_t) ((uncompensatedData->temperature >> 3)) - ((int32_t) calibrationData->temperatureCoef1 << 1));
     temp1 = (temp1 * ((int32_t) calibrationData->temperatureCoef2)) >> 11;
     int32_t temp2 = (int32_t) ((uncompensatedData->temperature >> 4) - ((int32_t) calibrationData->temperatureCoef1));
-    temp2 = (((temp1 * temp2) >> 12) * ((int32_t) calibrationData->temperatureCoef3)) >> 14;
+    temp2 = (((temp2 * temp2) >> 12) * ((int32_t) calibrationData->temperatureCoef3)) >> 14;
     calibrationData->temperatureTemporary = temp1 + temp2;
     temperature = (calibrationData->temperatureTemporary * 5 + 128) >> 8;
 
@@ -278,21 +278,22 @@ static uint32_t Bme280CompensatePressure(bme280_uncompensated_data_t * const unc
 {
     uint32_t pressure = 0;
 
-    int64_t temp1 = ((int64_t) calibrationData->temperatureTemporary - 128000);
+    int64_t temp1 = ((int64_t) calibrationData->temperatureTemporary) - 128000;
     int64_t temp2 = temp1 * temp1 * (int64_t) calibrationData->pressureCoef6;
     temp2 = temp2 + ((temp1 * (int64_t) calibrationData->pressureCoef5) << 17);
     temp2 = temp2 + (((int64_t) calibrationData->pressureCoef4) << 35);
-    temp1 = (temp1 * temp1 * (int64_t) calibrationData->pressureCoef3 >> 8) + (temp1 * ((int64_t) calibrationData->pressureCoef2) << 12);
+    temp1 = ((temp1 * temp1 * (int64_t) calibrationData->pressureCoef3) >> 8) + (temp1 * ((int64_t) calibrationData->pressureCoef2) << 12);
     temp1 = ((((int64_t) 1) << 47) + temp1) * ((int64_t) calibrationData->pressureCoef1) >> 33;
 
     if (temp1 != 0)
     {
-        int64_t temp4 = ((int64_t) 1 << 20) - uncompensatedData->pressure;
-        temp4 = (((temp4 * ((int64_t) 1 << 31)) - temp2) * 3125) / temp1;
-        temp1 = (((int64_t) calibrationData->pressureCoef9) * (temp4 >> 13) * (temp4 >> 13)) >> 25;
-        temp2 = (((int64_t) calibrationData->pressureCoef8) * temp4) >> 19;
-        temp4 = ((temp4 + temp1 + temp2) >> 8) + (((int64_t) calibrationData->pressureCoef7) << 4);
-        pressure = (uint32_t) (((temp4 >> 1) * 100) >> 7);
+        int64_t temp3 = ((int64_t) 1 << 20) - uncompensatedData->pressure;
+        temp3 = (((temp3 * ((int64_t) 1 << 31)) - temp2) * 3125) / temp1;
+        temp1 = (((int64_t) calibrationData->pressureCoef9) * (temp3 >> 13) * (temp3 >> 13)) >> 25;
+        temp2 = (((int64_t) calibrationData->pressureCoef8) * temp3) >> 19;
+        temp3 = ((temp3 + temp1 + temp2) >> 8) + (((int64_t) calibrationData->pressureCoef7) << 4);
+        pressure = (uint32_t) (((temp3 >> 1) * 100) >> 7);
+
         if (pressure < BME280_MIN_PRESSURE)
         {
             pressure = BME280_MIN_PRESSURE;
@@ -321,11 +322,11 @@ static uint32_t Bme280CompensateHumidity(bme280_uncompensated_data_t * const unc
     int32_t temp2 = (int32_t) (uncompensatedData->humidity << 14);
     int32_t temp3 = (int32_t) (((int32_t) calibrationData->humidityCoef4) << 20);
     int32_t temp4 = ((int32_t) calibrationData->humidityCoef5) * temp1;
-    int32_t temp5 = (((temp2 - temp3) - temp4) + (int32_t) 1 << 14) << 15;
-    temp2 = (temp1 * ((int32_t) calibrationData->humidityCoef6)) << 10;
-    temp3 = (temp1 * ((int32_t) calibrationData->humidityCoef3)) << 11;
-    temp4 = ((temp2 * (temp3 + (int32_t) 1 << 15)) >> 10) + (int32_t) 1 << 21;
-    temp2 = ((temp4 * ((int32_t) calibrationData->humidityCoef2)) + (int32_t) 1 << 13) >> 14;
+    int32_t temp5 = (((temp2 - temp3) - temp4) + ((int32_t) 1 << 14)) << 15;
+    temp2 = (temp1 * ((int32_t) calibrationData->humidityCoef6)) >> 10;
+    temp3 = (temp1 * ((int32_t) calibrationData->humidityCoef3)) >> 11;
+    temp4 = ((temp2 * (temp3 + ((int32_t) 1 << 15))) >> 10) + ((int32_t) 1 << 21);
+    temp2 = ((temp4 * ((int32_t) calibrationData->humidityCoef2)) + ((int32_t) 1 << 13)) >> 14;
     temp3 = temp5 * temp2;
     temp4 = ((temp3 >> 15) * (temp3 >> 15)) >> 7;
     temp5 = temp3 - ((temp4 * ((int32_t) calibrationData->humidityCoef1)) >> 4);
@@ -340,7 +341,6 @@ static uint32_t Bme280CompensateHumidity(bme280_uncompensated_data_t * const unc
     }
 
     return humidity;
-    // TODO
 }
 
 bme280_error_code_t Bme280Init(bme280_device_t * const device, bme280_handler_t const * const handler, i2c_t const * const i2cDevice, uint8_t const i2cAddress)
