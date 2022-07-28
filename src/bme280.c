@@ -146,6 +146,8 @@ static bme280_error_code_t Bme280SoftReset(bme280_device_t * const device)
 
     resetResult = Bme280CheckNull(device);
 
+    LOG_INFO("Started BME280 soft reset");
+
     if (resetResult == BME280_OK)
     {
         uint8_t const registerAdress = BME280_RESET_ADDRESS;
@@ -158,8 +160,11 @@ static bme280_error_code_t Bme280SoftReset(bme280_device_t * const device)
             uint8_t tryCount = 10;
             uint8_t statusRegister = 0;
 
+            LOG_INFO("Finished BME280 soft reset successfully");
+
             do
             {
+                LOG_INFO("Waiting for the BME280 NVM copying...");
                 _delay_ms(2);
                 resetResult = Bme280GetRegisters(device, BME280_STATUS_REGISTER_ADDRESS, &statusRegister, 1);
                 --tryCount;
@@ -169,6 +174,8 @@ static bme280_error_code_t Bme280SoftReset(bme280_device_t * const device)
             if (statusRegister & BME280_STATUS_UPDATE)
             {
                 resetResult = BME280_NVM_COPY_FAILED;
+
+                LOG_ERROR("The BME280 NVM copy failed");
             }
         }
     }
@@ -253,6 +260,8 @@ bme280_error_code_t Bme280Init(bme280_device_t * const device, bme280_handler_t 
     uint8_t tryCount = 10;
     uint8_t chipId = 0;
 
+    LOG_INFO("Started BME280 initialization");
+
     initResult = Bme280CheckNull(device);
 
     if (initResult == BME280_OK)
@@ -263,10 +272,9 @@ bme280_error_code_t Bme280Init(bme280_device_t * const device, bme280_handler_t 
         {
             initResult = Bme280GetRegisters(device, BME280_CHIP_ID_ADDRESS, &chipId, 1);
 
-            LOG_INFO("Chip ID = 0x%02X", chipId);
-
             if (initResult == BME280_OK && chipId == BME280_CHIP_ID)
             {
+                LOG_INFO("Found BME280 with chip ID = 0x60");
 
                 initResult = Bme280SoftReset(device);
 
@@ -278,6 +286,8 @@ bme280_error_code_t Bme280Init(bme280_device_t * const device, bme280_handler_t 
                 break;
             }
 
+            LOG_WARNING("Failed to find BME280. Trying again...");
+
             --tryCount;
             _delay_ms(1);
         }
@@ -286,6 +296,16 @@ bme280_error_code_t Bme280Init(bme280_device_t * const device, bme280_handler_t 
         {
             initResult = BME280_DEVICE_NOT_FOUND;
         }
+    }
+
+    if (initResult == BME280_OK)
+    {
+        LOG_INFO("Got BME280 calibration data from sensor");
+        LOG_INFO("Finished the BME280 initialization");
+    }
+    else
+    {
+        LOG_ERROR("Couldn't finish the BME280 initialization");
     }
 
     return initResult;

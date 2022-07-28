@@ -34,6 +34,7 @@
 
 #include <avr/io.h>
 #include <avr/cpufunc.h>
+#include <util/delay.h>
 
 extern uart_t const uart_1;
 extern i2c_t const i2c_0;
@@ -51,13 +52,13 @@ void main(void)
 
     i2c_0.Init(I2C_FAST_MODE_PLUS);
 
+    _delay_ms(5000);
+
     // BusScan();
 
     bme280_device_t weatherClick;
 
     Bme280Init(&weatherClick, &defaultHandler, &i2c_0, BME280_I2C_ADDRESS);
-
-    asm volatile ("nop");
 
     while (1)
     {
@@ -67,17 +68,17 @@ void main(void)
 
 void BusScan(void)
 {
-    printf("\n\rI2C Scan started from 0x%02X to 0x%02X", I2C_ADRESS_MIN, I2C_ADRESS_MAX);
+    uart_1.Print("\n\rI2C Scan started from 0x00 to 0x7F");
 
     for (uint8_t clientAddress = I2C_ADRESS_MIN; clientAddress <= I2C_ADRESS_MAX; ++clientAddress)
     {
         printf("\n\rScanning client address: 0x%02X", clientAddress);
         if (i2c_0.ClientAvailable(clientAddress))
         {
-            printf(" --> client ACKED");
+            uart_1.Print(" --> client ACKED");
         }
     }
-    printf("\n\rI2C Scan ended\n\r");
+    uart_1.Print("\n\rI2C Scan ended\n\r");
 
     return;
 }

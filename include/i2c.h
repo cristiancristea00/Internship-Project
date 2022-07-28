@@ -61,9 +61,9 @@ typedef enum I2C_STATE
 
 typedef enum I2C_MODE_BAUD
 {
-    I2C_STANDARD_MODE  = 115,
-    I2C_FAST_MODE      = 25,
-    I2C_FAST_MODE_PLUS = 7
+    I2C_STANDARD_MODE  = 101,
+    I2C_FAST_MODE      = 21,
+    I2C_FAST_MODE_PLUS = 6
 } i2c_mode_baud_t;
 
 

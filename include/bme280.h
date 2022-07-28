@@ -31,6 +31,7 @@
 #define	BME280_H
 
 #include "config.h"
+#include "uart.h"
 #include "i2c.h"
 
 #include <util/delay.h>
