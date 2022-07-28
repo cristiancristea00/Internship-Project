@@ -213,6 +213,8 @@ static uint32_t Bme280CompensatePressure(bme280_uncompensated_data_t * const unc
 
 static uint32_t Bme280CompensateHumidity(bme280_uncompensated_data_t * const uncompensatedData, bme280_calibration_data_t * const calibrationData);
 
+static bme280_error_code_t BMe280CompensateData(bme280_device_t * const device, bme280_uncompensated_data_t * const uncompensatedData);
+
 bme280_error_code_t Bme280Init(bme280_device_t * const device, bme280_handler_t const * const handler, i2c_t const * const handle, uint8_t const i2cAddress);
 
 #endif // BME280_H

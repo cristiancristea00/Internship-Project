@@ -343,6 +343,26 @@ static uint32_t Bme280CompensateHumidity(bme280_uncompensated_data_t * const unc
     return humidity;
 }
 
+static bme280_error_code_t BMe280CompensateData(bme280_device_t * const device, bme280_uncompensated_data_t * const uncompensatedData)
+{
+    bme280_error_code_t compensationResult = BME280_OK;
+
+    compensationResult = Bme280CheckNull(device);
+
+    if (uncompensatedData != NULL)
+    {
+        device->data.temperature = Bme280CompensateTemperature(uncompensatedData, &device->calibrationData);
+        device->data.pressure = Bme280CompensatePressure(uncompensatedData, &device->calibrationData);
+        device->data.humidity = Bme280CompensateHumidity(uncompensatedData, &device->calibrationData);
+    }
+    else
+    {
+        compensationResult = BME280_NULL_POINTER;
+    }
+
+    return compensationResult;
+}
+
 bme280_error_code_t Bme280Init(bme280_device_t * const device, bme280_handler_t const * const handler, i2c_t const * const i2cDevice, uint8_t const i2cAddress)
 {
     device->i2cDevice = NULL;
