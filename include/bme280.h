@@ -64,6 +64,13 @@
 #define BME280_TEMP_PRESS_CALIB_LENGTH 26
 #define BME280_HUMIDITY_CALIB_LENGTH   7
 
+
+#define BME280_MIN_TEMPERATURE  -4000
+#define BME280_MAX_TEMPERATURE   8500
+#define BME280_MIN_PRESSURE      3000000
+#define BME280_MAX_PRESSURE      11000000
+#define BME280_MAX_HUMIDITY      102400
+
 typedef enum BME280_ERROR_CODE
 {
     BME280_OK                  = 0,
@@ -78,30 +85,32 @@ typedef struct BME280_CALIBRATION_DATA
 {
     // Calibration coefficients for the temperature sensor
 
-    uint16_t coefTemperature1;
-    int16_t coefTemperature2;
-    int16_t coefTemperature3;
+    uint16_t temperatureCoef1;
+    int16_t temperatureCoef2;
+    int16_t temperatureCoef3;
+    
+    int32_t temperatureTemporary;
 
     // Calibration coefficients for the pressure sensor
 
-    uint16_t coefPressure1;
-    int16_t coefPressure2;
-    int16_t coefPressure3;
-    int16_t coefPressure4;
-    int16_t coefPressure5;
-    int16_t coefPressure6;
-    int16_t coefPressure7;
-    int16_t coefPressure8;
-    int16_t coefPressure9;
+    uint16_t pressureCoef1;
+    int16_t pressureCoef2;
+    int16_t pressureCoef3;
+    int16_t pressureCoef4;
+    int16_t pressureCoef5;
+    int16_t pressureCoef6;
+    int16_t pressureCoef7;
+    int16_t pressureCoef8;
+    int16_t pressureCoef9;
 
     // Calibration coefficients for the humidity sensor
 
-    uint8_t coefHumidity1;
-    int16_t coefHumidity2;
-    uint8_t coefHumidity3;
-    int16_t coefHumidity4;
-    int16_t coefHumidity5;
-    int8_t coefHumidity6;
+    uint8_t humidityCoef1;
+    int16_t humidityCoef2;
+    uint8_t humidityCoef3;
+    int16_t humidityCoef4;
+    int16_t humidityCoef5;
+    int8_t humidityCoef6;
 } bme280_calibration_data_t;
 
 
@@ -174,6 +183,9 @@ typedef struct BME280_DEVICE
 
     // Calibration data;
     bme280_calibration_data_t calibrationData;
+    
+    // Data
+    bme280_data_t data;
 
 } bme280_device_t;
 
@@ -194,6 +206,12 @@ static void Bme280ParseTemperatureAndPressureCalibration(bme280_calibration_data
 static void Bme280ParseHumidityCalibration(bme280_calibration_data_t * const calibrationData, uint8_t const * const rawData);
 
 static bme280_error_code_t Bm280GetCalibrationData(bme280_device_t * const device);
+
+static int32_t Bme280CompensateTemperature(bme280_uncompensated_data_t * const uncompensatedData, bme280_calibration_data_t * const calibrationData);
+
+static uint32_t Bme280CompensatePressure(bme280_uncompensated_data_t * const uncompensatedData, bme280_calibration_data_t * const calibrationData);
+
+static uint32_t Bme280CompensateHumidity(bme280_uncompensated_data_t * const uncompensatedData, bme280_calibration_data_t * const calibrationData);
 
 bme280_error_code_t Bme280Init(bme280_device_t * const device, bme280_handler_t const * const handler, i2c_t const * const handle, uint8_t const i2cAddress);
 

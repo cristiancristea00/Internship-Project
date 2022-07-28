@@ -187,43 +187,43 @@ static void Bme280ParseTemperatureAndPressureCalibration(bme280_calibration_data
 {
     // Temperature
 
-    calibrationData->coefTemperature1 = (uint16_t) BME280_CONCAT_BYTES(rawData[1], rawData[0]);
-    calibrationData->coefTemperature2 = (int16_t) BME280_CONCAT_BYTES(rawData[3], rawData[2]);
-    calibrationData->coefTemperature3 = (int16_t) BME280_CONCAT_BYTES(rawData[5], rawData[4]);
+    calibrationData->temperatureCoef1 = (uint16_t) BME280_CONCAT_BYTES(rawData[1], rawData[0]);
+    calibrationData->temperatureCoef2 = (int16_t) BME280_CONCAT_BYTES(rawData[3], rawData[2]);
+    calibrationData->temperatureCoef3 = (int16_t) BME280_CONCAT_BYTES(rawData[5], rawData[4]);
 
     //Pressure
 
-    calibrationData->coefPressure1 = (uint16_t) BME280_CONCAT_BYTES(rawData[7], rawData[6]);
-    calibrationData->coefPressure2 = (int16_t) BME280_CONCAT_BYTES(rawData[9], rawData[8]);
-    calibrationData->coefPressure3 = (int16_t) BME280_CONCAT_BYTES(rawData[11], rawData[10]);
-    calibrationData->coefPressure4 = (int16_t) BME280_CONCAT_BYTES(rawData[13], rawData[12]);
-    calibrationData->coefPressure5 = (int16_t) BME280_CONCAT_BYTES(rawData[15], rawData[14]);
-    calibrationData->coefPressure6 = (int16_t) BME280_CONCAT_BYTES(rawData[17], rawData[16]);
-    calibrationData->coefPressure7 = (int16_t) BME280_CONCAT_BYTES(rawData[19], rawData[18]);
-    calibrationData->coefPressure8 = (int16_t) BME280_CONCAT_BYTES(rawData[21], rawData[20]);
-    calibrationData->coefPressure9 = (int16_t) BME280_CONCAT_BYTES(rawData[23], rawData[22]);
+    calibrationData->pressureCoef1 = (uint16_t) BME280_CONCAT_BYTES(rawData[7], rawData[6]);
+    calibrationData->pressureCoef2 = (int16_t) BME280_CONCAT_BYTES(rawData[9], rawData[8]);
+    calibrationData->pressureCoef3 = (int16_t) BME280_CONCAT_BYTES(rawData[11], rawData[10]);
+    calibrationData->pressureCoef4 = (int16_t) BME280_CONCAT_BYTES(rawData[13], rawData[12]);
+    calibrationData->pressureCoef5 = (int16_t) BME280_CONCAT_BYTES(rawData[15], rawData[14]);
+    calibrationData->pressureCoef6 = (int16_t) BME280_CONCAT_BYTES(rawData[17], rawData[16]);
+    calibrationData->pressureCoef7 = (int16_t) BME280_CONCAT_BYTES(rawData[19], rawData[18]);
+    calibrationData->pressureCoef8 = (int16_t) BME280_CONCAT_BYTES(rawData[21], rawData[20]);
+    calibrationData->pressureCoef9 = (int16_t) BME280_CONCAT_BYTES(rawData[23], rawData[22]);
 
     // One lonely humidity coefficient
 
-    calibrationData->coefHumidity1 = (uint8_t) rawData[25];
+    calibrationData->humidityCoef1 = (uint8_t) rawData[25];
 }
 
 static void Bme280ParseHumidityCalibration(bme280_calibration_data_t * const calibrationData, uint8_t const * const rawData)
 {
     // Humidity
 
-    calibrationData->coefHumidity2 = (int16_t) BME280_CONCAT_BYTES(rawData[1], rawData[0]);
-    calibrationData->coefHumidity3 = (uint8_t) rawData[2];
+    calibrationData->humidityCoef2 = (int16_t) BME280_CONCAT_BYTES(rawData[1], rawData[0]);
+    calibrationData->humidityCoef3 = (uint8_t) rawData[2];
 
-    int16_t coefHumidity4_msb = (int16_t) ((int8_t) rawData[3] * 16);
+    int16_t coefHumidity4_msb = (int16_t) ((int8_t) rawData[3] << 4);
     int16_t coefHumidity4_lsb = (int16_t) (rawData[4] & 0x0F);
-    calibrationData->coefHumidity4 = (int16_t) (coefHumidity4_msb | coefHumidity4_lsb);
+    calibrationData->humidityCoef4 = (int16_t) (coefHumidity4_msb | coefHumidity4_lsb);
 
-    int16_t coefHumidity5_msb = (int16_t) ((int8_t) rawData[5] * 16);
+    int16_t coefHumidity5_msb = (int16_t) ((int8_t) rawData[5] << 4);
     int16_t coefHumidity5_lsb = (int16_t) (rawData[4] >> 4);
-    calibrationData->coefHumidity5 = (int16_t) (coefHumidity5_msb | coefHumidity5_lsb);
+    calibrationData->humidityCoef5 = (int16_t) (coefHumidity5_msb | coefHumidity5_lsb);
 
-    calibrationData->coefHumidity6 = (int8_t) rawData[6];
+    calibrationData->humidityCoef6 = (int8_t) rawData[6];
 }
 
 static bme280_error_code_t Bm280GetCalibrationData(bme280_device_t * const device)
@@ -247,6 +247,100 @@ static bme280_error_code_t Bm280GetCalibrationData(bme280_device_t * const devic
     }
 
     return calibrationResult;
+}
+
+static int32_t Bme280CompensateTemperature(bme280_uncompensated_data_t * const uncompensatedData, bme280_calibration_data_t * const calibrationData)
+{
+    int32_t temperature = 0;
+
+    int32_t temp1 = (int32_t) ((uncompensatedData->temperature >> 3) - ((int32_t) calibrationData->temperatureCoef1 << 2));
+    temp1 = (temp1 * ((int32_t) calibrationData->temperatureCoef2)) >> 11;
+    int32_t temp2 = (int32_t) ((uncompensatedData->temperature >> 4) - ((int32_t) calibrationData->temperatureCoef1));
+    temp2 = (((temp1 * temp2) >> 12) * ((int32_t) calibrationData->temperatureCoef3)) >> 14;
+    calibrationData->temperatureTemporary = temp1 + temp2;
+    temperature = (calibrationData->temperatureTemporary * 5 + 128) >> 8;
+
+    if (temperature < BME280_MIN_TEMPERATURE)
+    {
+        temperature = BME280_MIN_TEMPERATURE;
+        LOG_WARNING("BME280 read temperature is lower than the expected minimum");
+    }
+    else if (temperature > BME280_MAX_TEMPERATURE)
+    {
+        temperature = BME280_MAX_TEMPERATURE;
+        LOG_WARNING("BME280 read temperature is higher than the expected maximum");
+    }
+
+    return temperature;
+}
+
+static uint32_t Bme280CompensatePressure(bme280_uncompensated_data_t * const uncompensatedData, bme280_calibration_data_t * const calibrationData)
+{
+    uint32_t pressure = 0;
+
+    int64_t temp1 = ((int64_t) calibrationData->temperatureTemporary - 128000);
+    int64_t temp2 = temp1 * temp1 * (int64_t) calibrationData->pressureCoef6;
+    temp2 = temp2 + ((temp1 * (int64_t) calibrationData->pressureCoef5) << 17);
+    temp2 = temp2 + (((int64_t) calibrationData->pressureCoef4) << 35);
+    temp1 = (temp1 * temp1 * (int64_t) calibrationData->pressureCoef3 >> 8) + (temp1 * ((int64_t) calibrationData->pressureCoef2) << 12);
+    temp1 = ((((int64_t) 1) << 47) + temp1) * ((int64_t) calibrationData->pressureCoef1) >> 33;
+
+    if (temp1 != 0)
+    {
+        int64_t temp4 = ((int64_t) 1 << 20) - uncompensatedData->pressure;
+        temp4 = (((temp4 * ((int64_t) 1 << 31)) - temp2) * 3125) / temp1;
+        temp1 = (((int64_t) calibrationData->pressureCoef9) * (temp4 >> 13) * (temp4 >> 13)) >> 25;
+        temp2 = (((int64_t) calibrationData->pressureCoef8) * temp4) >> 19;
+        temp4 = ((temp4 + temp1 + temp2) >> 8) + (((int64_t) calibrationData->pressureCoef7) << 4);
+        pressure = (uint32_t) (((temp4 >> 1) * 100) >> 7);
+        if (pressure < BME280_MIN_PRESSURE)
+        {
+            pressure = BME280_MIN_PRESSURE;
+            LOG_WARNING("BME280 read pressure is lower than the expected minimum");
+        }
+        else if (pressure > BME280_MAX_PRESSURE)
+        {
+            pressure = BME280_MAX_PRESSURE;
+            LOG_WARNING("BME280 read pressure is higher than the expected maximum");
+        }
+    }
+    else
+    {
+        pressure = BME280_MIN_PRESSURE;
+        LOG_WARNING("BME280 read pressure is lower than the expected minimum");
+    }
+
+    return pressure;
+}
+
+static uint32_t Bme280CompensateHumidity(bme280_uncompensated_data_t * const uncompensatedData, bme280_calibration_data_t * const calibrationData)
+{
+    uint32_t humidity = 0;
+
+    int32_t temp1 = calibrationData->temperatureTemporary - ((int32_t) 76800);
+    int32_t temp2 = (int32_t) (uncompensatedData->humidity << 14);
+    int32_t temp3 = (int32_t) (((int32_t) calibrationData->humidityCoef4) << 20);
+    int32_t temp4 = ((int32_t) calibrationData->humidityCoef5) * temp1;
+    int32_t temp5 = (((temp2 - temp3) - temp4) + (int32_t) 1 << 14) << 15;
+    temp2 = (temp1 * ((int32_t) calibrationData->humidityCoef6)) << 10;
+    temp3 = (temp1 * ((int32_t) calibrationData->humidityCoef3)) << 11;
+    temp4 = ((temp2 * (temp3 + (int32_t) 1 << 15)) >> 10) + (int32_t) 1 << 21;
+    temp2 = ((temp4 * ((int32_t) calibrationData->humidityCoef2)) + (int32_t) 1 << 13) >> 14;
+    temp3 = temp5 * temp2;
+    temp4 = ((temp3 >> 15) * (temp3 >> 15)) >> 7;
+    temp5 = temp3 - ((temp4 * ((int32_t) calibrationData->humidityCoef1)) >> 4);
+    temp5 = temp5 > 0 ? 0 : temp5;
+    temp5 = temp5 > 419430400 ? 419430400 : temp5;
+    humidity = (uint32_t) (temp5 >> 12);
+
+    if (humidity > BME280_MAX_HUMIDITY)
+    {
+        humidity = BME280_MAX_HUMIDITY;
+        LOG_WARNING("BME280 read humidity is higher than the expected maximum");
+    }
+
+    return humidity;
+    // TODO
 }
 
 bme280_error_code_t Bme280Init(bme280_device_t * const device, bme280_handler_t const * const handler, i2c_t const * const i2cDevice, uint8_t const i2cAddress)
