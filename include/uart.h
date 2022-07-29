@@ -68,28 +68,28 @@ typedef struct UART
  *
  * @param baudRate The baud rate register value
  **/
-static void Uart1Init(uint16_t const baudRate);
+static void UART1_Init(uint16_t const baudRate);
 
 /**
  * @brief Sends a null-terminated string over UART.
  *
  * @param string The null-terminated string to be sent
  **/
-static void Uart1Print(char const * string);
+static void UART1_Print(char const * string);
 
 /**
  * @brief Send a single character over UART.
  *
  * @param character The character to be sent
  */
-static void Uart1PrintChar(char const character);
+static void UART1_PrintChar(char const character);
 
 /**
  * @brief Sends a byte over UART.
  *
  * @param dataByte The byte to be sent
  **/
-static void Uart1SendByte(uint8_t const dataByte);
+static void UART1_SendByte(uint8_t const dataByte);
 
 /**
  * @brief Checks if the UART module is busy sending data.
@@ -97,7 +97,7 @@ static void Uart1SendByte(uint8_t const dataByte);
  * @return true The UART module is busy.
  * @return false The UART module is ready.
  **/
-static bool Uart1TxBusy(void);
+static bool UART1_TXBusy(void);
 
 #ifdef UART_PRINTF
 
@@ -109,7 +109,7 @@ static bool Uart1TxBusy(void);
  * @param stream The stream used to send the character
  * @return int8_t Always returns 0
  **/
-static int8_t Uart1SendChar(char const character, FILE * const stream);
+static int8_t UART1_SendChar(char const character, FILE * const stream);
 
 #endif // UART_PRINTF
 

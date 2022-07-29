@@ -29,6 +29,8 @@
 
 #include "config.h"
 
+extern uart_t const uart_1;
+
 void SetClockFrequency(uint8_t const frequency, uint8_t const prescalerEnabled, ...)
 {
     // Enable external crystal oscillator
@@ -62,4 +64,9 @@ void SetClockFrequency(uint8_t const frequency, uint8_t const prescalerEnabled, 
 void TightLoopContents(void)
 {
     return;
+}
+
+void PrintForLogging(char const * const message)
+{
+    uart_1.Print(message);
 }

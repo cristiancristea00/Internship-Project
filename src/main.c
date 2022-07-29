@@ -30,13 +30,17 @@
 #include "config.h"
 #include "uart.h"
 #include "i2c.h"
+#include "bme280.h"
 
 #include <avr/io.h>
-#include <util/delay.h>
 #include <avr/cpufunc.h>
+#include <util/delay.h>
+
+#include <stdbool.h>
 
 extern uart_t const uart_1;
 extern i2c_t const i2c_0;
+extern bme280_handler_t const defaultHandler;
 
 void BusScan(void);
 
@@ -52,27 +56,39 @@ void main(void)
 
     _delay_ms(5000);
 
-    BusScan();
+    // BusScan();
 
-    while (1)
+    bme280_device_t weatherClick;
+
+    BME280_Init(&weatherClick, &defaultHandler, &i2c_0, BME280_I2C_ADDRESS);
+
+    BME280_GetSensorData(&weatherClick);
+
+    while (true)
     {
-        TightLoopContents();
+        BME280_GetSensorData(&weatherClick);
+
+        printf("Temperature %0.2f\n\r", (float) weatherClick.data.temperature / 100);
+        printf("Pressure %0.2f\n\r", (float) weatherClick.data.pressure / 256);
+        printf("Humidity %0.2f\n\r", (float) weatherClick.data.humidity / 1024);
+
+        _delay_ms(2000);
     }
 }
 
 void BusScan(void)
 {
-    printf("\n\rI2C Scan started from 0x%02X to 0x%02X", I2C_ADRESS_MIN, I2C_ADRESS_MAX);
+    uart_1.Print("\n\rI2C Scan started from 0x00 to 0x7F");
 
     for (uint8_t clientAddress = I2C_ADRESS_MIN; clientAddress <= I2C_ADRESS_MAX; ++clientAddress)
     {
         printf("\n\rScanning client address: 0x%02X", clientAddress);
         if (i2c_0.ClientAvailable(clientAddress))
         {
-            printf(" --> client ACKED");
+            uart_1.Print(" --> client ACKED");
         }
     }
-    printf("\n\rI2C Scan ended\n\r");
+    uart_1.Print("\n\rI2C Scan ended\n\r");
 
     return;
 }

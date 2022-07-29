@@ -34,25 +34,25 @@
  *
  **/
 uart_t const uart_1 = {
-    .Init = Uart1Init,
-    .Print = Uart1Print,
-    .PrintChar = Uart1PrintChar,
+    .Init = UART1_Init,
+    .Print = UART1_Print,
+    .PrintChar = UART1_PrintChar,
 };
 
 #ifdef UART_PRINTF
 
-static int8_t Uart1SendChar(char const character, FILE * const stream)
+static int8_t UART1_SendChar(char const character, FILE * const stream)
 {
-    Uart1PrintChar(character);
+    UART1_PrintChar(character);
 
     return 0;
 }
 
-FILE uart1Stream = FDEV_SETUP_STREAM(Uart1PrintChar, NULL, _FDEV_SETUP_WRITE);
+FILE uart1Stream = FDEV_SETUP_STREAM(UART1_PrintChar, NULL, _FDEV_SETUP_WRITE);
 
 #endif // UART_PRINTF
 
-static void Uart1Init(uint16_t const baudRate)
+static void UART1_Init(uint16_t const baudRate)
 {
 #ifdef UART_PRINTF
 
@@ -68,7 +68,7 @@ static void Uart1Init(uint16_t const baudRate)
     return;
 }
 
-static void Uart1Print(char const * string)
+static void UART1_Print(char const * string)
 {
     char character = '\0';
 
@@ -81,27 +81,27 @@ static void Uart1Print(char const * string)
             break;
         }
 
-        Uart1SendByte((uint8_t) character);
+        UART1_SendByte((uint8_t) character);
     }
 
     return;
 }
 
-static void Uart1PrintChar(char const character)
+static void UART1_PrintChar(char const character)
 {
-    Uart1SendByte((char) character);
+    UART1_SendByte((char) character);
 }
 
-static inline void Uart1SendByte(uint8_t const dataByte)
+static inline void UART1_SendByte(uint8_t const dataByte)
 {
-    while (Uart1TxBusy());
+    while (UART1_TXBusy());
 
     USART1.TXDATAL = dataByte;
 
     return;
 }
 
-static inline bool Uart1TxBusy(void)
+static inline bool UART1_TXBusy(void)
 {
     return !(USART1.STATUS & USART_DREIF_bm);
 }
