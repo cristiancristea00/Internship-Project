@@ -424,6 +424,27 @@ bme280_error_code_t BME280_GetSensorData(bme280_device_t * const device)
     return acquisitionResult;
 }
 
+static bme280_error_code_t BME280_SetOversamplingTemperaturePressure(bme280_device_t * const device, bme280_settings_t const * const settings)
+{
+    // TODO
+}
+
+static bme280_error_code_t BME280_SetOversamplingHumidity(bme280_device_t * const device, bme280_settings_t const * const settings)
+{
+    // TODO
+}
+
+bme280_error_code_t BME280_SetOversamplingSettings(bme280_device_t * const device, bme280_settings_t const * const settings)
+{
+    bme280_error_code_t oversamplingResult = BME280_OK;
+
+    oversamplingResult = BME280_SetOversamplingHumidity(device, settings);
+
+    oversamplingResult = BME280_SetOversamplingTemperaturePressure(device, settings);
+
+    return oversamplingResult;
+}
+
 bme280_error_code_t BME280_Init(bme280_device_t * const device, bme280_handler_t const * const handler, i2c_t const * const i2cDevice, uint8_t const i2cAddress)
 {
     device->i2cDevice = NULL;

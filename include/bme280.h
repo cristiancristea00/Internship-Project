@@ -44,44 +44,58 @@
  **/
 #define BME280_CONCAT_BYTES(MSB, LSB) (((uint16_t) (MSB) << 8) | (uint16_t) (LSB))
 
-#define BME280_I2C_ADDRESS 0x76
+/**
+ * @brief
+ * TODO - Add description
+ **/
+#define BME280_SET_BITS(REGISTER_DATA, BITNAME, DATA) ((REGISTER_DATA & ~(BITNAME ## _bm)) | ((DATA << BITNAME ## _bp) & BITNAME ## _bm))
 
-#define BME280_CHIP_ID_ADDRESS 0xD0
+/**
+ * @brief
+ * TODO - Add description
+ **/
+#define BME280_GET_BITS(REGISTER_DATA, BITNAME) ((REGISTER_DATA & ~(BITNAME ## _bm)) | (data & BITNAME ## _bm))
 
-#define BME280_CHIP_ID 0x60
+// Principal and secondary I2C addresses of the chip
+#define BME280_I2C_ADDRESS        0x76
+#define BME280_I2C_ADDRESS_SEC    0x77
 
-#define BME280_RESET_ADDRESS 0xE0
+// The BME280 chip identifier
+#define BME280_CHIP_ID    0x60
 
-#define BME280_SOFT_RESET_COMMAND 0xB6
+// Register addresses
+#define BME280_CHIP_ID_ADDRESS             0xD0
+#define BME280_RESET_ADDRESS               0xE0
+#define BME280_TEMP_PRESS_CALIB_ADDRESS    0x88
+#define BME280_HUMIDITY_CALIB_ADDRESS      0xE1
+#define BME280_DATA_ADDRESS                0xF7
 
-#define BME280_TEMP_PRESS_CALIB_ADDRESS 0x88
-#define BME280_HUMIDITY_CALIB_ADDRESS   0xE1
+// Registers related to sizes
+#define BME280_TEMP_PRESS_CALIB_LENGTH    26
+#define BME280_HUMIDITY_CALIB_LENGTH      7
+#define BME280_DATA_LENGTH                8
 
-#define BME280_STATUS_UPDATE 0x01
+// Status
+#define BME280_STATUS_REGISTER_ADDRESS    0xF3
+#define BME280_SOFT_RESET_COMMAND         0xB6
+#define BME280_STATUS_UPDATE              0x01
 
-#define BME280_STATUS_REGISTER_ADDRESS 0xF3
+// Value limits for measurements
+#define BME280_MIN_TEMPERATURE    -4000L
+#define BME280_MAX_TEMPERATURE    8500L
+#define BME280_MIN_PRESSURE       3000000UL
+#define BME280_MAX_PRESSURE       11000000UL
+#define BME280_MAX_HUMIDITY       102400UL
 
-#define BME280_TEMP_PRESS_CALIB_LENGTH 26
-#define BME280_HUMIDITY_CALIB_LENGTH   7
-
-
-#define BME280_MIN_TEMPERATURE  -4000
-#define BME280_MAX_TEMPERATURE   8500
-#define BME280_MIN_PRESSURE      3000000
-#define BME280_MAX_PRESSURE      11000000
-#define BME280_MAX_HUMIDITY      102400
-
-#define BME280_DATA_ADDRESS 0xF7
-#define BME280_DATA_LENGTH 8
 
 typedef enum BME280_ERROR_CODE
 {
-    BME280_OK                  = 0,
-    BME280_DEVICE_NOT_FOUND    = 1,
-    BME280_NULL_POINTER        = 2,
-    BME280_COMMUNICATION_ERROR = 3,
-    BME280_INVALID_LENGTH      = 4,
-    BME280_NVM_COPY_FAILED     = 5
+    BME280_OK                  = 0x00,
+    BME280_DEVICE_NOT_FOUND    = 0x01,
+    BME280_NULL_POINTER        = 0x02,
+    BME280_COMMUNICATION_ERROR = 0x03,
+    BME280_INVALID_LENGTH      = 0x04,
+    BME280_NVM_COPY_FAILED     = 0x05
 } bme280_error_code_t;
 
 typedef struct BME280_CALIBRATION_DATA
@@ -142,23 +156,54 @@ typedef struct BME280_DATA
     uint32_t humidity;
 } bme280_data_t;
 
+typedef enum BME280_OVERSAMPLING
+{
+    BME280_NO_OVERSAMPLING  = 0x00,
+    BME280_OVERSAMPLING_1X  = 0x01,
+    BME280_OVERSAMPLING_2X  = 0x02,
+    BME280_OVERSAMPLING_4X  = 0x03,
+    BME280_OVERSAMPLING_8X  = 0x04,
+    BME280_OVERSAMPLING_16X = 0x05
+} bme280_oversampling_t;
+
+typedef enum BME280_IIR_FILTER
+{
+    BME280_IIR_FILTER_OFF = 0x00,
+    BME280_IIR_FILTER_2   = 0x01,
+    BME280_IIR_FILTER_4   = 0x02,
+    BME280_IIR_FILTER_8   = 0x03,
+    BME280_IIR_FILTER_16  = 0x04
+            
+} bme280_iir_filter_t;
+
+typedef enum BME280_STANDY_TIME
+{
+BME280_STANDBY_TIME_0_5_MS  = 0x00,
+BME280_STANDBY_TIME_62_5_MS = 0x01,
+BME280_STANDBY_TIME_125_MS  = 0x02,
+BME280_STANDBY_TIME_250_MS  = 0x03,
+BME280_STANDBY_TIME_500_MS  = 0x04,
+BME280_STANDBY_TIME_1000_MS = 0x05,
+BME280_STANDBY_TIME_10_MS   = 0x06,
+BME280_STANDBY_TIME_20_MS   = 0x07
+} bme280_standby_time_t;
 
 typedef struct BME280_SETTINGS
 {
     // Temperature oversampling
-    uint8_t temperatureOversampling;
+    bme280_oversampling_t temperatureOversampling;
 
     // Pressure oversampling
-    uint8_t pressureOversampling;
+    bme280_oversampling_t pressureOversampling;
 
     // Humidity oversampling
-    uint8_t humidityOversampling;
+    bme280_oversampling_t humidityOversampling;
 
     // IIR filter coefficient
-    uint8_t iirFilterCoefficient;
+    bme280_iir_filter_t iirFilterCoefficients;
 
     // Standby time
-    uint8_t standbyTime;
+    bme280_standby_time_t standbyTime;
 } bme280_settings_t;
 
 typedef bme280_error_code_t (* bme280_read_t) (i2c_t * const, uint8_t const, uint8_t const, uint8_t * const, uint8_t const);
@@ -219,6 +264,12 @@ static uint32_t BME280_CompensateHumidity(bme280_uncompensated_data_t * const un
 static bme280_error_code_t BME280_CompensateData(bme280_device_t * const device, bme280_uncompensated_data_t * const uncompensatedData);
 
 static void BME280_ParseSensorData(uint8_t const * const data, bme280_uncompensated_data_t * const uncompensatedData);
+
+static bme280_error_code_t BME280_SetOversamplingTemperaturePressure(bme280_device_t * const device, bme280_settings_t const * const settings);
+
+static bme280_error_code_t BME280_SetOversamplingHumidity(bme280_device_t * const device, bme280_settings_t const * const settings);
+
+bme280_error_code_t BME280_SetOversamplingSettings(bme280_device_t * const device, bme280_settings_t const * const settings);
 
 bme280_error_code_t BME280_GetSensorData(bme280_device_t * const device);
 

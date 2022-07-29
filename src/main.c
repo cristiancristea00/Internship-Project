@@ -72,7 +72,7 @@ void main(void)
         printf("Pressure %0.2f\n\r", (float) weatherClick.data.pressure / 256);
         printf("Humidity %0.2f\n\r", (float) weatherClick.data.humidity / 1024);
 
-        _delay_ms(2000);
+        _delay_ms(5000);
     }
 }
 
