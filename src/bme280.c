@@ -445,6 +445,70 @@ bme280_error_code_t BME280_SetOversamplingSettings(bme280_device_t * const devic
     return oversamplingResult;
 }
 
+static void BME280_ParseSetings(bme280_settings_t * const settings, uint8_t const * const rawSettings)
+{
+    settings->temperatureOversampling = BME280_GET_BITS(rawSettings[2], BME280_CONTROL_TEMPERATURE);
+    settings->pressureOversampling = BME280_GET_BITS(rawSettings[2], BME280_CONTROL_PRESSURE);
+    settings->humidityOversampling = BME280_GET_BITS(rawSettings[0], BME280_CONTROL_HUMIDITY);
+    settings->iirFilterCoefficients = BME280_GET_BITS(rawSettings[3], BME280_FILTER);
+    settings->standbyTime = BME280_GET_BITS(rawSettings[3], BME280_STANDBY);
+}
+
+static bme280_error_code_t BME280_ReloadSettings(bme280_device_t * const device, bme280_settings_t const * const settings)
+{
+    // TODO
+}
+
+static bme280_error_code_t BME280_PutToSleep(bme280_device_t * const device)
+{
+    bme280_error_code_t sleepResult = BME280_OK;
+
+    uint8_t rawData[BME280_CONFIG_REGISTERS_LENGTH] = { 0 };
+
+    sleepResult = BME280_GetRegisters(device, BME280_CONTROL_HUMIDITY_ADDRESS, rawData, BME280_CONFIG_REGISTERS_LENGTH);
+
+    if (sleepResult == BME280_OK)
+    {
+        bme280_settings_t settings;
+
+        BME280_ParseSetings(&settings, rawData);
+
+        sleepResult = BME280_SoftReset(device);
+
+        if (sleepResult == BME280_OK)
+        {
+            sleepResult = BME280_ReloadSettings(device, &settings);
+        }
+    }
+
+    return BME280_OK;
+}
+
+static bme280_error_code_t BME280_WritePowerMode(bme280_device_t * const device, bme280_power_mode_t const powerMode)
+{
+    bme280_error_code_t powerResult = BME280_OK;
+
+    uint8_t powerControlAddress = BME280_POWER_CONTROL_ADDRESS;
+
+    uint8_t sensorModeValue = 0;
+
+    powerResult = BME280_GetRegisters(device, powerControlAddress, &sensorModeValue, 1);
+
+    if (powerResult == BME280_OK)
+    {
+        sensorModeValue = BME280_SET_BITS(sensorModeValue, BME280_SENSOR_MODE, powerMode);
+
+        powerResult = BME280_SetRegisters(device, &powerControlAddress, &sensorModeValue, 1);
+    }
+
+    return powerResult;
+}
+
+bme280_error_code_t BME280_SetSensorPowerMode(bme280_device_t * const device, uint8_t const sensorMode)
+{
+    // TODO
+}
+
 bme280_error_code_t BME280_Init(bme280_device_t * const device, bme280_handler_t const * const handler, i2c_t const * const i2cDevice, uint8_t const i2cAddress)
 {
     device->i2cDevice = NULL;

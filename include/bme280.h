@@ -48,13 +48,13 @@
  * @brief
  * TODO - Add description
  **/
-#define BME280_SET_BITS(REGISTER_DATA, BITNAME, DATA) ((REGISTER_DATA & ~(BITNAME ## _bm)) | ((DATA << BITNAME ## _bp) & BITNAME ## _bm))
+#define BME280_SET_BITS(REGISTER_DATA, BITNAME, DATA) ((REGISTER_DATA & ~(BITNAME ## _MSK)) | ((DATA << BITNAME ## _POS) & BITNAME ## _MSK))
 
 /**
  * @brief
  * TODO - Add description
  **/
-#define BME280_GET_BITS(REGISTER_DATA, BITNAME) ((REGISTER_DATA & ~(BITNAME ## _bm)) | (data & BITNAME ## _bm))
+#define BME280_GET_BITS(REGISTER_DATA, BITNAME) ((REGISTER_DATA & (BITNAME ## _MSK)) >> (BITNAME ## _POS))
 
 // Principal and secondary I2C addresses of the chip
 #define BME280_I2C_ADDRESS        0x76
@@ -69,11 +69,16 @@
 #define BME280_TEMP_PRESS_CALIB_ADDRESS    0x88
 #define BME280_HUMIDITY_CALIB_ADDRESS      0xE1
 #define BME280_DATA_ADDRESS                0xF7
+#define BME280_POWER_CONTROL_ADDRESS       0xF4
+#define BME280_CONTROL_HUMIDITY_ADDRESS    0xF2
+#define BME280_CONTROL_MEAS_ADDRESS        0xF4
+#define BME280_CONFIG_ADDRESS              0xF5
 
 // Registers related to sizes
 #define BME280_TEMP_PRESS_CALIB_LENGTH    26
 #define BME280_HUMIDITY_CALIB_LENGTH      7
 #define BME280_DATA_LENGTH                8
+#define BME280_CONFIG_REGISTERS_LENGTH    4
 
 // Status
 #define BME280_STATUS_REGISTER_ADDRESS    0xF3
@@ -87,6 +92,24 @@
 #define BME280_MAX_PRESSURE       11000000UL
 #define BME280_MAX_HUMIDITY       102400UL
 
+// Bit masks and bit positions
+#define BME280_CONTROL_TEMPERATURE_MSK    0xE0
+#define BME280_CONTROL_TEMPERATURE_POS    0x05
+
+#define BME280_CONTROL_PRESSURE_MSK       0x1C
+#define BME280_CONTROL_PRESSURE_POS       0x02
+
+#define BME280_CONTROL_HUMIDITY_MSK       0x07
+#define BME280_CONTROL_HUMIDITY_POS       0x00
+
+#define BME280_SENSOR_MODE_MSK            0x03
+#define BME280_SENSOR_MODE_POS            0x00
+
+#define BME280_FILTER_MSK                 0x1C
+#define BME280_FILTER_POS                 0x02
+
+#define BME280_STANDBY_MSK                0xE0
+#define BME280_STANDBY_POS                0x05
 
 typedef enum BME280_ERROR_CODE
 {
@@ -178,15 +201,22 @@ typedef enum BME280_IIR_FILTER
 
 typedef enum BME280_STANDY_TIME
 {
-BME280_STANDBY_TIME_0_5_MS  = 0x00,
-BME280_STANDBY_TIME_62_5_MS = 0x01,
-BME280_STANDBY_TIME_125_MS  = 0x02,
-BME280_STANDBY_TIME_250_MS  = 0x03,
-BME280_STANDBY_TIME_500_MS  = 0x04,
-BME280_STANDBY_TIME_1000_MS = 0x05,
-BME280_STANDBY_TIME_10_MS   = 0x06,
-BME280_STANDBY_TIME_20_MS   = 0x07
+    BME280_STANDBY_TIME_0_5_MS  = 0x00,
+    BME280_STANDBY_TIME_62_5_MS = 0x01,
+    BME280_STANDBY_TIME_125_MS  = 0x02,
+    BME280_STANDBY_TIME_250_MS  = 0x03,
+    BME280_STANDBY_TIME_500_MS  = 0x04,
+    BME280_STANDBY_TIME_1000_MS = 0x05,
+    BME280_STANDBY_TIME_10_MS   = 0x06,
+    BME280_STANDBY_TIME_20_MS   = 0x07
 } bme280_standby_time_t;
+
+typedef enum BME280_POWER_MODE
+{
+    BME280_SLEEP_MODE  = 0x00,
+    BME280_FORCED_MODE = 0x01,
+    BME280_NORMAL_MODE = 0x03
+} bme280_power_mode_t;
 
 typedef struct BME280_SETTINGS
 {
@@ -204,6 +234,9 @@ typedef struct BME280_SETTINGS
 
     // Standby time
     bme280_standby_time_t standbyTime;
+    
+    // Power mode
+    bme280_power_mode_t powerMode;
 } bme280_settings_t;
 
 typedef bme280_error_code_t (* bme280_read_t) (i2c_t * const, uint8_t const, uint8_t const, uint8_t * const, uint8_t const);
@@ -271,8 +304,18 @@ static bme280_error_code_t BME280_SetOversamplingHumidity(bme280_device_t * cons
 
 bme280_error_code_t BME280_SetOversamplingSettings(bme280_device_t * const device, bme280_settings_t const * const settings);
 
-bme280_error_code_t BME280_GetSensorData(bme280_device_t * const device);
+static void BME280_ParseSetings(bme280_settings_t * const settings, uint8_t const * const rawSettings);
+
+static bme280_error_code_t BME280_ReloadSettings(bme280_device_t * const device, bme280_settings_t const * const settings);
+
+static bme280_error_code_t BME280_PutToSleep(bme280_device_t * const device);
+
+static bme280_error_code_t BME280_WritePowerMode(bme280_device_t * const device, bme280_power_mode_t const powerMode);
+
+bme280_error_code_t BME280_SetSensorPowerMode(bme280_device_t * const device, uint8_t const sensorMode);
 
 bme280_error_code_t BME280_Init(bme280_device_t * const device, bme280_handler_t const * const handler, i2c_t const * const handle, uint8_t const i2cAddress);
+
+bme280_error_code_t BME280_GetSensorData(bme280_device_t * const device);
 
 #endif // BME280_H

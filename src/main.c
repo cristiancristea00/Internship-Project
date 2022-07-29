@@ -60,6 +60,7 @@ void main(void)
 
     bme280_device_t weatherClick;
 
+
     BME280_Init(&weatherClick, &defaultHandler, &i2c_0, BME280_I2C_ADDRESS);
 
     BME280_GetSensorData(&weatherClick);
