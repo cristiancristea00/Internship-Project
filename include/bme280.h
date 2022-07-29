@@ -71,6 +71,9 @@
 #define BME280_MAX_PRESSURE      11000000
 #define BME280_MAX_HUMIDITY      102400
 
+#define BME280_DATA_ADDRESS 0xF7
+#define BME280_DATA_LENGTH 8
+
 typedef enum BME280_ERROR_CODE
 {
     BME280_OK                  = 0,
@@ -189,32 +192,36 @@ typedef struct BME280_DEVICE
 
 } bme280_device_t;
 
-static bme280_error_code_t Bme280CheckNull(bme280_device_t const * const device);
+static bme280_error_code_t BME280_CheckNull(bme280_device_t const * const device);
 
-static bme280_error_code_t Bm280ReadRegisters(i2c_t * const i2c, uint8_t const address, uint8_t const registerAddress, uint8_t * const data, uint8_t const length);
+static bme280_error_code_t BME280_ReadRegisters(i2c_t * const i2c, uint8_t const address, uint8_t const registerAddress, uint8_t * const data, uint8_t const length);
 
-static bme280_error_code_t Bm280WriteRegisters(i2c_t * const i2c, uint8_t const address, uint8_t const * const registerAddresses, uint8_t const * const data, uint8_t const length);
+static bme280_error_code_t BME280_WriteRegisters(i2c_t * const i2c, uint8_t const address, uint8_t const * const registerAddresses, uint8_t const * const data, uint8_t const length);
 
-static bme280_error_code_t Bme280GetRegisters(bme280_device_t * const device, uint8_t const registerAddress, uint8_t * const data, uint8_t const length);
+static bme280_error_code_t BME280_GetRegisters(bme280_device_t * const device, uint8_t const registerAddress, uint8_t * const data, uint8_t const length);
 
-static bme280_error_code_t Bme280SetRegisters(bme280_device_t * const device, uint8_t const * const registerAddresses, uint8_t const * const data, uint8_t const length);
+static bme280_error_code_t BME280_SetRegisters(bme280_device_t * const device, uint8_t const * const registerAddresses, uint8_t const * const data, uint8_t const length);
 
-static bme280_error_code_t Bme280SoftReset(bme280_device_t * const device);
+static bme280_error_code_t BME280_SoftReset(bme280_device_t * const device);
 
-static void Bme280ParseTemperatureAndPressureCalibration(bme280_calibration_data_t * const calibrationData, uint8_t const * const rawData);
+static void BME280_ParseTemperatureAndPressureCalibration(bme280_calibration_data_t * const calibrationData, uint8_t const * const rawData);
 
-static void Bme280ParseHumidityCalibration(bme280_calibration_data_t * const calibrationData, uint8_t const * const rawData);
+static void BME280_ParseHumidityCalibration(bme280_calibration_data_t * const calibrationData, uint8_t const * const rawData);
 
-static bme280_error_code_t Bm280GetCalibrationData(bme280_device_t * const device);
+static bme280_error_code_t BME280_GetCalibrationData(bme280_device_t * const device);
 
-static int32_t Bme280CompensateTemperature(bme280_uncompensated_data_t * const uncompensatedData, bme280_calibration_data_t * const calibrationData);
+static int32_t BME280_CompensateTemperature(bme280_uncompensated_data_t * const uncompensatedData, bme280_calibration_data_t * const calibrationData);
 
-static uint32_t Bme280CompensatePressure(bme280_uncompensated_data_t * const uncompensatedData, bme280_calibration_data_t * const calibrationData);
+static uint32_t BME280_CompensatePressure(bme280_uncompensated_data_t * const uncompensatedData, bme280_calibration_data_t * const calibrationData);
 
-static uint32_t Bme280CompensateHumidity(bme280_uncompensated_data_t * const uncompensatedData, bme280_calibration_data_t * const calibrationData);
+static uint32_t BME280_CompensateHumidity(bme280_uncompensated_data_t * const uncompensatedData, bme280_calibration_data_t * const calibrationData);
 
-static bme280_error_code_t BMe280CompensateData(bme280_device_t * const device, bme280_uncompensated_data_t * const uncompensatedData);
+static bme280_error_code_t BME280_CompensateData(bme280_device_t * const device, bme280_uncompensated_data_t * const uncompensatedData);
 
-bme280_error_code_t Bme280Init(bme280_device_t * const device, bme280_handler_t const * const handler, i2c_t const * const handle, uint8_t const i2cAddress);
+static void BME280_ParseSensorData(uint8_t const * const data, bme280_uncompensated_data_t * const uncompensatedData);
+
+bme280_error_code_t BME280_GetSensorData(bme280_device_t * const device);
+
+bme280_error_code_t BME280_Init(bme280_device_t * const device, bme280_handler_t const * const handler, i2c_t const * const handle, uint8_t const i2cAddress);
 
 #endif // BME280_H

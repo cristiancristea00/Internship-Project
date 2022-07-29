@@ -36,6 +36,8 @@
 #include <avr/cpufunc.h>
 #include <util/delay.h>
 
+#include <stdbool.h>
+
 extern uart_t const uart_1;
 extern i2c_t const i2c_0;
 extern bme280_handler_t const defaultHandler;
@@ -58,11 +60,19 @@ void main(void)
 
     bme280_device_t weatherClick;
 
-    Bme280Init(&weatherClick, &defaultHandler, &i2c_0, BME280_I2C_ADDRESS);
+    BME280_Init(&weatherClick, &defaultHandler, &i2c_0, BME280_I2C_ADDRESS);
 
-    while (1)
+    BME280_GetSensorData(&weatherClick);
+
+    while (true)
     {
-        TightLoopContents();
+        BME280_GetSensorData(&weatherClick);
+
+        printf("Temperature %0.2f\n\r", (float) weatherClick.data.temperature / 100);
+        printf("Pressure %0.2f\n\r", (float) weatherClick.data.pressure / 256);
+        printf("Humidity %0.2f\n\r", (float) weatherClick.data.humidity / 1024);
+
+        _delay_ms(2000);
     }
 }
 
