@@ -43,9 +43,7 @@ extern i2c_t const i2c_0;
 extern bme280_handler_t const defaultHandler;
 
 void BusScan(void);
-
-void SetSensorSettings(bme280_device_t const * const device);
-void ForcedSensorRead(bme280_device_t const * const device);
+void SensorRead(bme280_device_t const * const device);
 
 void main(void)
 {
@@ -59,59 +57,35 @@ void main(void)
 
     _delay_ms(5000);
 
-    // BusScan();
-
     bme280_device_t weatherClick;
 
-    BME280_Init(&weatherClick, &defaultHandler, &i2c_0, BME280_I2C_ADDRESS);
+    bme280_settings_t settings = {
+        .temperatureOversampling = BME280_OVERSAMPLING_16X,
+        .pressureOversampling = BME280_OVERSAMPLING_16X,
+        .humidityOversampling = BME280_OVERSAMPLING_16X,
+        .iirFilterCoefficients = BME280_IIR_FILTER_16,
+        .powerMode = BME280_NORMAL_MODE,
+        .standbyTime = BME280_STANDBY_TIME_0_5_MS
+    };
 
-    SetSensorSettings(&weatherClick);
+    BME280_Init(&weatherClick, &defaultHandler, &i2c_0, BME280_I2C_ADDRESS, &settings);
+
+    SensorRead(&weatherClick);
 
     while (true)
     {
-        ForcedSensorRead(&weatherClick);
-
-        _delay_ms(2000);
+        TightLoopContents();
     }
 }
 
-void SetSensorSettings(bme280_device_t const * const device)
-{
-    bme280_error_code_t forcedModeResult = BME280_OK;
-
-    bme280_settings_t settings = {
-        .temperatureOversampling = BME280_OVERSAMPLING_1X,
-        .pressureOversampling = BME280_OVERSAMPLING_1X,
-        .humidityOversampling = BME280_OVERSAMPLING_1X,
-        .iirFilterCoefficients = BME280_IIR_FILTER_OFF,
-    };
-
-    forcedModeResult = BME280_SetSensorSettings(device, &settings);
-
-    return;
-}
-
-void ForcedSensorRead(bme280_device_t const * const device)
+void SensorRead(bme280_device_t const * const device)
 {
     static double temperature, pressure, humidity;
 
-    bme280_error_code_t readResult = BME280_OK;
-
-    readResult = BME280_SetSensorPowerMode(device, BME280_FORCED_MODE);
+    bme280_error_code_t readResult = BME280_GetSensorData(device);
 
     if (readResult != BME280_OK)
     {
-        LOG_ERROR("Failed settings forced mode");
-        return;
-    }
-
-    _delay_loop_2(BME280_ComputeDelay(&device->settings));
-
-    readResult = BME280_GetSensorData(device);
-
-    if (readResult != BME280_OK)
-    {
-        LOG_ERROR("Failed to read sensor data");
         return;
     }
 
@@ -119,7 +93,9 @@ void ForcedSensorRead(bme280_device_t const * const device)
     pressure = 0.0001F * device->data.pressure;
     humidity = (1.0F / 1024.0F) * device->data.humidity;
 
-    printf("%0.2lf deg C, %0.2lf hPa, %0.2lf\n\r", temperature, pressure, humidity);
+    printf("%0.2lf deg C, %0.2lf hPa, %0.2lf%% \n\r", temperature, pressure, humidity);
+
+    return;
 }
 
 void BusScan(void)

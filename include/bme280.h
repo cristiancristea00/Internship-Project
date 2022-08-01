@@ -308,9 +308,9 @@ static bme280_error_code_t BME280_SetOversamplingTemperaturePressure(bme280_devi
 
 static bme280_error_code_t BME280_SetOversamplingHumidity(bme280_device_t * const device, bme280_settings_t const * const settings);
 
-bme280_error_code_t BME280_SetOversamplingSettings(bme280_device_t * const device, bme280_settings_t const * const settings);
+static bme280_error_code_t BME280_SetOversamplingSettings(bme280_device_t * const device, bme280_settings_t const * const settings);
 
-bme280_error_code_t BME280_SetFilterStandbySettings(bme280_device_t * const device, bme280_settings_t const * const settings);
+static bme280_error_code_t BME280_SetFilterStandbySettings(bme280_device_t * const device, bme280_settings_t const * const settings);
 
 static void BME280_ParseSetings(bme280_settings_t * const settings, uint8_t const * const rawSettings);
 
@@ -320,15 +320,15 @@ static bme280_error_code_t BME280_PutToSleep(bme280_device_t * const device);
 
 static bme280_error_code_t BME280_WritePowerMode(bme280_device_t * const device, bme280_power_mode_t const powerMode);
 
-bme280_error_code_t BME280_SetSensorPowerMode(bme280_device_t * const device, bme280_power_mode_t const powerMode);
+static bme280_error_code_t BME280_SetSensorPowerMode(bme280_device_t * const device, bme280_settings_t const * const settings);
 
-bme280_error_code_t BME280_GetSensorPowerMode(bme280_device_t * const device, bme280_power_mode_t * const powerMode);
+static bme280_error_code_t BME280_GetSensorPowerMode(bme280_device_t * const device, bme280_power_mode_t * const powerMode);
 
-bme280_error_code_t BME280_SetSensorSettings(bme280_device_t * const device, bme280_settings_t const * const settings);
+static bme280_error_code_t BME280_SetSensorSettings(bme280_device_t * const device, bme280_settings_t const * const settings);
 
 uint32_t BME280_ComputeDelay(bme280_settings_t const * const settings);
 
-bme280_error_code_t BME280_Init(bme280_device_t * const device, bme280_handler_t const * const handler, i2c_t const * const handle, uint8_t const i2cAddress);
+bme280_error_code_t BME280_Init(bme280_device_t * const device, bme280_handler_t const * const handler, i2c_t const * const handle, uint8_t const i2cAddress, bme280_settings_t const * const settings);
 
 bme280_error_code_t BME280_GetSensorData(bme280_device_t * const device);
 

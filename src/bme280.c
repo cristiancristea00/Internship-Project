@@ -246,6 +246,15 @@ static bme280_error_code_t BME280_GetCalibrationData(bme280_device_t * const dev
         }
     }
 
+    if (calibrationResult == BME280_OK)
+    {
+        LOG_INFO("Got BME280 calibration data from sensor");
+    }
+    else
+    {
+        LOG_ERROR("Failed to get BME280 calibration data");
+    }
+
     return calibrationResult;
 }
 
@@ -442,6 +451,15 @@ static bme280_error_code_t BME280_SetOversamplingTemperaturePressure(bme280_devi
         oversamplingResult = BME280_SetRegisters(device, &measAddress, &registerData, 1);
     }
 
+    if (oversamplingResult == BME280_OK)
+    {
+        LOG_INFO("Set oversampling settings for temperature and pressure successfully");
+    }
+    else
+    {
+        LOG_ERROR("Failed to set oversampling settings for temperature and pressure");
+    }
+
     return oversamplingResult;
 }
 
@@ -454,6 +472,15 @@ static bme280_error_code_t BME280_SetOversamplingHumidity(bme280_device_t * cons
     uint8_t registerData = settings->humidityOversampling & BME280_CONTROL_HUMIDITY_MSK;
 
     oversamplingResult = BME280_SetRegisters(device, &humidityAddress, &registerData, 1);
+
+    if (oversamplingResult == BME280_OK)
+    {
+        LOG_INFO("Set oversampling settings for humidity successfully");
+    }
+    else
+    {
+        LOG_ERROR("Failed to set oversampling settings for humidity");
+    }
 
     return oversamplingResult;
 }
@@ -487,6 +514,15 @@ bme280_error_code_t BME280_SetFilterStandbySettings(bme280_device_t * const devi
         standbyFilterResult = BME280_SetRegisters(device, &configAddress, &registerData, 1);
     }
 
+    if (standbyFilterResult == BME280_OK)
+    {
+        LOG_INFO("Set filter and standby settings successfully");
+    }
+    else
+    {
+        LOG_ERROR("Failed to set filter and standby settings");
+    }
+
     return standbyFilterResult;
 }
 
@@ -510,6 +546,15 @@ static bme280_error_code_t BME280_ReloadSettings(bme280_device_t * const device,
         reloadResult = BME280_SetFilterStandbySettings(device, settings);
     }
 
+    if (reloadResult == BME280_OK)
+    {
+        LOG_INFO("Reloaded BME280 settings successfully");
+    }
+    else
+    {
+        LOG_ERROR("Failed to reload BME280 settings");
+    }
+
     return reloadResult;
 }
 
@@ -520,6 +565,8 @@ static bme280_error_code_t BME280_PutToSleep(bme280_device_t * const device)
     uint8_t rawData[BME280_CONFIG_REGISTERS_LENGTH] = { 0 };
 
     sleepResult = BME280_GetRegisters(device, BME280_CONTROL_HUMIDITY_ADDRESS, rawData, BME280_CONFIG_REGISTERS_LENGTH);
+
+    LOG_INFO("Putting BME280 to sleep...");
 
     if (sleepResult == BME280_OK)
     {
@@ -533,6 +580,15 @@ static bme280_error_code_t BME280_PutToSleep(bme280_device_t * const device)
         {
             sleepResult = BME280_ReloadSettings(device, &settings);
         }
+    }
+
+    if (sleepResult == BME280_OK)
+    {
+        LOG_INFO("Put BME280 to sleep successfully");
+    }
+    else
+    {
+        LOG_ERROR("Failed to put BME280 to sleep");
     }
 
     return BME280_OK;
@@ -558,7 +614,7 @@ static bme280_error_code_t BME280_WritePowerMode(bme280_device_t * const device,
     return powerResult;
 }
 
-bme280_error_code_t BME280_SetSensorPowerMode(bme280_device_t * const device, bme280_power_mode_t const powerMode)
+static bme280_error_code_t BME280_SetSensorPowerMode(bme280_device_t * const device, bme280_settings_t const * const settings)
 {
     bme280_error_code_t modeResult = BME280_OK;
 
@@ -566,23 +622,22 @@ bme280_error_code_t BME280_SetSensorPowerMode(bme280_device_t * const device, bm
 
     if (modeResult == BME280_OK)
     {
-        bme280_power_mode_t lastPowerMode = device->settings.powerMode;
+        modeResult = BME280_WritePowerMode(device, settings->powerMode);
+    }
 
-        if (lastPowerMode != BME280_SLEEP_MODE)
-        {
-            modeResult = BME280_PutToSleep(device);
-        }
-
-        if (modeResult == BME280_OK)
-        {
-            modeResult = BME280_WritePowerMode(device, powerMode);
-        }
+    if (modeResult == BME280_OK)
+    {
+        LOG_INFO("Set power mode settings successfully");
+    }
+    else
+    {
+        LOG_ERROR("Failed to set power mode settings");
     }
 
     return modeResult;
 }
 
-bme280_error_code_t BME280_GetSensorPowerMode(bme280_device_t * const device, bme280_power_mode_t * const powerMode)
+static bme280_error_code_t BME280_GetSensorPowerMode(bme280_device_t * const device, bme280_power_mode_t * const powerMode)
 {
     bme280_error_code_t powerResult = BME280_OK;
 
@@ -602,7 +657,7 @@ bme280_error_code_t BME280_GetSensorPowerMode(bme280_device_t * const device, bm
     return powerResult;
 }
 
-bme280_error_code_t BME280_SetSensorSettings(bme280_device_t * const device, bme280_settings_t const * const settings)
+static bme280_error_code_t BME280_SetSensorSettings(bme280_device_t * const device, bme280_settings_t const * const settings)
 {
     bme280_error_code_t settingsResult = BME280_OK;
 
@@ -610,15 +665,6 @@ bme280_error_code_t BME280_SetSensorSettings(bme280_device_t * const device, bme
 
     if (settingsResult == BME280_OK)
     {
-        bme280_power_mode_t powerMode;
-
-        settingsResult = BME280_GetSensorPowerMode(device, &powerMode);
-
-        if (settingsResult == BME280_OK && powerMode != BME280_SLEEP_MODE)
-        {
-            settingsResult = BME280_PutToSleep(device);
-        }
-
         if (settingsResult == BME280_OK)
         {
             settingsResult = BME280_SetOversamplingSettings(device, settings);
@@ -627,6 +673,11 @@ bme280_error_code_t BME280_SetSensorSettings(bme280_device_t * const device, bme
         if (settingsResult == BME280_OK)
         {
             settingsResult = BME280_SetFilterStandbySettings(device, settings);
+        }
+
+        if (settingsResult == BME280_OK)
+        {
+            settingsResult = BME280_SetSensorPowerMode(device, settings);
         }
     }
 
@@ -683,7 +734,7 @@ uint32_t BME280_ComputeDelay(bme280_settings_t const * const settings)
     return maxDelay;
 }
 
-bme280_error_code_t BME280_Init(bme280_device_t * const device, bme280_handler_t const * const handler, i2c_t const * const i2cDevice, uint8_t const i2cAddress)
+bme280_error_code_t BME280_Init(bme280_device_t * const device, bme280_handler_t const * const handler, i2c_t const * const i2cDevice, uint8_t const i2cAddress, bme280_settings_t const * const settings)
 {
     device->i2cDevice = NULL;
     device->i2cAddress = i2cAddress;
@@ -734,7 +785,11 @@ bme280_error_code_t BME280_Init(bme280_device_t * const device, bme280_handler_t
 
     if (initResult == BME280_OK)
     {
-        LOG_INFO("Got BME280 calibration data from sensor");
+        initResult = BME280_SetSensorSettings(device, settings);
+    }
+
+    if (initResult == BME280_OK)
+    {
         LOG_INFO("Finished the BME280 initialization");
     }
     else
