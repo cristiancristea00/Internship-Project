@@ -37,9 +37,46 @@
 #define F_CPU 24000000UL           // The CPU frequency. To be set manuallly.
 
 #define UART_PRINTF                // Uncomment to enable printf functionality on UART.
+#define LOGGING                    // Uncomment to enable logging
 
 #define PRESCALE_ENABLED  true     // Enable the CPU prescaler
 #define PRESCALE_DISABLED false    // Disable the CPU prescaler
+
+#ifdef LOGGING
+
+#include <stdio.h>
+
+#include "uart.h"
+
+/**
+ * @brief TODO
+ *
+ **/
+void PrintForLogging(char const * const message);
+
+#define LOG_DEBUG_PRINTF(STRING, ...)    printf("[DEBUG]: " STRING "\n\r", ##__VA_ARGS__)
+#define LOG_INFO_PRINTF(STRING, ...)     printf("[INFO]: " STRING "\n\r", ##__VA_ARGS__)
+#define LOG_WARNING_PRINTF(STRING, ...)  printf("[WARNING]: " STRING "\n\r", ##__VA_ARGS__)
+#define LOG_ERROR_PRINTF(STRING, ...)    printf("[ERROR]: " STRING "\n\r", ##__VA_ARGS__)
+
+#define LOG_DEBUG(STRING)                PrintForLogging("[DEBUG]: " STRING "\n\r")
+#define LOG_INFO(STRING)                 PrintForLogging("[INFO]: " STRING "\n\r")
+#define LOG_WARNING(STRING)              PrintForLogging("[WARNING]: " STRING "\n\r")
+#define LOG_ERROR(STRING)                PrintForLogging("[ERROR]: " STRING "\n\r")
+
+#else
+
+#define LOG_DEBUG_PRINTF
+#define LOG_INFO_PRINTF
+#define LOG_WARNING_PRINTF
+#define LOG_ERROR_PRINTF
+
+#define LOG_DEBUG
+#define LOG_INFO
+#define LOG_WARNING
+#define LOG_ERROR
+
+#endif // LOGGING
 
 /**
  * @brief Sets the CPU's clock frequency and optionally the prescale factor.

@@ -30,12 +30,20 @@
 #include "config.h"
 #include "uart.h"
 #include "i2c.h"
+#include "bme280.h"
 
 #include <avr/io.h>
-#include <util/delay.h>
 #include <avr/cpufunc.h>
+#include <util/delay.h>
+
+#include <stdbool.h>
+
+extern uart_t const uart_1;
+extern i2c_t const i2c_0;
+extern bme280_handler_t const defaultHandler;
 
 void BusScan(void);
+void SensorRead(bme280_device_t const * const device);
 
 void main(void)
 {
@@ -43,33 +51,59 @@ void main(void)
 
     SetClockFrequency(CLKCTRL_FRQSEL_24M_gc, PRESCALE_DISABLED);
 
-    Uart1Init(UART_BAUD_RATE(460800));
+    uart_1.Init(UART_BAUD_RATE(460800));
 
-    I2c0Init(I2C_FAST_MODE_PLUS);
+    i2c_0.Init(I2C_FAST_MODE_PLUS);
 
     _delay_ms(5000);
 
-    BusScan();
+    bme280_device_t weatherClick;
 
-    while (1)
+    bme280_settings_t settings = {
+        .temperatureOversampling = BME280_OVERSAMPLING_16X,
+        .pressureOversampling = BME280_OVERSAMPLING_16X,
+        .humidityOversampling = BME280_OVERSAMPLING_16X,
+        .iirFilterCoefficients = BME280_IIR_FILTER_16,
+        .powerMode = BME280_NORMAL_MODE,
+        .standbyTime = BME280_STANDBY_TIME_0_5_MS
+    };
+
+    BME280_Init(&weatherClick, &defaultHandler, &i2c_0, BME280_I2C_ADDRESS, &settings);
+
+    while (true)
     {
-        TightLoopContents();
+        SensorRead(&weatherClick);
+        _delay_ms(5000);
     }
+}
+
+void SensorRead(bme280_device_t const * const device)
+{
+    bme280_error_code_t readResult = BME280_GetSensorData(device);
+
+    if (readResult != BME280_OK)
+    {
+        return;
+    }
+
+    printf("%0.2lf deg C, %0.2lf hPa, %0.2lf\n\r", device->data.temperature, device->data.pressure, device->data.humidity);
+
+    return;
 }
 
 void BusScan(void)
 {
-    printf("\n\rI2C Scan started from 0x%02X to 0x%02X", I2C_ADRESS_MIN, I2C_ADRESS_MAX);
+    uart_1.Print("\n\rI2C Scan started from 0x00 to 0x7F");
 
     for (uint8_t clientAddress = I2C_ADRESS_MIN; clientAddress <= I2C_ADRESS_MAX; ++clientAddress)
     {
         printf("\n\rScanning client address: 0x%02X", clientAddress);
-        if (I2c0ClientAvailable(clientAddress))
+        if (i2c_0.ClientAvailable(clientAddress))
         {
-            printf(" --> client ACKED");
+            uart_1.Print(" --> client ACKED");
         }
     }
-    printf("\n\rI2C Scan ended\n\r");
+    uart_1.Print("\n\rI2C Scan ended\n\r");
 
     return;
 }

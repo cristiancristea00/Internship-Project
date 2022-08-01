@@ -45,11 +45,20 @@
  **/
 #define UART_BAUD_RATE(x) ((uint16_t) ((4UL * F_CPU) / x ## UL))
 
+typedef void (* uart_init_t) (uint16_t const);
+typedef void (* uart_print_t) (char const *);
+typedef void (* uart_print_char_t) (char const);
+
 /**
- * @brief Callback type for the UART interrupt.
+ * @brief Object struct for the UART module
  *
  **/
-typedef void (* uart_callback_t) (uint8_t);
+typedef struct UART
+{
+    uart_init_t Init;
+    uart_print_t Print;
+    uart_print_char_t PrintChar;
+} uart_t;
 
 /**
  * @brief Initialize the UART module by setting the baud rate and enabling the
@@ -59,35 +68,28 @@ typedef void (* uart_callback_t) (uint8_t);
  *
  * @param baudRate The baud rate register value
  **/
-void Uart1Init(uint16_t const baudRate);
-
-/**
- * @brief Register a callback function.
- *
- * @param callback The callback function to be called when an interrupt occurs
- **/
-void Uart1RegisterCallback(uart_callback_t const callback);
+static void UART1_Init(uint16_t const baudRate);
 
 /**
  * @brief Sends a null-terminated string over UART.
  *
  * @param string The null-terminated string to be sent
  **/
-void Uart1Print(char const * string);
+static void UART1_Print(char const * string);
 
 /**
  * @brief Send a single character over UART.
  *
  * @param character The character to be sent
  */
-void Uart1PrintChar(char const character);
+static void UART1_PrintChar(char const character);
 
 /**
  * @brief Sends a byte over UART.
  *
  * @param dataByte The byte to be sent
  **/
-static void Uart1SendByte(uint8_t const dataByte);
+static void UART1_SendByte(uint8_t const dataByte);
 
 /**
  * @brief Checks if the UART module is busy sending data.
@@ -95,7 +97,7 @@ static void Uart1SendByte(uint8_t const dataByte);
  * @return true The UART module is busy.
  * @return false The UART module is ready.
  **/
-static bool Uart1TxBusy(void);
+static bool UART1_TXBusy(void);
 
 #ifdef UART_PRINTF
 
@@ -107,7 +109,7 @@ static bool Uart1TxBusy(void);
  * @param stream The stream used to send the character
  * @return int8_t Always returns 0
  **/
-static int8_t Uart1SendChar(char const character, FILE * const stream);
+static int8_t UART1_SendChar(char const character, FILE * const stream);
 
 #endif // UART_PRINTF
 
