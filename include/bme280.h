@@ -304,7 +304,7 @@ static bme280_error_code_t BME280_CheckNull(bme280_device_t const * const device
  *
  * @return bme280_error_code_t Error code
  **/
-static bme280_error_code_t BME280_ReadRegisters(i2c_t * const i2c, uint8_t const address, uint8_t const registerAddress, uint8_t * const data, uint8_t const length);
+static bme280_error_code_t BME280_ReadRegisters(i2c_t const * const i2c, uint8_t const address, uint8_t const registerAddress, uint8_t const * const data, uint8_t const length);
 
 /**
  * @brief Writes a number of one byte registers to the device using I2C from a
@@ -318,7 +318,7 @@ static bme280_error_code_t BME280_ReadRegisters(i2c_t * const i2c, uint8_t const
  *
  * @return bme280_error_code_t Error code
  **/
-static bme280_error_code_t BME280_WriteRegisters(i2c_t * const i2c, uint8_t const address, uint8_t const * const registerAddresses, uint8_t const * const data, uint8_t const length);
+static bme280_error_code_t BME280_WriteRegisters(i2c_t const * const i2c, uint8_t const address, uint8_t const * const registerAddresses, uint8_t const * const data, uint8_t const length);
 
 /**
  * @brief Reads a number of one byte registers from the device and stores the
@@ -331,7 +331,7 @@ static bme280_error_code_t BME280_WriteRegisters(i2c_t * const i2c, uint8_t cons
  *
  * @return bme280_error_code_t Error code
  **/
-static bme280_error_code_t BME280_GetRegisters(bme280_device_t * const device, uint8_t const registerAddress, uint8_t * const data, uint8_t const length);
+static bme280_error_code_t BME280_GetRegisters(bme280_device_t const * const device, uint8_t const registerAddress, uint8_t const * const data, uint8_t const length);
 
 /**
  * @brief Writes a number of one byte registers to the device from a buffer.
@@ -343,7 +343,7 @@ static bme280_error_code_t BME280_GetRegisters(bme280_device_t * const device, u
  *
  * @return bme280_error_code_t Error code
  **/
-static bme280_error_code_t BME280_SetRegisters(bme280_device_t * const device, uint8_t const * const registerAddresses, uint8_t const * const data, uint8_t const length);
+static bme280_error_code_t BME280_SetRegisters(bme280_device_t const * const device, uint8_t const * const registerAddresses, uint8_t const * const data, uint8_t const length);
 
 /**
  * @brief Soft resets the device to default settings and to sleep mode.
@@ -352,7 +352,7 @@ static bme280_error_code_t BME280_SetRegisters(bme280_device_t * const device, u
  *
  * @return bme280_error_code_t Error code
  **/
-static bme280_error_code_t BME280_SoftReset(bme280_device_t * const device);
+static bme280_error_code_t BME280_SoftReset(bme280_device_t const * const device);
 
 /**
  * @brief Parses the temperature and pressure calibration data from the device
@@ -379,7 +379,7 @@ static void BME280_ParseHumidityCalibration(bme280_calibration_data_t * const ca
  *
  * @return bme280_error_code_t Error code
  **/
-static bme280_error_code_t BME280_GetCalibrationData(bme280_device_t * const device);
+static bme280_error_code_t BME280_GetCalibrationData(bme280_device_t const * const device);
 
 /**
  * @brief Compensates the raw temperature data using the calibration parameters.
@@ -420,7 +420,7 @@ static double BME280_CompensateHumidity(bme280_uncompensated_data_t const * cons
  *
  * @return bme280_error_code_t Error code
  **/
-static bme280_error_code_t BME280_CompensateData(bme280_device_t * const device, bme280_uncompensated_data_t * const uncompensatedData);
+static bme280_error_code_t BME280_CompensateData(bme280_device_t * const device, bme280_uncompensated_data_t const * const uncompensatedData);
 
 /**
  * @brief Concatenates the register values to uncompensated data.
@@ -438,7 +438,7 @@ static void BME280_ParseSensorData(uint8_t const * const data, bme280_uncompensa
  *
  * @return bme280_error_code_t Error code
  **/
-static bme280_error_code_t BME280_SetOversamplingTemperaturePressure(bme280_device_t * const device, bme280_settings_t const * const settings);
+static bme280_error_code_t BME280_SetOversamplingTemperaturePressure(bme280_device_t const * const device, bme280_settings_t const * const settings);
 
 /**
  * @brief Sets the device humidity oversampling settings.
@@ -448,7 +448,7 @@ static bme280_error_code_t BME280_SetOversamplingTemperaturePressure(bme280_devi
  *
  * @return bme280_error_code_t Error code
  **/
-static bme280_error_code_t BME280_SetOversamplingHumidity(bme280_device_t * const device, bme280_settings_t const * const settings);
+static bme280_error_code_t BME280_SetOversamplingHumidity(bme280_device_t const * const device, bme280_settings_t const * const settings);
 
 /**
  * @brief Sets the device oversampling settings.
@@ -458,7 +458,7 @@ static bme280_error_code_t BME280_SetOversamplingHumidity(bme280_device_t * cons
  *
  * @return bme280_error_code_t Error code
  **/
-static bme280_error_code_t BME280_SetOversamplingSettings(bme280_device_t * const device, bme280_settings_t const * const settings);
+static bme280_error_code_t BME280_SetOversamplingSettings(bme280_device_t const * const device, bme280_settings_t const * const settings);
 
 /**
  * @brief Sets the device filter and standby settings.
@@ -467,7 +467,7 @@ static bme280_error_code_t BME280_SetOversamplingSettings(bme280_device_t * cons
  * @param[in] settings The settings to set
  * @return bme280_error_code_t Error code
  **/
-static bme280_error_code_t BME280_SetFilterStandbySettings(bme280_device_t * const device, bme280_settings_t const * const settings);
+static bme280_error_code_t BME280_SetFilterStandbySettings(bme280_device_t const * const device, bme280_settings_t const * const settings);
 
 /**
  * @brief Writes the power mode to the device.
@@ -477,7 +477,7 @@ static bme280_error_code_t BME280_SetFilterStandbySettings(bme280_device_t * con
  *
  * @return bme280_error_code_t Error code
  **/
-static bme280_error_code_t BME280_WritePowerMode(bme280_device_t * const device, bme280_power_mode_t const powerMode);
+static bme280_error_code_t BME280_WritePowerMode(bme280_device_t const * const device, bme280_power_mode_t const powerMode);
 
 /**
  * @brief Sets the device power mode.
@@ -487,7 +487,7 @@ static bme280_error_code_t BME280_WritePowerMode(bme280_device_t * const device,
  *
  * @return bme280_error_code_t Error code
  **/
-static bme280_error_code_t BME280_SetSensorPowerMode(bme280_device_t * const device, bme280_settings_t const * const settings);
+static bme280_error_code_t BME280_SetSensorPowerMode(bme280_device_t const * const device, bme280_settings_t const * const settings);
 
 /**
  * @brief Sets the device settings.
@@ -502,7 +502,7 @@ static bme280_error_code_t BME280_SetSensorSettings(bme280_device_t * const devi
 /**
  * @brief Initializes the BME280 device.
  *
- * @param[in] device BME280 device
+ * @param[in, out] device BME280 device
  * @param[in] handler Read and write operations handler
  * @param[in] i2cDevice I2C device
  * @param[in] i2cAddress I2C device address
@@ -520,6 +520,6 @@ bme280_error_code_t BME280_Init(bme280_device_t * const device, bme280_handler_t
  *
  * @return bme280_error_code_t Error code
  **/
-bme280_error_code_t BME280_GetSensorData(bme280_device_t * const device);
+bme280_error_code_t BME280_GetSensorData(bme280_device_t const * const device);
 
 #endif // BME280_H

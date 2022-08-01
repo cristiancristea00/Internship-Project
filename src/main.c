@@ -60,10 +60,10 @@ void main(void)
     bme280_device_t weatherClick;
 
     bme280_settings_t settings = {
-        .temperatureOversampling = BME280_OVERSAMPLING_16X,
-        .pressureOversampling = BME280_OVERSAMPLING_16X,
-        .humidityOversampling = BME280_OVERSAMPLING_16X,
-        .iirFilterCoefficients = BME280_IIR_FILTER_16,
+        .temperatureOversampling = BME280_OVERSAMPLING_4X,
+        .pressureOversampling = BME280_OVERSAMPLING_4X,
+        .humidityOversampling = BME280_OVERSAMPLING_4X,
+        .iirFilterCoefficients = BME280_IIR_FILTER_8,
         .powerMode = BME280_NORMAL_MODE,
         .standbyTime = BME280_STANDBY_TIME_0_5_MS
     };

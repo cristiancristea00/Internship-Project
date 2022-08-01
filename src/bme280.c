@@ -48,7 +48,7 @@ static bme280_error_code_t BME280_CheckNull(bme280_device_t const * const device
     }
 }
 
-static bme280_error_code_t BME280_ReadRegisters(i2c_t * const i2c, uint8_t const address, uint8_t const registerAddress, uint8_t * const data, uint8_t const length)
+static bme280_error_code_t BME280_ReadRegisters(i2c_t const * const i2c, uint8_t const address, uint8_t const registerAddress, uint8_t const * const data, uint8_t const length)
 {
     bme280_error_code_t readResult = BME280_OK;
 
@@ -67,7 +67,7 @@ static bme280_error_code_t BME280_ReadRegisters(i2c_t * const i2c, uint8_t const
     return readResult;
 }
 
-static bme280_error_code_t BME280_WriteRegisters(i2c_t * const i2c, uint8_t const address, uint8_t const * const registerAddresses, uint8_t const * const data, uint8_t const length)
+static bme280_error_code_t BME280_WriteRegisters(i2c_t const * const i2c, uint8_t const address, uint8_t const * const registerAddresses, uint8_t const * const data, uint8_t const length)
 {
     bme280_error_code_t writeResult = BME280_OK;
 
@@ -90,7 +90,7 @@ static bme280_error_code_t BME280_WriteRegisters(i2c_t * const i2c, uint8_t cons
     return writeResult;
 }
 
-static bme280_error_code_t BME280_GetRegisters(bme280_device_t * const device, uint8_t const registerAddress, uint8_t * const data, uint8_t const length)
+static bme280_error_code_t BME280_GetRegisters(bme280_device_t const * const device, uint8_t const registerAddress, uint8_t const * const data, uint8_t const length)
 {
     bme280_error_code_t getResult = BME280_OK;
 
@@ -111,7 +111,7 @@ static bme280_error_code_t BME280_GetRegisters(bme280_device_t * const device, u
     return getResult;
 }
 
-static bme280_error_code_t BME280_SetRegisters(bme280_device_t * const device, uint8_t const * const registerAddresses, uint8_t const * const data, uint8_t const length)
+static bme280_error_code_t BME280_SetRegisters(bme280_device_t const * const device, uint8_t const * const registerAddresses, uint8_t const * const data, uint8_t const length)
 {
     bme280_error_code_t setResult = BME280_OK;
 
@@ -140,7 +140,7 @@ static bme280_error_code_t BME280_SetRegisters(bme280_device_t * const device, u
     return setResult;
 }
 
-static bme280_error_code_t BME280_SoftReset(bme280_device_t * const device)
+static bme280_error_code_t BME280_SoftReset(bme280_device_t const * const device)
 {
     bme280_error_code_t resetResult = BME280_OK;
 
@@ -226,7 +226,7 @@ static void BME280_ParseHumidityCalibration(bme280_calibration_data_t * const ca
     calibrationData->humidityCoef6 = (int8_t) rawData[6];
 }
 
-static bme280_error_code_t BME280_GetCalibrationData(bme280_device_t * const device)
+static bme280_error_code_t BME280_GetCalibrationData(bme280_device_t const * const device)
 {
     bme280_error_code_t calibrationResult = BME280_OK;
 
@@ -353,7 +353,7 @@ static double BME280_CompensateHumidity(bme280_uncompensated_data_t const * cons
     return (1.0f / 1024.0f) * (double) humidity;
 }
 
-static bme280_error_code_t BME280_CompensateData(bme280_device_t * const device, bme280_uncompensated_data_t * const uncompensatedData)
+static bme280_error_code_t BME280_CompensateData(bme280_device_t * const device, bme280_uncompensated_data_t const * const uncompensatedData)
 {
     bme280_error_code_t compensationResult = BME280_OK;
 
@@ -399,7 +399,7 @@ static void BME280_ParseSensorData(uint8_t const * const data, bme280_uncompensa
     uncompensatedData->humidity = humidityMSB | humidityLSB;
 }
 
-static bme280_error_code_t BME280_SetOversamplingTemperaturePressure(bme280_device_t * const device, bme280_settings_t const * const settings)
+static bme280_error_code_t BME280_SetOversamplingTemperaturePressure(bme280_device_t const * const device, bme280_settings_t const * const settings)
 {
     bme280_error_code_t oversamplingResult = BME280_OK;
 
@@ -429,7 +429,7 @@ static bme280_error_code_t BME280_SetOversamplingTemperaturePressure(bme280_devi
     return oversamplingResult;
 }
 
-static bme280_error_code_t BME280_SetOversamplingHumidity(bme280_device_t * const device, bme280_settings_t const * const settings)
+static bme280_error_code_t BME280_SetOversamplingHumidity(bme280_device_t const * const device, bme280_settings_t const * const settings)
 {
     bme280_error_code_t oversamplingResult = BME280_OK;
 
@@ -451,7 +451,7 @@ static bme280_error_code_t BME280_SetOversamplingHumidity(bme280_device_t * cons
     return oversamplingResult;
 }
 
-bme280_error_code_t BME280_SetOversamplingSettings(bme280_device_t * const device, bme280_settings_t const * const settings)
+bme280_error_code_t BME280_SetOversamplingSettings(bme280_device_t const * const device, bme280_settings_t const * const settings)
 {
     bme280_error_code_t oversamplingResult = BME280_OK;
 
@@ -462,7 +462,7 @@ bme280_error_code_t BME280_SetOversamplingSettings(bme280_device_t * const devic
     return oversamplingResult;
 }
 
-bme280_error_code_t BME280_SetFilterStandbySettings(bme280_device_t * const device, bme280_settings_t const * const settings)
+bme280_error_code_t BME280_SetFilterStandbySettings(bme280_device_t const * const device, bme280_settings_t const * const settings)
 {
     bme280_error_code_t standbyFilterResult = BME280_OK;
 
@@ -492,7 +492,7 @@ bme280_error_code_t BME280_SetFilterStandbySettings(bme280_device_t * const devi
     return standbyFilterResult;
 }
 
-static bme280_error_code_t BME280_WritePowerMode(bme280_device_t * const device, bme280_power_mode_t const powerMode)
+static bme280_error_code_t BME280_WritePowerMode(bme280_device_t const * const device, bme280_power_mode_t const powerMode)
 {
     bme280_error_code_t powerResult = BME280_OK;
 
@@ -512,7 +512,7 @@ static bme280_error_code_t BME280_WritePowerMode(bme280_device_t * const device,
     return powerResult;
 }
 
-static bme280_error_code_t BME280_SetSensorPowerMode(bme280_device_t * const device, bme280_settings_t const * const settings)
+static bme280_error_code_t BME280_SetSensorPowerMode(bme280_device_t const * const device, bme280_settings_t const * const settings)
 {
     bme280_error_code_t modeResult = BME280_OK;
 
@@ -635,7 +635,7 @@ bme280_error_code_t BME280_Init(bme280_device_t * const device, bme280_handler_t
     return initResult;
 }
 
-bme280_error_code_t BME280_GetSensorData(bme280_device_t * const device)
+bme280_error_code_t BME280_GetSensorData(bme280_device_t const * const device)
 {
     bme280_error_code_t acquisitionResult = BME280_OK;
 

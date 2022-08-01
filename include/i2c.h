@@ -132,7 +132,7 @@ static i2c_state_t I2C0_WaitRead(void);
  * @param length The length of the data to be sent
  * @return i2c_error_code_t The error code of the operation
  **/
-static i2c_error_code_t I2C0_SendData(uint8_t const address, uint8_t const * dataForSend, uint8_t const initLength);
+static i2c_error_code_t I2C0_SendData(uint8_t const address, uint8_t const * const dataForSend, uint8_t const initLength);
 
 /**
  * @brief Receives a specific number of bytes from the device using the I2C bus.
