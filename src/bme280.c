@@ -215,13 +215,13 @@ static void BME280_ParseHumidityCalibration(bme280_calibration_data_t * const ca
     calibrationData->humidityCoef2 = (int16_t) BME280_CONCAT_BYTES(rawData[1], rawData[0]);
     calibrationData->humidityCoef3 = (uint8_t) rawData[2];
 
-    int16_t coefHumidity4_msb = (int16_t) ((int8_t) rawData[3] << 4);
-    int16_t coefHumidity4_lsb = (int16_t) (rawData[4] & 0x0F);
-    calibrationData->humidityCoef4 = (int16_t) (coefHumidity4_msb | coefHumidity4_lsb);
+    int16_t coefHumidity4_MSB = (int16_t) ((int8_t) rawData[3] << 4);
+    int16_t coefHumidity4_LSB = (int16_t) (rawData[4] & 0x0F);
+    calibrationData->humidityCoef4 = (int16_t) (coefHumidity4_MSB | coefHumidity4_LSB);
 
-    int16_t coefHumidity5_msb = (int16_t) ((int8_t) rawData[5] << 4);
-    int16_t coefHumidity5_lsb = (int16_t) (rawData[4] >> 4);
-    calibrationData->humidityCoef5 = (int16_t) (coefHumidity5_msb | coefHumidity5_lsb);
+    int16_t coefHumidity5_MSB = (int16_t) ((int8_t) rawData[5] << 4);
+    int16_t coefHumidity5_LSB = (int16_t) (rawData[4] >> 4);
+    calibrationData->humidityCoef5 = (int16_t) (coefHumidity5_MSB | coefHumidity5_LSB);
 
     calibrationData->humidityCoef6 = (int8_t) rawData[6];
 }
@@ -258,16 +258,15 @@ static bme280_error_code_t BME280_GetCalibrationData(bme280_device_t * const dev
     return calibrationResult;
 }
 
-static int32_t BME280_CompensateTemperature(bme280_uncompensated_data_t * const uncompensatedData, bme280_calibration_data_t * const calibrationData)
+static double BME280_CompensateTemperature(bme280_uncompensated_data_t * const uncompensatedData, bme280_calibration_data_t * const calibrationData)
 {
-    int32_t temperature = 0;
-
-    int32_t temp1 = ((int32_t) ((uncompensatedData->temperature >> 3)) - ((int32_t) calibrationData->temperatureCoef1 << 1));
+    int32_t temp1 = (int32_t) ((uncompensatedData->temperature >> 3) - ((int32_t) calibrationData->temperatureCoef1 << 1));
     temp1 = (temp1 * ((int32_t) calibrationData->temperatureCoef2)) >> 11;
     int32_t temp2 = (int32_t) ((uncompensatedData->temperature >> 4) - ((int32_t) calibrationData->temperatureCoef1));
     temp2 = (((temp2 * temp2) >> 12) * ((int32_t) calibrationData->temperatureCoef3)) >> 14;
     calibrationData->temperatureTemporary = temp1 + temp2;
-    temperature = (calibrationData->temperatureTemporary * 5 + 128) >> 8;
+
+    int32_t temperature = (calibrationData->temperatureTemporary * 5 + 128) >> 8;
 
     if (temperature < BME280_MIN_TEMPERATURE)
     {
@@ -280,10 +279,10 @@ static int32_t BME280_CompensateTemperature(bme280_uncompensated_data_t * const 
         LOG_WARNING("BME280 read temperature is higher than the expected maximum");
     }
 
-    return temperature;
+    return 0.01f * (double) temperature;
 }
 
-static uint32_t BME280_CompensatePressure(bme280_uncompensated_data_t * const uncompensatedData, bme280_calibration_data_t * const calibrationData)
+static double BME280_CompensatePressure(bme280_uncompensated_data_t * const uncompensatedData, bme280_calibration_data_t * const calibrationData)
 {
     uint32_t pressure = 0;
 
@@ -320,10 +319,10 @@ static uint32_t BME280_CompensatePressure(bme280_uncompensated_data_t * const un
         LOG_WARNING("BME280 read pressure is lower than the expected minimum");
     }
 
-    return pressure;
+    return 0.0001f * (double) pressure;
 }
 
-static uint32_t BME280_CompensateHumidity(bme280_uncompensated_data_t * const uncompensatedData, bme280_calibration_data_t * const calibrationData)
+static double BME280_CompensateHumidity(bme280_uncompensated_data_t * const uncompensatedData, bme280_calibration_data_t * const calibrationData)
 {
     uint32_t humidity = 0;
 
@@ -331,7 +330,7 @@ static uint32_t BME280_CompensateHumidity(bme280_uncompensated_data_t * const un
     int32_t temp2 = (int32_t) (uncompensatedData->humidity << 14);
     int32_t temp3 = (int32_t) (((int32_t) calibrationData->humidityCoef4) << 20);
     int32_t temp4 = ((int32_t) calibrationData->humidityCoef5) * temp1;
-    int32_t temp5 = (((temp2 - temp3) - temp4) + ((int32_t) 1 << 14)) << 15;
+    int32_t temp5 = ((temp2 - temp3 - temp4) + ((int32_t) 1 << 14)) >> 15;
     temp2 = (temp1 * ((int32_t) calibrationData->humidityCoef6)) >> 10;
     temp3 = (temp1 * ((int32_t) calibrationData->humidityCoef3)) >> 11;
     temp4 = ((temp2 * (temp3 + ((int32_t) 1 << 15))) >> 10) + ((int32_t) 1 << 21);
@@ -339,7 +338,7 @@ static uint32_t BME280_CompensateHumidity(bme280_uncompensated_data_t * const un
     temp3 = temp5 * temp2;
     temp4 = ((temp3 >> 15) * (temp3 >> 15)) >> 7;
     temp5 = temp3 - ((temp4 * ((int32_t) calibrationData->humidityCoef1)) >> 4);
-    temp5 = temp5 > 0 ? 0 : temp5;
+    temp5 = temp5 < 0 ? 0 : temp5;
     temp5 = temp5 > 419430400 ? 419430400 : temp5;
     humidity = (uint32_t) (temp5 >> 12);
 
@@ -349,7 +348,7 @@ static uint32_t BME280_CompensateHumidity(bme280_uncompensated_data_t * const un
         LOG_WARNING("BME280 read humidity is higher than the expected maximum");
     }
 
-    return humidity;
+    return (1.0f / 1024.0f) * (double) humidity;
 }
 
 static bme280_error_code_t BME280_CompensateData(bme280_device_t * const device, bme280_uncompensated_data_t * const uncompensatedData)
@@ -407,7 +406,7 @@ bme280_error_code_t BME280_GetSensorData(bme280_device_t * const device)
     if (acquisitionResult == BME280_OK)
     {
         uint8_t data[BME280_DATA_LENGTH] = { 0 };
-        bme280_uncompensated_data_t uncompensatedData;
+        bme280_uncompensated_data_t uncompensatedData = { 0 };
 
         acquisitionResult = BME280_GetRegisters(device, BME280_DATA_ADDRESS, data, BME280_DATA_LENGTH);
 
@@ -526,74 +525,6 @@ bme280_error_code_t BME280_SetFilterStandbySettings(bme280_device_t * const devi
     return standbyFilterResult;
 }
 
-static void BME280_ParseSetings(bme280_settings_t * const settings, uint8_t const * const rawSettings)
-{
-    settings->temperatureOversampling = BME280_GET_BITS(rawSettings[2], BME280_CONTROL_TEMPERATURE);
-    settings->pressureOversampling = BME280_GET_BITS(rawSettings[2], BME280_CONTROL_PRESSURE);
-    settings->humidityOversampling = BME280_GET_BITS(rawSettings[0], BME280_CONTROL_HUMIDITY);
-    settings->iirFilterCoefficients = BME280_GET_BITS(rawSettings[3], BME280_FILTER);
-    settings->standbyTime = BME280_GET_BITS(rawSettings[3], BME280_STANDBY);
-}
-
-static bme280_error_code_t BME280_ReloadSettings(bme280_device_t * const device, bme280_settings_t const * const settings)
-{
-    bme280_error_code_t reloadResult = BME280_OK;
-
-    reloadResult = BME280_SetOversamplingSettings(device, settings);
-
-    if (reloadResult == BME280_OK)
-    {
-        reloadResult = BME280_SetFilterStandbySettings(device, settings);
-    }
-
-    if (reloadResult == BME280_OK)
-    {
-        LOG_INFO("Reloaded BME280 settings successfully");
-    }
-    else
-    {
-        LOG_ERROR("Failed to reload BME280 settings");
-    }
-
-    return reloadResult;
-}
-
-static bme280_error_code_t BME280_PutToSleep(bme280_device_t * const device)
-{
-    bme280_error_code_t sleepResult = BME280_OK;
-
-    uint8_t rawData[BME280_CONFIG_REGISTERS_LENGTH] = { 0 };
-
-    sleepResult = BME280_GetRegisters(device, BME280_CONTROL_HUMIDITY_ADDRESS, rawData, BME280_CONFIG_REGISTERS_LENGTH);
-
-    LOG_INFO("Putting BME280 to sleep...");
-
-    if (sleepResult == BME280_OK)
-    {
-        bme280_settings_t settings;
-
-        BME280_ParseSetings(&settings, rawData);
-
-        sleepResult = BME280_SoftReset(device);
-
-        if (sleepResult == BME280_OK)
-        {
-            sleepResult = BME280_ReloadSettings(device, &settings);
-        }
-    }
-
-    if (sleepResult == BME280_OK)
-    {
-        LOG_INFO("Put BME280 to sleep successfully");
-    }
-    else
-    {
-        LOG_ERROR("Failed to put BME280 to sleep");
-    }
-
-    return BME280_OK;
-}
-
 static bme280_error_code_t BME280_WritePowerMode(bme280_device_t * const device, bme280_power_mode_t const powerMode)
 {
     bme280_error_code_t powerResult = BME280_OK;
@@ -637,26 +568,6 @@ static bme280_error_code_t BME280_SetSensorPowerMode(bme280_device_t * const dev
     return modeResult;
 }
 
-static bme280_error_code_t BME280_GetSensorPowerMode(bme280_device_t * const device, bme280_power_mode_t * const powerMode)
-{
-    bme280_error_code_t powerResult = BME280_OK;
-
-    powerResult = BME280_CheckNull(device);
-
-    if (powerResult == BME280_OK && powerMode != NULL)
-    {
-        powerResult = BME280_GetRegisters(device, BME280_POWER_CONTROL_ADDRESS, powerMode, 1);
-
-        *powerMode = BME280_GET_BITS(*powerMode, BME280_SENSOR_MODE);
-    }
-    else
-    {
-        powerResult = BME280_NULL_POINTER;
-    }
-
-    return powerResult;
-}
-
 static bme280_error_code_t BME280_SetSensorSettings(bme280_device_t * const device, bme280_settings_t const * const settings)
 {
     bme280_error_code_t settingsResult = BME280_OK;
@@ -687,51 +598,6 @@ static bme280_error_code_t BME280_SetSensorSettings(bme280_device_t * const devi
     }
 
     return settingsResult;
-}
-
-uint32_t BME280_ComputeDelay(bme280_settings_t const * const settings)
-{
-    uint32_t const overesamplingLookup[] = { 0UL, 1UL, 2UL, 4UL, 8UL, 16UL };
-
-    uint32_t temperatureOversampling = 0;
-
-    if (settings->temperatureOversampling <= 5)
-    {
-        temperatureOversampling = overesamplingLookup[settings->temperatureOversampling];
-    }
-    else
-    {
-        temperatureOversampling = 16;
-    }
-
-    uint32_t pressureOversampling = 0;
-
-    if (settings->pressureOversampling <= 5)
-    {
-        pressureOversampling = overesamplingLookup[settings->pressureOversampling];
-    }
-    else
-    {
-        pressureOversampling = 16;
-    }
-
-    uint32_t humidtyOversampling = 0;
-
-    if (settings->humidityOversampling <= 5)
-    {
-        pressureOversampling = overesamplingLookup[settings->humidityOversampling];
-    }
-    else
-    {
-        humidtyOversampling = 16;
-    }
-
-    uint32_t maxDelay = (uint32_t) ((BME280_MEAS_OFFSET + (BME280_MEAS_DURAATION * temperatureOversampling)
-            + ((BME280_MEAS_DURAATION * pressureOversampling) + BME280_PRESSURE_HUMIDITY_MEAS_OFFSET)
-            + ((BME280_MEAS_DURAATION * humidtyOversampling) + BME280_PRESSURE_HUMIDITY_MEAS_OFFSET))
-            / BME280_MEAS_OFFSET);
-
-    return maxDelay;
 }
 
 bme280_error_code_t BME280_Init(bme280_device_t * const device, bme280_handler_t const * const handler, i2c_t const * const i2cDevice, uint8_t const i2cAddress, bme280_settings_t const * const settings)
@@ -796,6 +662,8 @@ bme280_error_code_t BME280_Init(bme280_device_t * const device, bme280_handler_t
     {
         LOG_ERROR("Couldn't finish the BME280 initialization");
     }
+
+    _delay_ms(100);
 
     return initResult;
 }

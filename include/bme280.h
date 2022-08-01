@@ -56,23 +56,29 @@
  **/
 #define BME280_GET_BITS(REGISTER_DATA, BITNAME) ((REGISTER_DATA & (BITNAME ## _MSK)) >> (BITNAME ## _POS))
 
+/**
+ * @brief
+ * TODO - Add description
+ **/
+#define UINT8(X) ((uint8_t) X)
+
 // Principal and secondary I2C addresses of the chip
-#define BME280_I2C_ADDRESS        0x76
-#define BME280_I2C_ADDRESS_SEC    0x77
+#define BME280_I2C_ADDRESS        UINT8(0x76)
+#define BME280_I2C_ADDRESS_SEC    UINT8(0x77)
 
 // The BME280 chip identifier
-#define BME280_CHIP_ID    0x60
+#define BME280_CHIP_ID    UINT8(0x60)
 
 // Register addresses
-#define BME280_CHIP_ID_ADDRESS             0xD0
-#define BME280_RESET_ADDRESS               0xE0
-#define BME280_TEMP_PRESS_CALIB_ADDRESS    0x88
-#define BME280_HUMIDITY_CALIB_ADDRESS      0xE1
-#define BME280_DATA_ADDRESS                0xF7
-#define BME280_POWER_CONTROL_ADDRESS       0xF4
-#define BME280_CONTROL_HUMIDITY_ADDRESS    0xF2
-#define BME280_CONTROL_MEAS_ADDRESS        0xF4
-#define BME280_CONFIG_ADDRESS              0xF5
+#define BME280_CHIP_ID_ADDRESS             UINT8(0xD0)
+#define BME280_RESET_ADDRESS               UINT8(0xE0)
+#define BME280_TEMP_PRESS_CALIB_ADDRESS    UINT8(0x88)
+#define BME280_HUMIDITY_CALIB_ADDRESS      UINT8(0xE1)
+#define BME280_DATA_ADDRESS                UINT8(0xF7)
+#define BME280_POWER_CONTROL_ADDRESS       UINT8(0xF4)
+#define BME280_CONTROL_HUMIDITY_ADDRESS    UINT8(0xF2)
+#define BME280_CONTROL_MEAS_ADDRESS        UINT8(0xF4)
+#define BME280_CONFIG_ADDRESS              UINT8(0xF5)
 
 // Registers related to sizes
 #define BME280_TEMP_PRESS_CALIB_LENGTH    26
@@ -81,9 +87,9 @@
 #define BME280_CONFIG_REGISTERS_LENGTH    4
 
 // Status
-#define BME280_STATUS_REGISTER_ADDRESS    0xF3
-#define BME280_SOFT_RESET_COMMAND         0xB6
-#define BME280_STATUS_UPDATE              0x01
+#define BME280_STATUS_REGISTER_ADDRESS    UINT8(0xF3)
+#define BME280_SOFT_RESET_COMMAND         UINT8(0xB6)
+#define BME280_STATUS_UPDATE              UINT8(0x01)
 
 // Value limits for measurements
 #define BME280_MIN_TEMPERATURE    -4000L
@@ -99,23 +105,23 @@
 #define BME280_MEAS_SCALING_FACTOR              1000UL
 
 // Bit masks and bit positions
-#define BME280_CONTROL_TEMPERATURE_MSK    0xE0
-#define BME280_CONTROL_TEMPERATURE_POS    0x05
+#define BME280_CONTROL_TEMPERATURE_MSK    UINT8(0xE0)
+#define BME280_CONTROL_TEMPERATURE_POS    UINT8(0x05)
 
-#define BME280_CONTROL_PRESSURE_MSK       0x1C
-#define BME280_CONTROL_PRESSURE_POS       0x02
+#define BME280_CONTROL_PRESSURE_MSK       UINT8(0x1C)
+#define BME280_CONTROL_PRESSURE_POS       UINT8(0x02)
 
-#define BME280_CONTROL_HUMIDITY_MSK       0x07
-#define BME280_CONTROL_HUMIDITY_POS       0x00
+#define BME280_CONTROL_HUMIDITY_MSK       UINT8(0x07)
+#define BME280_CONTROL_HUMIDITY_POS       UINT8(0x00)
 
-#define BME280_SENSOR_MODE_MSK            0x03
-#define BME280_SENSOR_MODE_POS            0x00
+#define BME280_SENSOR_MODE_MSK            UINT8(0x03)
+#define BME280_SENSOR_MODE_POS            UINT8(0x00)
 
-#define BME280_FILTER_MSK                 0x1C
-#define BME280_FILTER_POS                 0x02
+#define BME280_FILTER_MSK                 UINT8(0x1C)
+#define BME280_FILTER_POS                 UINT8(0x02)
 
-#define BME280_STANDBY_MSK                0xE0
-#define BME280_STANDBY_POS                0x05
+#define BME280_STANDBY_MSK                UINT8(0xE0)
+#define BME280_STANDBY_POS                UINT8(0x05)
 
 typedef enum BME280_ERROR_CODE
 {
@@ -176,13 +182,13 @@ typedef struct BME280_UNCOMPENSATED_DATA
 typedef struct BME280_DATA
 {
     // Compensated data for the temperature sensor
-    int32_t temperature;
+    double temperature;
 
     // Compensated data for the pressure sensor
-    uint32_t  pressure;
+    double  pressure;
 
     // Compensated data for the humidity sensor
-    uint32_t humidity;
+    double humidity;
 } bme280_data_t;
 
 typedef enum BME280_OVERSAMPLING
@@ -294,11 +300,11 @@ static void BME280_ParseHumidityCalibration(bme280_calibration_data_t * const ca
 
 static bme280_error_code_t BME280_GetCalibrationData(bme280_device_t * const device);
 
-static int32_t BME280_CompensateTemperature(bme280_uncompensated_data_t * const uncompensatedData, bme280_calibration_data_t * const calibrationData);
+static double BME280_CompensateTemperature(bme280_uncompensated_data_t * const uncompensatedData, bme280_calibration_data_t * const calibrationData);
 
-static uint32_t BME280_CompensatePressure(bme280_uncompensated_data_t * const uncompensatedData, bme280_calibration_data_t * const calibrationData);
+static double BME280_CompensatePressure(bme280_uncompensated_data_t * const uncompensatedData, bme280_calibration_data_t * const calibrationData);
 
-static uint32_t BME280_CompensateHumidity(bme280_uncompensated_data_t * const uncompensatedData, bme280_calibration_data_t * const calibrationData);
+static double BME280_CompensateHumidity(bme280_uncompensated_data_t * const uncompensatedData, bme280_calibration_data_t * const calibrationData);
 
 static bme280_error_code_t BME280_CompensateData(bme280_device_t * const device, bme280_uncompensated_data_t * const uncompensatedData);
 
@@ -312,21 +318,11 @@ static bme280_error_code_t BME280_SetOversamplingSettings(bme280_device_t * cons
 
 static bme280_error_code_t BME280_SetFilterStandbySettings(bme280_device_t * const device, bme280_settings_t const * const settings);
 
-static void BME280_ParseSetings(bme280_settings_t * const settings, uint8_t const * const rawSettings);
-
-static bme280_error_code_t BME280_ReloadSettings(bme280_device_t * const device, bme280_settings_t const * const settings);
-
-static bme280_error_code_t BME280_PutToSleep(bme280_device_t * const device);
-
 static bme280_error_code_t BME280_WritePowerMode(bme280_device_t * const device, bme280_power_mode_t const powerMode);
 
 static bme280_error_code_t BME280_SetSensorPowerMode(bme280_device_t * const device, bme280_settings_t const * const settings);
 
-static bme280_error_code_t BME280_GetSensorPowerMode(bme280_device_t * const device, bme280_power_mode_t * const powerMode);
-
 static bme280_error_code_t BME280_SetSensorSettings(bme280_device_t * const device, bme280_settings_t const * const settings);
-
-uint32_t BME280_ComputeDelay(bme280_settings_t const * const settings);
 
 bme280_error_code_t BME280_Init(bme280_device_t * const device, bme280_handler_t const * const handler, i2c_t const * const handle, uint8_t const i2cAddress, bme280_settings_t const * const settings);
 

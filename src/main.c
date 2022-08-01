@@ -70,18 +70,15 @@ void main(void)
 
     BME280_Init(&weatherClick, &defaultHandler, &i2c_0, BME280_I2C_ADDRESS, &settings);
 
-    SensorRead(&weatherClick);
-
     while (true)
     {
-        TightLoopContents();
+        SensorRead(&weatherClick);
+        _delay_ms(5000);
     }
 }
 
 void SensorRead(bme280_device_t const * const device)
 {
-    static double temperature, pressure, humidity;
-
     bme280_error_code_t readResult = BME280_GetSensorData(device);
 
     if (readResult != BME280_OK)
@@ -89,11 +86,7 @@ void SensorRead(bme280_device_t const * const device)
         return;
     }
 
-    temperature = 0.01F * device->data.temperature;
-    pressure = 0.0001F * device->data.pressure;
-    humidity = (1.0F / 1024.0F) * device->data.humidity;
-
-    printf("%0.2lf deg C, %0.2lf hPa, %0.2lf%% \n\r", temperature, pressure, humidity);
+    printf("%0.2lf deg C, %0.2lf hPa, %0.2lf\n\r", device->data.temperature, device->data.pressure, device->data.humidity);
 
     return;
 }
