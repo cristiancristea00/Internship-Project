@@ -72,7 +72,7 @@ static void UART1_Print(char const * string)
 {
     char character = '\0';
 
-    while (1)
+    while (true)
     {
         character = *string++;
 

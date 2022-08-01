@@ -43,6 +43,7 @@ extern i2c_t const i2c_0;
 extern bme280_handler_t const defaultHandler;
 
 void BusScan(void);
+void SensorRead(bme280_device_t const * const device);
 
 void main(void)
 {
@@ -56,24 +57,38 @@ void main(void)
 
     _delay_ms(5000);
 
-    // BusScan();
-
     bme280_device_t weatherClick;
 
-    BME280_Init(&weatherClick, &defaultHandler, &i2c_0, BME280_I2C_ADDRESS);
+    bme280_settings_t settings = {
+        .temperatureOversampling = BME280_OVERSAMPLING_16X,
+        .pressureOversampling = BME280_OVERSAMPLING_16X,
+        .humidityOversampling = BME280_OVERSAMPLING_16X,
+        .iirFilterCoefficients = BME280_IIR_FILTER_16,
+        .powerMode = BME280_NORMAL_MODE,
+        .standbyTime = BME280_STANDBY_TIME_0_5_MS
+    };
 
-    BME280_GetSensorData(&weatherClick);
+    BME280_Init(&weatherClick, &defaultHandler, &i2c_0, BME280_I2C_ADDRESS, &settings);
 
     while (true)
     {
-        BME280_GetSensorData(&weatherClick);
-
-        printf("Temperature %0.2f\n\r", (float) weatherClick.data.temperature / 100);
-        printf("Pressure %0.2f\n\r", (float) weatherClick.data.pressure / 256);
-        printf("Humidity %0.2f\n\r", (float) weatherClick.data.humidity / 1024);
-
-        _delay_ms(2000);
+        SensorRead(&weatherClick);
+        _delay_ms(5000);
     }
+}
+
+void SensorRead(bme280_device_t const * const device)
+{
+    bme280_error_code_t readResult = BME280_GetSensorData(device);
+
+    if (readResult != BME280_OK)
+    {
+        return;
+    }
+
+    printf("%0.2lf deg C, %0.2lf hPa, %0.2lf\n\r", device->data.temperature, device->data.pressure, device->data.humidity);
+
+    return;
 }
 
 void BusScan(void)
