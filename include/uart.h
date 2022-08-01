@@ -49,10 +49,6 @@ typedef void (* uart_init_t) (uint16_t const);
 typedef void (* uart_print_t) (char const *);
 typedef void (* uart_print_char_t) (char const);
 
-/**
- * @brief Object struct for the UART module
- *
- **/
 typedef struct UART
 {
     uart_init_t Init;
@@ -66,28 +62,28 @@ typedef struct UART
  *        no parity and 1 stop bit. Also, the Receive Complete Interrupt is
  *        enabled.
  *
- * @param baudRate The baud rate register value
+ * @param[in] baudRate The baud rate register value
  **/
 static void UART1_Init(uint16_t const baudRate);
 
 /**
  * @brief Sends a null-terminated string over UART.
  *
- * @param string The null-terminated string to be sent
+ * @param[in] string The null-terminated string to be sent
  **/
 static void UART1_Print(char const * string);
 
 /**
  * @brief Send a single character over UART.
  *
- * @param character The character to be sent
+ * @param[in] character The character to be sent
  */
 static void UART1_PrintChar(char const character);
 
 /**
  * @brief Sends a byte over UART.
  *
- * @param dataByte The byte to be sent
+ * @param[in] dataByte The byte to be sent
  **/
 static void UART1_SendByte(uint8_t const dataByte);
 
@@ -105,8 +101,9 @@ static bool UART1_TXBusy(void);
  * @brief Wrapper around the @ref Uart1PrintChar function to make it compatible
  *        with the C stream interface.
  *
- * @param character The character to be sent
- * @param stream The stream used to send the character
+ * @param[in] character The character to be sent
+ * @param[in] stream The stream used to send the character
+ *
  * @return int8_t Always returns 0
  **/
 static int8_t UART1_SendChar(char const character, FILE * const stream);

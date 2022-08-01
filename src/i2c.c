@@ -151,7 +151,7 @@ static void I2C0_EndSession(void)
     return;
 }
 
-static i2c_error_code_t I2C0_SendData(uint8_t const address, uint8_t const * dataForSend, uint8_t const initLength)
+static i2c_error_code_t I2C0_SendData(uint8_t const address, uint8_t const * const dataForSend, uint8_t const initLength)
 {
     TWI0.MADDR = I2C0_SetAdress(address, I2C_DATA_SEND);
 
@@ -167,17 +167,18 @@ static i2c_error_code_t I2C0_SendData(uint8_t const address, uint8_t const * dat
 
     uint8_t bytesSent = 0;
     uint8_t length = initLength;
+    uint8_t const * dataPointer = dataForSend;
 
     while (length != 0)
     {
         --length;
 
-        TWI0.MDATA = *dataForSend;
+        TWI0.MDATA = *dataPointer;
 
         if (I2C0_WaitWrite() == I2C_ACKED)
         {
             ++bytesSent;
-            ++dataForSend;
+            ++dataPointer;
         }
         else
         {
@@ -195,7 +196,7 @@ static i2c_error_code_t I2C0_SendData(uint8_t const address, uint8_t const * dat
     }
 }
 
-static i2c_error_code_t I2C0_ReceiveData(uint8_t const address, uint8_t * dataForReceive, uint8_t const initLength)
+static i2c_error_code_t I2C0_ReceiveData(uint8_t const address, uint8_t * const dataForReceive, uint8_t const initLength)
 {
     TWI0.MADDR = I2C0_SetAdress(address, I2C_DATA_RECEIVE);
 
@@ -211,6 +212,7 @@ static i2c_error_code_t I2C0_ReceiveData(uint8_t const address, uint8_t * dataFo
 
     uint8_t bytesReceived = 0;
     uint8_t length = initLength;
+    uint8_t * dataPointer = dataForReceive;
 
     while (length != 0)
     {
@@ -218,12 +220,12 @@ static i2c_error_code_t I2C0_ReceiveData(uint8_t const address, uint8_t * dataFo
 
         if (I2C0_WaitRead() == I2C_READY)
         {
-            *dataForReceive = TWI0.MDATA;
+            *dataPointer = TWI0.MDATA;
 
             TWI0.MCTRLB = (length == 0) ? (TWI_ACKACT_NACK_gc | TWI_MCMD_STOP_gc) : TWI_MCMD_RECVTRANS_gc;
 
             ++bytesReceived;
-            ++dataForReceive;
+            ++dataPointer;
         }
         else
         {
