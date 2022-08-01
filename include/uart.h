@@ -49,10 +49,6 @@ typedef void (* uart_init_t) (uint16_t const);
 typedef void (* uart_print_t) (char const *);
 typedef void (* uart_print_char_t) (char const);
 
-/**
- * @brief Object struct for the UART module
- *
- **/
 typedef struct UART
 {
     uart_init_t Init;
