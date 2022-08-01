@@ -92,6 +92,12 @@
 #define BME280_MAX_PRESSURE       11000000UL
 #define BME280_MAX_HUMIDITY       102400UL
 
+// Values for delay calculations
+#define BME280_MEAS_OFFSET                      1250UL
+#define BME280_MEAS_DURAATION                   2300UL
+#define BME280_PRESSURE_HUMIDITY_MEAS_OFFSET    575UL
+#define BME280_MEAS_SCALING_FACTOR              1000UL
+
 // Bit masks and bit positions
 #define BME280_CONTROL_TEMPERATURE_MSK    0xE0
 #define BME280_CONTROL_TEMPERATURE_POS    0x05
@@ -304,6 +310,8 @@ static bme280_error_code_t BME280_SetOversamplingHumidity(bme280_device_t * cons
 
 bme280_error_code_t BME280_SetOversamplingSettings(bme280_device_t * const device, bme280_settings_t const * const settings);
 
+bme280_error_code_t BME280_SetFilterStandbySettings(bme280_device_t * const device, bme280_settings_t const * const settings);
+
 static void BME280_ParseSetings(bme280_settings_t * const settings, uint8_t const * const rawSettings);
 
 static bme280_error_code_t BME280_ReloadSettings(bme280_device_t * const device, bme280_settings_t const * const settings);
@@ -312,7 +320,13 @@ static bme280_error_code_t BME280_PutToSleep(bme280_device_t * const device);
 
 static bme280_error_code_t BME280_WritePowerMode(bme280_device_t * const device, bme280_power_mode_t const powerMode);
 
-bme280_error_code_t BME280_SetSensorPowerMode(bme280_device_t * const device, uint8_t const sensorMode);
+bme280_error_code_t BME280_SetSensorPowerMode(bme280_device_t * const device, bme280_power_mode_t const powerMode);
+
+bme280_error_code_t BME280_GetSensorPowerMode(bme280_device_t * const device, bme280_power_mode_t * const powerMode);
+
+bme280_error_code_t BME280_SetSensorSettings(bme280_device_t * const device, bme280_settings_t const * const settings);
+
+uint32_t BME280_ComputeDelay(bme280_settings_t const * const settings);
 
 bme280_error_code_t BME280_Init(bme280_device_t * const device, bme280_handler_t const * const handler, i2c_t const * const handle, uint8_t const i2cAddress);
 

@@ -426,12 +426,36 @@ bme280_error_code_t BME280_GetSensorData(bme280_device_t * const device)
 
 static bme280_error_code_t BME280_SetOversamplingTemperaturePressure(bme280_device_t * const device, bme280_settings_t const * const settings)
 {
-    // TODO
+    bme280_error_code_t oversamplingResult = BME280_OK;
+
+    uint8_t measAddress = BME280_CONTROL_MEAS_ADDRESS;
+
+    uint8_t registerData = 0;
+
+    oversamplingResult = BME280_GetRegisters(device, measAddress, &registerData, 1);
+
+    if (oversamplingResult == BME280_OK)
+    {
+        registerData = BME280_SET_BITS(registerData, BME280_CONTROL_TEMPERATURE, settings->temperatureOversampling);
+        registerData = BME280_SET_BITS(registerData, BME280_CONTROL_PRESSURE, settings->pressureOversampling);
+
+        oversamplingResult = BME280_SetRegisters(device, &measAddress, &registerData, 1);
+    }
+
+    return oversamplingResult;
 }
 
 static bme280_error_code_t BME280_SetOversamplingHumidity(bme280_device_t * const device, bme280_settings_t const * const settings)
 {
-    // TODO
+    bme280_error_code_t oversamplingResult = BME280_OK;
+
+    uint8_t humidityAddress = BME280_CONTROL_HUMIDITY_ADDRESS;
+
+    uint8_t registerData = settings->humidityOversampling & BME280_CONTROL_HUMIDITY_MSK;
+
+    oversamplingResult = BME280_SetRegisters(device, &humidityAddress, &registerData, 1);
+
+    return oversamplingResult;
 }
 
 bme280_error_code_t BME280_SetOversamplingSettings(bme280_device_t * const device, bme280_settings_t const * const settings)
@@ -445,6 +469,27 @@ bme280_error_code_t BME280_SetOversamplingSettings(bme280_device_t * const devic
     return oversamplingResult;
 }
 
+bme280_error_code_t BME280_SetFilterStandbySettings(bme280_device_t * const device, bme280_settings_t const * const settings)
+{
+    bme280_error_code_t standbyFilterResult = BME280_OK;
+
+    uint8_t configAddress = BME280_CONFIG_ADDRESS;
+
+    uint8_t registerData = 0;
+
+    standbyFilterResult = BME280_GetRegisters(device, configAddress, &registerData, 1);
+
+    if (standbyFilterResult == BME280_OK)
+    {
+        registerData = BME280_SET_BITS(registerData, BME280_FILTER, settings->iirFilterCoefficients);
+        registerData = BME280_SET_BITS(registerData, BME280_STANDBY, settings->standbyTime);
+
+        standbyFilterResult = BME280_SetRegisters(device, &configAddress, &registerData, 1);
+    }
+
+    return standbyFilterResult;
+}
+
 static void BME280_ParseSetings(bme280_settings_t * const settings, uint8_t const * const rawSettings)
 {
     settings->temperatureOversampling = BME280_GET_BITS(rawSettings[2], BME280_CONTROL_TEMPERATURE);
@@ -456,7 +501,16 @@ static void BME280_ParseSetings(bme280_settings_t * const settings, uint8_t cons
 
 static bme280_error_code_t BME280_ReloadSettings(bme280_device_t * const device, bme280_settings_t const * const settings)
 {
-    // TODO
+    bme280_error_code_t reloadResult = BME280_OK;
+
+    reloadResult = BME280_SetOversamplingSettings(device, settings);
+
+    if (reloadResult == BME280_OK)
+    {
+        reloadResult = BME280_SetFilterStandbySettings(device, settings);
+    }
+
+    return reloadResult;
 }
 
 static bme280_error_code_t BME280_PutToSleep(bme280_device_t * const device)
@@ -504,9 +558,129 @@ static bme280_error_code_t BME280_WritePowerMode(bme280_device_t * const device,
     return powerResult;
 }
 
-bme280_error_code_t BME280_SetSensorPowerMode(bme280_device_t * const device, uint8_t const sensorMode)
+bme280_error_code_t BME280_SetSensorPowerMode(bme280_device_t * const device, bme280_power_mode_t const powerMode)
 {
-    // TODO
+    bme280_error_code_t modeResult = BME280_OK;
+
+    modeResult = BME280_CheckNull(device);
+
+    if (modeResult == BME280_OK)
+    {
+        bme280_power_mode_t lastPowerMode = device->settings.powerMode;
+
+        if (lastPowerMode != BME280_SLEEP_MODE)
+        {
+            modeResult = BME280_PutToSleep(device);
+        }
+
+        if (modeResult == BME280_OK)
+        {
+            modeResult = BME280_WritePowerMode(device, powerMode);
+        }
+    }
+
+    return modeResult;
+}
+
+bme280_error_code_t BME280_GetSensorPowerMode(bme280_device_t * const device, bme280_power_mode_t * const powerMode)
+{
+    bme280_error_code_t powerResult = BME280_OK;
+
+    powerResult = BME280_CheckNull(device);
+
+    if (powerResult == BME280_OK && powerMode != NULL)
+    {
+        powerResult = BME280_GetRegisters(device, BME280_POWER_CONTROL_ADDRESS, powerMode, 1);
+
+        *powerMode = BME280_GET_BITS(*powerMode, BME280_SENSOR_MODE);
+    }
+    else
+    {
+        powerResult = BME280_NULL_POINTER;
+    }
+
+    return powerResult;
+}
+
+bme280_error_code_t BME280_SetSensorSettings(bme280_device_t * const device, bme280_settings_t const * const settings)
+{
+    bme280_error_code_t settingsResult = BME280_OK;
+
+    settingsResult = BME280_CheckNull(device);
+
+    if (settingsResult == BME280_OK)
+    {
+        bme280_power_mode_t powerMode;
+
+        settingsResult = BME280_GetSensorPowerMode(device, &powerMode);
+
+        if (settingsResult == BME280_OK && powerMode != BME280_SLEEP_MODE)
+        {
+            settingsResult = BME280_PutToSleep(device);
+        }
+
+        if (settingsResult == BME280_OK)
+        {
+            settingsResult = BME280_SetOversamplingSettings(device, settings);
+        }
+
+        if (settingsResult == BME280_OK)
+        {
+            settingsResult = BME280_SetFilterStandbySettings(device, settings);
+        }
+    }
+
+    if (settingsResult == BME280_OK)
+    {
+        device->settings = *settings;
+    }
+
+    return settingsResult;
+}
+
+uint32_t BME280_ComputeDelay(bme280_settings_t const * const settings)
+{
+    uint32_t const overesamplingLookup[] = { 0UL, 1UL, 2UL, 4UL, 8UL, 16UL };
+
+    uint32_t temperatureOversampling = 0;
+
+    if (settings->temperatureOversampling <= 5)
+    {
+        temperatureOversampling = overesamplingLookup[settings->temperatureOversampling];
+    }
+    else
+    {
+        temperatureOversampling = 16;
+    }
+
+    uint32_t pressureOversampling = 0;
+
+    if (settings->pressureOversampling <= 5)
+    {
+        pressureOversampling = overesamplingLookup[settings->pressureOversampling];
+    }
+    else
+    {
+        pressureOversampling = 16;
+    }
+
+    uint32_t humidtyOversampling = 0;
+
+    if (settings->humidityOversampling <= 5)
+    {
+        pressureOversampling = overesamplingLookup[settings->humidityOversampling];
+    }
+    else
+    {
+        humidtyOversampling = 16;
+    }
+
+    uint32_t maxDelay = (uint32_t) ((BME280_MEAS_OFFSET + (BME280_MEAS_DURAATION * temperatureOversampling)
+            + ((BME280_MEAS_DURAATION * pressureOversampling) + BME280_PRESSURE_HUMIDITY_MEAS_OFFSET)
+            + ((BME280_MEAS_DURAATION * humidtyOversampling) + BME280_PRESSURE_HUMIDITY_MEAS_OFFSET))
+            / BME280_MEAS_OFFSET);
+
+    return maxDelay;
 }
 
 bme280_error_code_t BME280_Init(bme280_device_t * const device, bme280_handler_t const * const handler, i2c_t const * const i2cDevice, uint8_t const i2cAddress)

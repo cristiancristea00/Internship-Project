@@ -44,6 +44,9 @@ extern bme280_handler_t const defaultHandler;
 
 void BusScan(void);
 
+void SetSensorSettings(bme280_device_t const * const device);
+void ForcedSensorRead(bme280_device_t const * const device);
+
 void main(void)
 {
     PORTC.DIRSET = PIN0_bm;
@@ -60,21 +63,63 @@ void main(void)
 
     bme280_device_t weatherClick;
 
-
     BME280_Init(&weatherClick, &defaultHandler, &i2c_0, BME280_I2C_ADDRESS);
 
-    BME280_GetSensorData(&weatherClick);
+    SetSensorSettings(&weatherClick);
 
     while (true)
     {
-        BME280_GetSensorData(&weatherClick);
+        ForcedSensorRead(&weatherClick);
 
-        printf("Temperature %0.2f\n\r", (float) weatherClick.data.temperature / 100);
-        printf("Pressure %0.2f\n\r", (float) weatherClick.data.pressure / 256);
-        printf("Humidity %0.2f\n\r", (float) weatherClick.data.humidity / 1024);
-
-        _delay_ms(5000);
+        _delay_ms(2000);
     }
+}
+
+void SetSensorSettings(bme280_device_t const * const device)
+{
+    bme280_error_code_t forcedModeResult = BME280_OK;
+
+    bme280_settings_t settings = {
+        .temperatureOversampling = BME280_OVERSAMPLING_1X,
+        .pressureOversampling = BME280_OVERSAMPLING_1X,
+        .humidityOversampling = BME280_OVERSAMPLING_1X,
+        .iirFilterCoefficients = BME280_IIR_FILTER_OFF,
+    };
+
+    forcedModeResult = BME280_SetSensorSettings(device, &settings);
+
+    return;
+}
+
+void ForcedSensorRead(bme280_device_t const * const device)
+{
+    static double temperature, pressure, humidity;
+
+    bme280_error_code_t readResult = BME280_OK;
+
+    readResult = BME280_SetSensorPowerMode(device, BME280_FORCED_MODE);
+
+    if (readResult != BME280_OK)
+    {
+        LOG_ERROR("Failed settings forced mode");
+        return;
+    }
+
+    _delay_loop_2(BME280_ComputeDelay(&device->settings));
+
+    readResult = BME280_GetSensorData(device);
+
+    if (readResult != BME280_OK)
+    {
+        LOG_ERROR("Failed to read sensor data");
+        return;
+    }
+
+    temperature = 0.01F * device->data.temperature;
+    pressure = 0.0001F * device->data.pressure;
+    humidity = (1.0F / 1024.0F) * device->data.humidity;
+
+    printf("%0.2lf deg C, %0.2lf hPa, %0.2lf\n\r", temperature, pressure, humidity);
 }
 
 void BusScan(void)
