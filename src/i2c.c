@@ -35,14 +35,14 @@
  *
  **/
 i2c_t const i2c_0 = {
-    .Init = I2C0_Init,
+    .Initialize = I2C0_Inititialize,
     .SendData = I2C0_SendData,
     .ReceiveData = I2C0_ReceiveData,
-    .EndSession = I2C0_EndSession,
+    .EndTransaction = I2C0_EndTransation,
     .ClientAvailable = I2C0_ClientAvailable
 };
 
-static void I2C0_Init(i2c_mode_baud_t const modeBaud)
+static void I2C0_Inititialize(i2c_mode_t const mode)
 {
     // Select I2C pins to PC2 - SDA and PC3 - SCL
     PORTMUX.TWIROUTEA = PORTMUX_TWI0_ALT2_gc;
@@ -52,10 +52,10 @@ static void I2C0_Init(i2c_mode_baud_t const modeBaud)
     PORTC.PIN3CTRL = PORT_PULLUPEN_bm;
 
     // Host baud rate control
-    TWI0.MBAUD = modeBaud;
+    TWI0.MBAUD = mode;
 
     // Enable Fast Mode Plus
-    if (modeBaud == I2C_FAST_MODE_PLUS)
+    if (mode == I2C_FAST_MODE_PLUS)
     {
         TWI0.CTRLA = TWI_FMPEN_ON_gc;
     }
@@ -75,7 +75,7 @@ static void I2C0_Init(i2c_mode_baud_t const modeBaud)
     return;
 }
 
-static uint8_t I2C0_SetAdress(uint8_t const deviceAddress, i2c_data_direction_t const dataDirection)
+static uint8_t I2C0_SetAdressDirectionBit(uint8_t const deviceAddress, i2c_data_direction_t const dataDirection)
 {
     if (dataDirection == I2C_DATA_SEND)
     {
@@ -142,18 +142,17 @@ static i2c_state_t I2C0_WaitRead(void)
     return state;
 }
 
-static void I2C0_EndSession(void)
+static void I2C0_EndTransation(void)
 {
     // Sends STOP condition to the bus and clears the internal state of the host
-    // TWI0.MCTRLB = (TWI_MCMD_STOP_gc | TWI_FLUSH_bm);
     TWI0.MCTRLB = TWI_MCMD_STOP_gc;
 
     return;
 }
 
-static i2c_error_code_t I2C0_SendData(uint8_t const address, uint8_t const * const dataForSend, uint8_t const initLength)
+static i2c_error_code_t I2C0_SendData(uint8_t const address, uint8_t const * const dataForSend, uint8_t const initialLength)
 {
-    TWI0.MADDR = I2C0_SetAdress(address, I2C_DATA_SEND);
+    TWI0.MADDR = I2C0_SetAdressDirectionBit(address, I2C_DATA_SEND);
 
     if (I2C0_WaitWrite() != I2C_ACKED)
     {
@@ -166,7 +165,7 @@ static i2c_error_code_t I2C0_SendData(uint8_t const address, uint8_t const * con
     }
 
     uint8_t bytesSent = 0;
-    uint8_t length = initLength;
+    uint8_t length = initialLength;
     uint8_t const * dataPointer = dataForSend;
 
     while (length != 0)
@@ -186,7 +185,7 @@ static i2c_error_code_t I2C0_SendData(uint8_t const address, uint8_t const * con
         }
     }
 
-    if (bytesSent == initLength)
+    if (bytesSent == initialLength)
     {
         return I2C_OK;
     }
@@ -196,9 +195,9 @@ static i2c_error_code_t I2C0_SendData(uint8_t const address, uint8_t const * con
     }
 }
 
-static i2c_error_code_t I2C0_ReceiveData(uint8_t const address, uint8_t * const dataForReceive, uint8_t const initLength)
+static i2c_error_code_t I2C0_ReceiveData(uint8_t const address, uint8_t * const dataForReceive, uint8_t const initialLength)
 {
-    TWI0.MADDR = I2C0_SetAdress(address, I2C_DATA_RECEIVE);
+    TWI0.MADDR = I2C0_SetAdressDirectionBit(address, I2C_DATA_RECEIVE);
 
     if (I2C0_WaitWrite() != I2C_ACKED)
     {
@@ -211,7 +210,7 @@ static i2c_error_code_t I2C0_ReceiveData(uint8_t const address, uint8_t * const 
     }
 
     uint8_t bytesReceived = 0;
-    uint8_t length = initLength;
+    uint8_t length = initialLength;
     uint8_t * dataPointer = dataForReceive;
 
     while (length != 0)
@@ -233,9 +232,7 @@ static i2c_error_code_t I2C0_ReceiveData(uint8_t const address, uint8_t * const 
         }
     }
 
-
-
-    if (bytesReceived == initLength)
+    if (bytesReceived == initialLength)
     {
         return I2C_OK;
     }
@@ -245,9 +242,9 @@ static i2c_error_code_t I2C0_ReceiveData(uint8_t const address, uint8_t * const 
     }
 }
 
-static bool I2C0_ClientAvailable(uint8_t const address)
+static bool I2C0_ClientAvailable(uint8_t const clientAddress)
 {
-    i2c_error_code_t returnValue = I2C0_SendData(address, NULL, 0);
-    I2C0_EndSession();
+    i2c_error_code_t returnValue = I2C0_SendData(clientAddress, NULL, 0);
+    I2C0_EndTransation();
     return (returnValue != I2C_NACK_OF_ADDRESS);
 }

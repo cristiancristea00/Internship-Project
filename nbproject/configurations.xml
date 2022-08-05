@@ -78,7 +78,7 @@
       <HI-TECH-COMP>
         <property key="additional-warnings" value="true"/>
         <property key="asmlist" value="true"/>
-        <property key="call-prologues" value="false"/>
+        <property key="call-prologues" value="true"/>
         <property key="default-bitfield-type" value="true"/>
         <property key="default-char-type" value="true"/>
         <property key="define-macros" value=""/>
@@ -101,14 +101,14 @@
         <property key="optimization-stable-enable" value="false"/>
         <property key="preprocess-assembler" value="true"/>
         <property key="short-enums" value="true"/>
-        <property key="tentative-definitions" value="-fcommon"/>
+        <property key="tentative-definitions" value="-fno-common"/>
         <property key="undefine-macros" value=""/>
         <property key="use-cci" value="false"/>
         <property key="use-iar" value="false"/>
         <property key="verbose" value="false"/>
         <property key="warning-level" value="-3"/>
         <property key="what-to-do" value="ignore"/>
-        <appendMe value="-Wall -Wextra -Wpedantic -Wunused -Wfatal-errors -Wconversion -Winline -Wshadow -Wunreachable-code -Wwrite-strings -Wredundant-decls -Wmissing-prototypes -Wno-unused-function -Winline"/>
+        <appendMe value="-Wall -Wextra -Wpedantic -Wunused -Wfatal-errors -Winline -Wshadow -Wunreachable-code -Wwrite-strings -Wredundant-decls -Wmissing-prototypes -Wno-unused-function -Winline"/>
       </HI-TECH-COMP>
       <HI-TECH-LINK>
         <property key="additional-options-checksum" value=""/>

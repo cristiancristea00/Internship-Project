@@ -45,13 +45,13 @@
  **/
 #define UART_BAUD_RATE(x) ((uint16_t) ((4UL * F_CPU) / x ## UL))
 
-typedef void (* uart_init_t) (uint16_t const);
+typedef void (* uart_initialize_t) (uint16_t const);
 typedef void (* uart_print_t) (char const *);
 typedef void (* uart_print_char_t) (char const);
 
 typedef struct UART
 {
-    uart_init_t Init;
+    uart_initialize_t Initialize;
     uart_print_t Print;
     uart_print_char_t PrintChar;
 } uart_t;
@@ -64,7 +64,7 @@ typedef struct UART
  *
  * @param[in] baudRate The baud rate register value
  **/
-static void UART1_Init(uint16_t const baudRate);
+static void UART1_Initialize(uint16_t const baudRate);
 
 /**
  * @brief Sends a null-terminated string over UART.
