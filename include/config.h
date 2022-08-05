@@ -30,6 +30,8 @@
 #ifndef CONFIG_H
 #define	CONFIG_H
 
+#include "uart.h"
+
 #include <avr/io.h>
 
 #include <stdarg.h>
@@ -46,23 +48,21 @@
 
 #include <stdio.h>
 
-#include "uart.h"
-
 /**
  * @brief TODO
  *
  **/
 void PrintForLogging(char const * const message);
 
-#define LOG_DEBUG_PRINTF(STRING, ...)    printf("[DEBUG]: " STRING "\n\r", ##__VA_ARGS__)
-#define LOG_INFO_PRINTF(STRING, ...)     printf("[INFO]: " STRING "\n\r", ##__VA_ARGS__)
-#define LOG_WARNING_PRINTF(STRING, ...)  printf("[WARNING]: " STRING "\n\r", ##__VA_ARGS__)
-#define LOG_ERROR_PRINTF(STRING, ...)    printf("[ERROR]: " STRING "\n\r", ##__VA_ARGS__)
+#define LOG_DEBUG_PRINTF(STRING, ...)    (printf("[DEBUG]: " STRING "\n\r", ##__VA_ARGS__))
+#define LOG_INFO_PRINTF(STRING, ...)     (printf("[INFO]: " STRING "\n\r", ##__VA_ARGS__))
+#define LOG_WARNING_PRINTF(STRING, ...)  (printf("[WARNING]: " STRING "\n\r", ##__VA_ARGS__))
+#define LOG_ERROR_PRINTF(STRING, ...)    (printf("[ERROR]: " STRING "\n\r", ##__VA_ARGS__)
 
-#define LOG_DEBUG(STRING)                PrintForLogging("[DEBUG]: " STRING "\n\r")
-#define LOG_INFO(STRING)                 PrintForLogging("[INFO]: " STRING "\n\r")
-#define LOG_WARNING(STRING)              PrintForLogging("[WARNING]: " STRING "\n\r")
-#define LOG_ERROR(STRING)                PrintForLogging("[ERROR]: " STRING "\n\r")
+#define LOG_DEBUG(STRING)                (PrintForLogging("[DEBUG]: " STRING "\n\r"))
+#define LOG_INFO(STRING)                 (PrintForLogging("[INFO]: " STRING "\n\r"))
+#define LOG_WARNING(STRING)              (PrintForLogging("[WARNING]: " STRING "\n\r"))
+#define LOG_ERROR(STRING)                (PrintForLogging("[ERROR]: " STRING "\n\r"))
 
 #else
 

@@ -40,7 +40,7 @@
 
 extern uart_t const uart_1;
 extern i2c_t const i2c_0;
-extern bme280_handler_t const defaultHandler;
+extern bme280_handler_t const BME280_I2C0_Handler;
 
 void BusScan(void);
 void SensorRead(bme280_device_t const * const device);
@@ -51,29 +51,31 @@ void main(void)
 
     SetClockFrequency(CLKCTRL_FRQSEL_24M_gc, PRESCALE_DISABLED);
 
-    uart_1.Init(UART_BAUD_RATE(460800));
+    uart_1.Initialize(UART_BAUD_RATE(460800));
 
-    i2c_0.Init(I2C_FAST_MODE_PLUS);
+    i2c_0.Initialize(I2C_FAST_MODE_PLUS);
 
     _delay_ms(5000);
+
+    BusScan();
 
     bme280_device_t weatherClick;
 
     bme280_settings_t settings = {
-        .temperatureOversampling = BME280_OVERSAMPLING_4X,
-        .pressureOversampling = BME280_OVERSAMPLING_4X,
-        .humidityOversampling = BME280_OVERSAMPLING_4X,
+        .temperatureOversampling = BME280_OVERSAMPLING_16X,
+        .pressureOversampling = BME280_OVERSAMPLING_16X,
+        .humidityOversampling = BME280_OVERSAMPLING_16X,
         .iirFilterCoefficients = BME280_IIR_FILTER_8,
         .powerMode = BME280_NORMAL_MODE,
-        .standbyTime = BME280_STANDBY_TIME_0_5_MS
+        .standbyTime = BME280_STANDBY_TIME_500_MS
     };
 
-    BME280_Init(&weatherClick, &defaultHandler, &i2c_0, BME280_I2C_ADDRESS, &settings);
+    BME280_Init(&weatherClick, &BME280_I2C0_Handler, &i2c_0, BME280_I2C_ADDRESS, &settings);
 
     while (true)
     {
         SensorRead(&weatherClick);
-        _delay_ms(5000);
+        _delay_ms(60000);
     }
 }
 
@@ -86,7 +88,9 @@ void SensorRead(bme280_device_t const * const device)
         return;
     }
 
-    printf("%0.2lf deg C, %0.2lf hPa, %0.2lf\n\r", device->data.temperature, device->data.pressure, device->data.humidity);
+    printf("Temperature: %0.2lf °C\n\r", BME280_GetDisplayTemperature(device));
+    printf("Pressure: %0.2lf hPa\n\r", BME280_GetDisplayPressure(device));
+    printf("Relative humidity: %0.2lf%c\n\r", BME280_GetDisplayHumidity(device), '%');
 
     return;
 }

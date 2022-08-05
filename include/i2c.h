@@ -61,12 +61,12 @@ typedef enum I2C_STATE
 } i2c_state_t;
 
 
-typedef enum I2C_MODE_BAUD
+typedef enum I2C_MODE
 {
     I2C_STANDARD_MODE  = 101,
     I2C_FAST_MODE      = 21,
     I2C_FAST_MODE_PLUS = 6
-} i2c_mode_baud_t;
+} i2c_mode_t;
 
 
 typedef enum I2C_DATA_DIRECTION
@@ -76,10 +76,10 @@ typedef enum I2C_DATA_DIRECTION
 } i2c_data_direction_t;
 
 
-typedef void (* i2c_init_t) (i2c_mode_baud_t const);
+typedef void (* i2c_initialize_t) (i2c_mode_t const);
 typedef int8_t (* i2c_send_data_t) (uint8_t const, uint8_t const *, uint8_t);
 typedef int8_t (* i2c_receive_data_t) (uint8_t const, uint8_t *, uint8_t);
-typedef void (* i2c_end_session_t) (void);
+typedef void (* i2c_end_transaction_t) (void);
 typedef bool (* i2c_client_available_t) (uint8_t const);
 
 /**
@@ -88,19 +88,19 @@ typedef bool (* i2c_client_available_t) (uint8_t const);
  **/
 typedef struct I2C
 {
-    i2c_init_t Init;
+    i2c_initialize_t Initialize;
     i2c_send_data_t SendData;
     i2c_receive_data_t ReceiveData;
-    i2c_end_session_t EndSession;
+    i2c_end_transaction_t EndTransaction;
     i2c_client_available_t ClientAvailable;
 } i2c_t;
 
 /**
  * @brief Initialize the I2C module on the TWI0 bus with the given mode.
  *
- * @param[in] modeBaud The mode of the I2C bus: Standard, Fast or Fast Plus
+ * @param[in] mode The mode of the I2C bus: Standard, Fast or Fast Plus
  **/
-static void I2C0_Init(i2c_mode_baud_t const modeBaud);
+static void I2C0_Inititialize(i2c_mode_t const mode);
 
 /**
  * @brief Sets the I2C bus address of the device based on the given chip address
@@ -111,7 +111,7 @@ static void I2C0_Init(i2c_mode_baud_t const modeBaud);
  *
  * @return i2c_error_code_t The error code of the operation
  **/
-static i2c_error_code_t I2C0_SetAdress(uint8_t const deviceAddress, i2c_data_direction_t const dataDirection);
+static i2c_error_code_t I2C0_SetAdressDirectionBit(uint8_t const deviceAddress, i2c_data_direction_t const dataDirection);
 
 /**
  * @brief Waits for the I2C bus to be ready after write operation.
@@ -136,24 +136,24 @@ static i2c_state_t I2C0_WaitRead(void);
  *
  * @return i2c_error_code_t The error code of the operation
  **/
-static i2c_error_code_t I2C0_SendData(uint8_t const address, uint8_t const * const dataForSend, uint8_t const initLength);
+static i2c_error_code_t I2C0_SendData(uint8_t const address, uint8_t const * const dataForSend, uint8_t const initialLength);
 
 /**
  * @brief Receives a specific number of bytes from the device using the I2C bus.
  *
- * @param[in] address The address of the device
+ * @param[in]  address The address of the device
  * @param[out] dataForReceive Pointer to the data to be received
- * @param[in] length The length of the data to be received
+ * @param[in]  length The length of the data to be received
  *
  * @return i2c_error_code_t The error code of the operation
  **/
-static i2c_error_code_t I2C0_ReceiveData(uint8_t const address, uint8_t * dataForReceive, uint8_t const initLength);
+static i2c_error_code_t I2C0_ReceiveData(uint8_t const address, uint8_t * dataForReceive, uint8_t const initialLength);
 
 /**
  * @brief Ends the I2C communication by sending a stop condition.
  *
  **/
-static void I2C0_EndSession(void);
+static void I2C0_EndTransation(void);
 
 /**
  * @brief Checks if a device is available on the I2C bus.
@@ -163,6 +163,6 @@ static void I2C0_EndSession(void);
  * @return true If the device is available
  * @return false If the device is not available
  **/
-static bool I2C0_ClientAvailable(uint8_t const address);
+static bool I2C0_ClientAvailable(uint8_t const clientAddress);
 
 #endif // I2C_H

@@ -69,4 +69,6 @@ void TightLoopContents(void)
 void PrintForLogging(char const * const message)
 {
     uart_1.Print(message);
+
+    return;
 }
