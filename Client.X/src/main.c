@@ -3,7 +3,7 @@
  *  @author Cristian Cristea - M70957
  *  @date 18 July 2022
  *
- *  @brief Main source file for the project
+ *  @brief Main source file for the Client program
  *
  *  @copyright (c) 2022 Microchip Technology Inc. and its subsidiaries.
  *
