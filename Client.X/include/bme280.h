@@ -249,8 +249,8 @@ typedef struct BME280_SETTINGS
     bme280_power_mode_t powerMode;
 } bme280_settings_t;
 
-typedef bme280_error_code_t (* bme280_read_t) (i2c_t * const, uint8_t const, uint8_t const, uint8_t * const, uint8_t const);
-typedef bme280_error_code_t (* bme280_write_t) (i2c_t * const, uint8_t const, uint8_t const * const, uint8_t const * const, uint8_t const);
+typedef bme280_error_code_t (* bme280_read_t) (i2c_t const * const, uint8_t const, uint8_t const, uint8_t * const, uint8_t const);
+typedef bme280_error_code_t (* bme280_write_t) (i2c_t const * const, uint8_t const, uint8_t const * const, uint8_t const * const, uint8_t const);
 
 typedef struct BME280_HANDLER
 {
@@ -513,11 +513,11 @@ bme280_error_code_t BME280_Init(bme280_device_t * const device, bme280_handler_t
  * @brief Reads the sensor data from the device and stores it in the sensor data
  *        structure.
  *
- * @param[in] device BME280 device
+ * @param[in, out] device BME280 device
  *
  * @return bme280_error_code_t Error code
  **/
-bme280_error_code_t BME280_GetSensorData(bme280_device_t const * const device);
+bme280_error_code_t BME280_GetSensorData(bme280_device_t * const device);
 
 /**
  * @brief Returns the temperature from the last measurement.

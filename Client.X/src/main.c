@@ -43,7 +43,7 @@ extern i2c_t const i2c_0;
 extern bme280_handler_t const BME280_I2C0_Handler;
 
 void BusScan(void);
-void SensorRead(bme280_device_t const * const device);
+void SensorRead(bme280_device_t * const device);
 
 void main(void)
 {
@@ -79,7 +79,7 @@ void main(void)
     }
 }
 
-void SensorRead(bme280_device_t const * const device)
+void SensorRead(bme280_device_t * const device)
 {
     bme280_error_code_t readResult = BME280_GetSensorData(device);
 

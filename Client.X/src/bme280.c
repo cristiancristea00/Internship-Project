@@ -646,7 +646,7 @@ bme280_error_code_t BME280_Init(bme280_device_t * const device, bme280_handler_t
     return initResult;
 }
 
-bme280_error_code_t BME280_GetSensorData(bme280_device_t const * const device)
+bme280_error_code_t BME280_GetSensorData(bme280_device_t * const device)
 {
     bme280_error_code_t acquisitionResult = BME280_OK;
 

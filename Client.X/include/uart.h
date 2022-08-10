@@ -37,6 +37,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <assert.h>
 
 /**
  * @brief Macro to convert UART baud rate to the value to be used in the BAUD

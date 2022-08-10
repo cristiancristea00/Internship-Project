@@ -43,6 +43,8 @@ uart_t const uart_1 = {
 
 static int8_t UART1_SendChar(char const character, FILE * const stream)
 {
+    assert(stream == NULL);
+
     UART1_PrintChar(character);
 
     return 0;
