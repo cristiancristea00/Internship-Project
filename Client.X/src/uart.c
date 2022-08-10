@@ -60,9 +60,12 @@ uart_t const uart_1 = {
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-static void UART0_Initialize(uint16_t const baudRate)
+static void UART0_Initialize(uint32_t const baudRate)
 {
-    USART0.BAUD = baudRate;
+    PORTA.DIRSET = PIN0_bm;
+    PORTA.DIRCLR = PIN1_bm;
+
+    USART0.BAUD = UART_BAUD_RATE(baudRate);
 
     USART0.CTRLA = USART_RXCIE_bm;
     USART0.CTRLB = USART_TXEN_bm | USART_RXEN_bm;
@@ -135,7 +138,7 @@ static inline bool UART0_TXBusy(void)
 
 static int8_t UART1_SendChar(char const character, FILE * const stream)
 {
-    assert(stream == NULL);
+    assert(stream != NULL);
 
     UART1_PrintChar(character);
 
@@ -146,7 +149,7 @@ FILE uart_1_stream = FDEV_SETUP_STREAM(UART1_SendChar, NULL, _FDEV_SETUP_WRITE);
 
 #endif // UART_PRINTF
 
-static void UART1_Initialize(uint16_t const baudRate)
+static void UART1_Initialize(uint32_t const baudRate)
 {
 #ifdef UART_PRINTF
 
@@ -154,7 +157,10 @@ static void UART1_Initialize(uint16_t const baudRate)
 
 #endif // UART_PRINTF
 
-    USART1.BAUD = baudRate;
+    PORTC.DIRSET = PIN0_bm;
+    PORTC.DIRCLR = PIN1_bm;
+
+    USART1.BAUD = UART_BAUD_RATE(baudRate);
 
     USART1.CTRLA = USART_RXCIE_bm;
     USART1.CTRLB = USART_TXEN_bm | USART_RXEN_bm;

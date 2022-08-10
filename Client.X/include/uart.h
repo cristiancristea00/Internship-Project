@@ -44,9 +44,9 @@
  *        register of the USART.
  *
  **/
-#define UART_BAUD_RATE(x) ((uint16_t) ((4UL * F_CPU) / x ## UL))
+#define UART_BAUD_RATE(x) ((uint16_t) ((4UL * F_CPU) / (x)))
 
-typedef void (* uart_initialize_t) (uint16_t const);
+typedef void (* uart_initialize_t) (uint32_t const);
 typedef void (* uart_send_byte_t) (uint8_t const);
 typedef void (* uart_send_data_t) (uint8_t const * const, uint8_t const);
 typedef void (* uart_print_char_t) (char const);
@@ -76,7 +76,7 @@ typedef struct UART
  *
  * @param[in] baudRate The baud rate register value
  **/
-static void UART0_Initialize(uint16_t const baudRate);
+static void UART0_Initialize(uint32_t const baudRate);
 
 /**
  * @brief Sends a null-terminated string over UART0.
@@ -130,7 +130,7 @@ static bool UART0_TXBusy(void);
  *
  * @param[in] baudRate The baud rate register value
  **/
-static void UART1_Initialize(uint16_t const baudRate);
+static void UART1_Initialize(uint32_t const baudRate);
 
 /**
  * @brief Sends a null-terminated string over UART1.

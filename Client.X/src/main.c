@@ -47,11 +47,9 @@ void SensorRead(bme280_device_t * const device);
 
 void main(void)
 {
-    PORTC.DIRSET = PIN0_bm;
-
     SetClockFrequency(CLKCTRL_FRQSEL_24M_gc, PRESCALE_DISABLED);
 
-    uart_1.Initialize(UART_BAUD_RATE(460800));
+    uart_1.Initialize(460800);
 
     i2c_0.Initialize(I2C_FAST_MODE_PLUS);
 
@@ -97,7 +95,7 @@ void SensorRead(bme280_device_t * const device)
 
 void BusScan(void)
 {
-    uart_1.Print("\n\rI2C Scan started from 0x00 to 0x7F");
+    uart_1.Print("I2C Scan started from 0x00 to 0x7F");
 
     for (uint8_t clientAddress = I2C_ADRESS_MIN; clientAddress <= I2C_ADRESS_MAX; ++clientAddress)
     {
