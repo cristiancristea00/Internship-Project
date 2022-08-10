@@ -47,20 +47,85 @@
 #define UART_BAUD_RATE(x) ((uint16_t) ((4UL * F_CPU) / x ## UL))
 
 typedef void (* uart_initialize_t) (uint16_t const);
-typedef void (* uart_print_t) (char const *);
+typedef void (* uart_send_byte_t) (uint8_t const);
+typedef void (* uart_send_data_t) (uint8_t const * const, uint8_t const);
 typedef void (* uart_print_char_t) (char const);
+typedef void (* uart_print_t) (char const * const);
 
 typedef struct UART
 {
     uart_initialize_t Initialize;
-    uart_print_t Print;
+    uart_send_byte_t SendByte;
+    uart_send_data_t SendData;
     uart_print_char_t PrintChar;
+    uart_print_t Print;
 } uart_t;
 
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                            UART0 Declarations                              //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
 /**
- * @brief Initialize the UART module by setting the baud rate and enabling the
- *        transmitter and receiver. The UART module is configured for 8-bit with
- *        no parity and 1 stop bit. Also, the Receive Complete Interrupt is
+ * @brief Initialize the UART0 module by setting the baud rate and enabling the
+ *        transmitter and receiver. The UART1 module is configured for 8-bit
+ *        with no parity and 1 stop bit. Also, the Receive Complete Interrupt is
+ *        enabled.
+ *
+ * @param[in] baudRate The baud rate register value
+ **/
+static void UART0_Initialize(uint16_t const baudRate);
+
+/**
+ * @brief Sends a null-terminated string over UART0.
+ *
+ * @param[in] string The null-terminated string to be sent
+ **/
+static void UART0_Print(char const * const string);
+
+/**
+ * @brief Send a single character over UART0.
+ *
+ * @param[in] character The character to be sent
+ */
+static void UART0_PrintChar(char const character);
+
+/**
+ * @brief Sends a number of bytes over UART0.
+ *
+ * @param[in] buffer The buffer containing the bytes to be sent
+ * @param[in] bufferSize The number of bytes to be sent
+ **/
+static void UART0_SendData(uint8_t const * const buffer, uint8_t const bufferSize);
+
+/**
+ * @brief Sends a byte over UART0.
+ *
+ * @param[in] dataByte The byte to be sent
+ **/
+static void UART0_SendByte(uint8_t const dataByte);
+
+/**
+ * @brief Checks if the UART0 module is busy sending data.
+ *
+ * @return true The UART1 module is busy.
+ * @return false The UART1 module is ready.
+ **/
+static bool UART0_TXBusy(void);
+
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                            UART1 Declarations                              //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * @brief Initialize the UART1 module by setting the baud rate and enabling the
+ *        transmitter and receiver. The UART1 module is configured for 8-bit
+ *        with no parity and 1 stop bit. Also, the Receive Complete Interrupt is
  *        enabled.
  *
  * @param[in] baudRate The baud rate register value
@@ -68,38 +133,46 @@ typedef struct UART
 static void UART1_Initialize(uint16_t const baudRate);
 
 /**
- * @brief Sends a null-terminated string over UART.
+ * @brief Sends a null-terminated string over UART1.
  *
  * @param[in] string The null-terminated string to be sent
  **/
-static void UART1_Print(char const * string);
+static void UART1_Print(char const * const string);
 
 /**
- * @brief Send a single character over UART.
+ * @brief Send a single character over UART1.
  *
  * @param[in] character The character to be sent
  */
 static void UART1_PrintChar(char const character);
 
 /**
- * @brief Sends a byte over UART.
+ * @brief Sends a number of bytes over UART1.
+ *
+ * @param[in] buffer The buffer containing the bytes to be sent
+ * @param[in] bufferSize The number of bytes to be sent
+ **/
+static void UART1_SendData(uint8_t const * const buffer, uint8_t const bufferSize);
+
+/**
+ * @brief Sends a byte over UART1.
  *
  * @param[in] dataByte The byte to be sent
  **/
 static void UART1_SendByte(uint8_t const dataByte);
 
 /**
- * @brief Checks if the UART module is busy sending data.
+ * @brief Checks if the UART1 module is busy sending data.
  *
- * @return true The UART module is busy.
- * @return false The UART module is ready.
+ * @return true The UART1 module is busy.
+ * @return false The UART1 module is ready.
  **/
 static bool UART1_TXBusy(void);
 
 #ifdef UART_PRINTF
 
 /**
- * @brief Wrapper around the @ref Uart1PrintChar function to make it compatible
+ * @brief Wrapper around the @ref UART1_PrintChar function to make it compatible
  *        with the C stream interface.
  *
  * @param[in] character The character to be sent

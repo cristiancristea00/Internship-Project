@@ -30,14 +30,106 @@
 #include "uart.h"
 
 /**
+ * @brief  Module for UART0
+ *
+ **/
+uart_t const uart_0 = {
+    .Initialize = UART0_Initialize,
+    .SendByte = UART0_SendByte,
+    .SendData = UART0_SendData,
+    .PrintChar = UART0_PrintChar,
+    .Print = UART0_Print
+};
+
+/**
  * @brief  Module for UART1
  *
  **/
 uart_t const uart_1 = {
     .Initialize = UART1_Initialize,
-    .Print = UART1_Print,
+    .SendByte = UART1_SendByte,
+    .SendData = UART1_SendData,
     .PrintChar = UART1_PrintChar,
+    .Print = UART1_Print
 };
+
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                            UART0 Definitions                               //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+static void UART0_Initialize(uint16_t const baudRate)
+{
+    USART0.BAUD = baudRate;
+
+    USART0.CTRLA = USART_RXCIE_bm;
+    USART0.CTRLB = USART_TXEN_bm | USART_RXEN_bm;
+
+    return;
+}
+
+static void UART0_Print(char const * const string)
+{
+    char character = '\0';
+    char const * currentStringPosition = string;
+
+    while (true)
+    {
+        character = *currentStringPosition++;
+
+        if (character == '\0')
+        {
+            break;
+        }
+
+        UART0_PrintChar(character);
+    }
+
+    return;
+}
+
+static void UART0_PrintChar(char const character)
+{
+    UART0_SendByte((char) character);
+
+    return;
+}
+
+static void UART0_SendData(uint8_t const * const buffer, uint8_t const bufferSize)
+{
+    for (uint8_t bufferPosition = 0; bufferPosition < bufferSize; ++bufferPosition)
+    {
+        UART0_SendByte(buffer[bufferPosition]);
+    }
+
+    return;
+}
+
+static void UART0_SendByte(uint8_t const dataByte)
+{
+    while (UART0_TXBusy())
+    {
+        TightLoopContents();
+    }
+
+    USART0.TXDATAL = dataByte;
+
+    return;
+}
+
+static inline bool UART0_TXBusy(void)
+{
+    return !(USART0.STATUS & USART_DREIF_bm);
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                            UART1 Definitions                               //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
 
 #ifdef UART_PRINTF
 
@@ -50,7 +142,7 @@ static int8_t UART1_SendChar(char const character, FILE * const stream)
     return 0;
 }
 
-FILE uart1Stream = FDEV_SETUP_STREAM(UART1_PrintChar, NULL, _FDEV_SETUP_WRITE);
+FILE uart_1_stream = FDEV_SETUP_STREAM(UART1_SendChar, NULL, _FDEV_SETUP_WRITE);
 
 #endif // UART_PRINTF
 
@@ -58,7 +150,7 @@ static void UART1_Initialize(uint16_t const baudRate)
 {
 #ifdef UART_PRINTF
 
-    stdout = &uart1Stream;
+    stdout = &uart_1_stream;
 
 #endif // UART_PRINTF
 
@@ -70,20 +162,21 @@ static void UART1_Initialize(uint16_t const baudRate)
     return;
 }
 
-static void UART1_Print(char const * string)
+static void UART1_Print(char const * const string)
 {
     char character = '\0';
+    char const * currentStringPosition = string;
 
     while (true)
     {
-        character = *string++;
+        character = *currentStringPosition++;
 
         if (character == '\0')
         {
             break;
         }
 
-        UART1_SendByte((uint8_t) character);
+        UART1_PrintChar(character);
     }
 
     return;
@@ -96,9 +189,22 @@ static void UART1_PrintChar(char const character)
     return;
 }
 
-static inline void UART1_SendByte(uint8_t const dataByte)
+static void UART1_SendData(uint8_t const * const buffer, uint8_t const bufferSize)
 {
-    while (UART1_TXBusy());
+    for (uint8_t bufferPosition = 0; bufferPosition < bufferSize; ++bufferPosition)
+    {
+        UART1_SendByte(buffer[bufferPosition]);
+    }
+
+    return;
+}
+
+static void UART1_SendByte(uint8_t const dataByte)
+{
+    while (UART1_TXBusy())
+    {
+        TightLoopContents();
+    }
 
     USART1.TXDATAL = dataByte;
 
