@@ -32,12 +32,13 @@
 
 #include "config.h"
 
+#include <avr/interrupt.h>
+#include <util/atomic.h>
 #include <avr/io.h>
 
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <assert.h>
 
 /**
  * @brief Macro to convert UART baud rate to the value to be used in the BAUD
@@ -46,11 +47,21 @@
  **/
 #define UART_BAUD_RATE(x) ((uint16_t) ((4UL * F_CPU) / (x)))
 
-typedef void (* uart_initialize_t) (uint32_t const);
+typedef enum UART_RECEIVE
+{
+    UART_RECEIVE_DISABLED = 0x00,
+    UART_RECEIVE_ENABLED = 0x01
+} uart_receive_t;
+
+
+typedef void (* uart_callback_t) (uint8_t const);
+
+typedef void (* uart_initialize_t) (uint32_t const, uart_receive_t const);
 typedef void (* uart_send_byte_t) (uint8_t const);
 typedef void (* uart_send_data_t) (uint8_t const * const, uint8_t const);
 typedef void (* uart_print_char_t) (char const);
 typedef void (* uart_print_t) (char const * const);
+typedef void (* uart_register_callback_t) (uart_callback_t const);
 
 typedef struct UART
 {
@@ -59,6 +70,7 @@ typedef struct UART
     uart_send_data_t SendData;
     uart_print_char_t PrintChar;
     uart_print_t Print;
+    uart_register_callback_t RegisterCallback;
 } uart_t;
 
 
@@ -76,7 +88,7 @@ typedef struct UART
  *
  * @param[in] baudRate The baud rate register value
  **/
-static void UART0_Initialize(uint32_t const baudRate);
+static void UART0_Initialize(uint32_t const baudRate, uart_receive_t const enableReceive);
 
 /**
  * @brief Sends a null-terminated string over UART0.
@@ -115,6 +127,14 @@ static void UART0_SendByte(uint8_t const dataByte);
  **/
 static bool UART0_TXBusy(void);
 
+/**
+ * @brief Registers a callback function to be called when a byte is received
+ *        over UART0.
+ *
+ * @param[in] callback The callback function to be registered
+ **/
+static void UART0_RegisterCallback(uart_callback_t const callback);
+
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -130,7 +150,7 @@ static bool UART0_TXBusy(void);
  *
  * @param[in] baudRate The baud rate register value
  **/
-static void UART1_Initialize(uint32_t const baudRate);
+static void UART1_Initialize(uint32_t const baudRate, uart_receive_t const enableReceive);
 
 /**
  * @brief Sends a null-terminated string over UART1.
@@ -168,6 +188,14 @@ static void UART1_SendByte(uint8_t const dataByte);
  * @return false The UART1 module is ready.
  **/
 static bool UART1_TXBusy(void);
+
+/**
+ * @brief Registers a callback function to be called when a byte is received
+ *        over UART1.
+ *
+ * @param[in] callback The callback function to be registered
+ **/
+static void UART1_RegisterCallback(uart_callback_t const callback);
 
 #ifdef UART_PRINTF
 

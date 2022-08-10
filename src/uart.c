@@ -29,6 +29,25 @@
 
 #include "uart.h"
 
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                            UART0 Definitions                               //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+static uart_callback_t uart_0_callback = NULL;
+
+ISR(USART0_RXC_vect)
+{
+    uint8_t byte = USART0.RXDATAL;
+
+    if (uart_0_callback != NULL)
+    {
+        uart_0_callback(byte);
+    }
+}
+
 /**
  * @brief  Module for UART0
  *
@@ -38,37 +57,29 @@ uart_t const uart_0 = {
     .SendByte = UART0_SendByte,
     .SendData = UART0_SendData,
     .PrintChar = UART0_PrintChar,
-    .Print = UART0_Print
+    .Print = UART0_Print,
+    .RegisterCallback = UART0_RegisterCallback
 };
 
-/**
- * @brief  Module for UART1
- *
- **/
-uart_t const uart_1 = {
-    .Initialize = UART1_Initialize,
-    .SendByte = UART1_SendByte,
-    .SendData = UART1_SendData,
-    .PrintChar = UART1_PrintChar,
-    .Print = UART1_Print
-};
-
-
-////////////////////////////////////////////////////////////////////////////////
-//                                                                            //
-//                            UART0 Definitions                               //
-//                                                                            //
-////////////////////////////////////////////////////////////////////////////////
-
-static void UART0_Initialize(uint32_t const baudRate)
+static void UART0_Initialize(uint32_t const baudRate, uart_receive_t const enableReceive)
 {
     PORTA.DIRSET = PIN0_bm;
-    PORTA.DIRCLR = PIN1_bm;
 
     USART0.BAUD = UART_BAUD_RATE(baudRate);
 
-    USART0.CTRLA = USART_RXCIE_bm;
-    USART0.CTRLB = USART_TXEN_bm | USART_RXEN_bm;
+    USART0.CTRLB = USART_TXEN_bm;
+
+    if (enableReceive == UART_RECEIVE_ENABLED)
+    {
+        PORTA.DIRCLR = PIN1_bm;
+
+        ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+        {
+            USART0.CTRLA = USART_RXCIE_bm;
+        }
+
+        USART0.CTRLB |= USART_RXEN_bm;
+    }
 
     return;
 }
@@ -127,6 +138,11 @@ static inline bool UART0_TXBusy(void)
     return !(USART0.STATUS & USART_DREIF_bm);
 }
 
+static void UART0_RegisterCallback(uart_callback_t const callback)
+{
+    uart_0_callback = callback;
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -134,12 +150,35 @@ static inline bool UART0_TXBusy(void)
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
+static uart_callback_t uart_1_callback = NULL;
+
+ISR(USART1_RXC_vect)
+{
+    uint8_t byte = USART1.RXDATAL;
+
+    if (uart_1_callback != NULL)
+    {
+        uart_1_callback(byte);
+    }
+}
+
+/**
+ * @brief  Module for UART1
+ *
+ **/
+uart_t const uart_1 = {
+    .Initialize = UART1_Initialize,
+    .SendByte = UART1_SendByte,
+    .SendData = UART1_SendData,
+    .PrintChar = UART1_PrintChar,
+    .Print = UART1_Print,
+    .RegisterCallback = UART1_RegisterCallback
+};
+
 #ifdef UART_PRINTF
 
 static int8_t UART1_SendChar(char const character, FILE * const stream)
 {
-    assert(stream != NULL);
-
     UART1_PrintChar(character);
 
     return 0;
@@ -149,7 +188,7 @@ FILE uart_1_stream = FDEV_SETUP_STREAM(UART1_SendChar, NULL, _FDEV_SETUP_WRITE);
 
 #endif // UART_PRINTF
 
-static void UART1_Initialize(uint32_t const baudRate)
+static void UART1_Initialize(uint32_t const baudRate, uart_receive_t const enableReceive)
 {
 #ifdef UART_PRINTF
 
@@ -158,12 +197,22 @@ static void UART1_Initialize(uint32_t const baudRate)
 #endif // UART_PRINTF
 
     PORTC.DIRSET = PIN0_bm;
-    PORTC.DIRCLR = PIN1_bm;
 
     USART1.BAUD = UART_BAUD_RATE(baudRate);
 
-    USART1.CTRLA = USART_RXCIE_bm;
-    USART1.CTRLB = USART_TXEN_bm | USART_RXEN_bm;
+    USART1.CTRLB = USART_TXEN_bm;
+
+    if (enableReceive == UART_RECEIVE_ENABLED)
+    {
+        PORTC.DIRCLR = PIN1_bm;
+
+        ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+        {
+            USART1.CTRLA = USART_RXCIE_bm;
+        }
+
+        USART1.CTRLB |= USART_RXEN_bm;
+    }
 
     return;
 }
@@ -220,4 +269,9 @@ static void UART1_SendByte(uint8_t const dataByte)
 static inline bool UART1_TXBusy(void)
 {
     return !(USART1.STATUS & USART_DREIF_bm);
+}
+
+static void UART1_RegisterCallback(uart_callback_t const callback)
+{
+    uart_1_callback = callback;
 }

@@ -57,7 +57,7 @@ void PrintForLogging(char const * const message);
 #define LOG_DEBUG_PRINTF(STRING, ...)    (printf("[DEBUG]: " STRING "\n\r", ##__VA_ARGS__))
 #define LOG_INFO_PRINTF(STRING, ...)     (printf("[INFO]: " STRING "\n\r", ##__VA_ARGS__))
 #define LOG_WARNING_PRINTF(STRING, ...)  (printf("[WARNING]: " STRING "\n\r", ##__VA_ARGS__))
-#define LOG_ERROR_PRINTF(STRING, ...)    (printf("[ERROR]: " STRING "\n\r", ##__VA_ARGS__)
+#define LOG_ERROR_PRINTF(STRING, ...)    (printf("[ERROR]: " STRING "\n\r", ##__VA_ARGS__))
 
 #define LOG_DEBUG(STRING)                (PrintForLogging("[DEBUG]: " STRING "\n\r"))
 #define LOG_INFO(STRING)                 (PrintForLogging("[INFO]: " STRING "\n\r"))
@@ -81,9 +81,9 @@ void PrintForLogging(char const * const message);
 /**
  * @brief Sets the CPU's clock frequency and optionally the prescale factor.
  *
- * @param frequency The desired frequency of the CPU's clock
- * @param prescalerEnabled The prescaler status
- * @param ... Optional desired prescaler value of the CPU's clock
+ * @param[in] frequency The desired frequency of the CPU's clock
+ * @param[in] prescalerEnabled The prescaler status
+ * @param[in] ... Optional desired prescaler value of the CPU's clock
  **/
 void SetClockFrequency(uint8_t const frequency, uint8_t const prescalerEnabled, ...);
 

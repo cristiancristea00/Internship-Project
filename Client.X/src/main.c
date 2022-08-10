@@ -28,11 +28,10 @@
 
 
 #include "config.h"
+#include "bme280.h"
 #include "uart.h"
 #include "i2c.h"
-#include "bme280.h"
 
-#include <avr/io.h>
 #include <avr/cpufunc.h>
 #include <util/delay.h>
 
@@ -42,14 +41,14 @@ extern uart_t const uart_1;
 extern i2c_t const i2c_0;
 extern bme280_handler_t const BME280_I2C0_Handler;
 
-void BusScan(void);
-void SensorRead(bme280_device_t * const device);
+static void BusScan(void);
+static void SensorRead(bme280_device_t * const device);
 
 void main(void)
 {
     SetClockFrequency(CLKCTRL_FRQSEL_24M_gc, PRESCALE_DISABLED);
 
-    uart_1.Initialize(460800);
+    uart_1.Initialize(460800, UART_RECEIVE_DISABLED);
 
     i2c_0.Initialize(I2C_FAST_MODE_PLUS);
 
@@ -77,7 +76,7 @@ void main(void)
     }
 }
 
-void SensorRead(bme280_device_t * const device)
+static void SensorRead(bme280_device_t * const device)
 {
     bme280_error_code_t readResult = BME280_GetSensorData(device);
 
@@ -93,7 +92,7 @@ void SensorRead(bme280_device_t * const device)
     return;
 }
 
-void BusScan(void)
+static void BusScan(void)
 {
     uart_1.Print("I2C Scan started from 0x00 to 0x7F");
 

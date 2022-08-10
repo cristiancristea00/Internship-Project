@@ -8,13 +8,15 @@
             <make-project-type>0</make-project-type>
             <c-extensions>c</c-extensions>
             <cpp-extensions/>
-            <header-extensions/>
+            <header-extensions>h</header-extensions>
             <asminc-extensions/>
             <sourceEncoding>UTF-8</sourceEncoding>
             <make-dep-projects/>
             <sourceRootList>
                 <sourceRootElem>src</sourceRootElem>
                 <sourceRootElem>include</sourceRootElem>
+                <sourceRootElem>C:/Users/M70957/Documents/Internship-Project/src</sourceRootElem>
+                <sourceRootElem>C:/Users/M70957/Documents/Internship-Project/inlcude</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>

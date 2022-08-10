@@ -26,12 +26,39 @@
  *  DIRECTLY TO MICROCHIP FOR THIS SOFTWARE.
  **/
 
-#include <avr/io.h>
+
+#include "config.h"
+#include "uart.h"
+
+#include <util/delay.h>
+
+extern uart_t const uart_0;
+extern uart_t const uart_1;
+
+void UART0_Callback(uint8_t const byte);
 
 void main(void)
 {
+    SetClockFrequency(CLKCTRL_FRQSEL_24M_gc, PRESCALE_DISABLED);
+
+    uart_0.Initialize(460800, UART_RECEIVE_ENABLED);
+    uart_1.Initialize(460800, UART_RECEIVE_DISABLED);
+
+    uart_0.RegisterCallback(UART0_Callback);
+
+    sei();
+
+    _delay_ms(5000);
+
+    uart_1.Print("Ready to receive data!\n\r");
+
     while (1)
     {
-        ;
+        TightLoopContents();
     }
+}
+
+void UART0_Callback(uint8_t const byte)
+{
+    uart_1.SendByte(byte);
 }
