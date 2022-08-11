@@ -79,13 +79,19 @@ void PrintForLogging(char const * const message);
 #endif // LOGGING
 
 /**
- * @brief Sets the CPU's clock frequency and optionally the prescale factor.
+ * @brief Sets the CPU's clock frequency and the prescaler factor.
  *
  * @param[in] frequency The desired frequency of the CPU's clock
- * @param[in] prescalerEnabled The prescaler status
- * @param[in] ... Optional desired prescaler value of the CPU's clock
+ * @param[in] prescaler The prescaler factor
  **/
-void SetClockFrequency(uint8_t const frequency, uint8_t const prescalerEnabled, ...);
+void SetClockFrequencyWithPrescaler(uint8_t const frequency, uint8_t const prescaler);
+
+/**
+ * @brief Sets the CPU's clock frequency and optionally the prescaler factor.
+ *
+ * @param[in] frequency The desired frequency of the CPU's clock
+ **/
+void SetClockFrequency(uint8_t const frequency);
 
 /**
  * @brief Empty function that should be used in loops for better readability.

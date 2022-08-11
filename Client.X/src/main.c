@@ -46,9 +46,9 @@ static void SensorRead(bme280_device_t * const device);
 
 void main(void)
 {
-    SetClockFrequency(CLKCTRL_FRQSEL_24M_gc, PRESCALE_DISABLED);
+    SetClockFrequency(CLKCTRL_FRQSEL_24M_gc);
 
-    uart_1.Initialize(460800, UART_RECEIVE_DISABLED);
+    uart_1.Initialize(460800);
 
     i2c_0.Initialize(I2C_FAST_MODE_PLUS);
 

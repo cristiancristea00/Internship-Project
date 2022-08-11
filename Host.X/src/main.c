@@ -39,12 +39,10 @@ void UART0_Callback(uint8_t const byte);
 
 void main(void)
 {
-    SetClockFrequency(CLKCTRL_FRQSEL_24M_gc, PRESCALE_DISABLED);
+    SetClockFrequency(CLKCTRL_FRQSEL_24M_gc);
 
-    uart_0.Initialize(460800, UART_RECEIVE_ENABLED);
-    uart_1.Initialize(460800, UART_RECEIVE_DISABLED);
-
-    uart_0.RegisterCallback(UART0_Callback);
+    uart_0.InitializeWithReceive(460800, UART0_Callback);
+    uart_1.Initialize(460800);
 
     sei();
 

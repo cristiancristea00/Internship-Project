@@ -47,16 +47,11 @@
  **/
 #define UART_BAUD_RATE(x) ((uint16_t) ((4UL * F_CPU) / (x)))
 
-typedef enum UART_RECEIVE
-{
-    UART_RECEIVE_DISABLED = 0x00,
-    UART_RECEIVE_ENABLED = 0x01
-} uart_receive_t;
-
 
 typedef void (* uart_callback_t) (uint8_t const);
 
-typedef void (* uart_initialize_t) (uint32_t const, uart_receive_t const);
+typedef void (* uart_initialize_t) (uint32_t const);
+typedef void (* uart_initialize_receive_t) (uint32_t const, uart_callback_t const);
 typedef void (* uart_send_byte_t) (uint8_t const);
 typedef void (* uart_send_data_t) (uint8_t const * const, uint8_t const);
 typedef void (* uart_print_char_t) (char const);
@@ -66,6 +61,7 @@ typedef void (* uart_register_callback_t) (uart_callback_t const);
 typedef struct UART
 {
     uart_initialize_t Initialize;
+    uart_initialize_receive_t InitializeWithReceive;
     uart_send_byte_t SendByte;
     uart_send_data_t SendData;
     uart_print_char_t PrintChar;
@@ -82,13 +78,24 @@ typedef struct UART
 
 /**
  * @brief Initialize the UART0 module by setting the baud rate and enabling the
- *        transmitter and receiver. The UART1 module is configured for 8-bit
- *        with no parity and 1 stop bit. Also, the Receive Complete Interrupt is
+ *        transmitter and receiver. The UART0 module is configured for 8-bit
+ *        with no parity and 1 stop bit. The Receive Complete Interrupt is
  *        enabled.
  *
- * @param[in] baudRate The baud rate register value
+ * @param[in] baudRate The baud rate
+ * @param[in] receiveCallback The callback function to be called when a byte is
+ *                        received
  **/
-static void UART0_Initialize(uint32_t const baudRate, uart_receive_t const enableReceive);
+static void UART0_InitializeWithReceive(uint32_t const baudRate, uart_callback_t const receiveCallback);
+
+/**
+ * @brief Initialize the UART0 module by setting the baud rate and enabling the
+ *        transmitter. The UART1 module is configured for 8-bit with no parity
+ *        and 1 stop bit.
+ *
+ * @param[in] baudRate The baud rate
+ **/
+static void UART0_Initialize(uint32_t const baudRate);
 
 /**
  * @brief Sends a null-terminated string over UART0.
@@ -145,12 +152,23 @@ static void UART0_RegisterCallback(uart_callback_t const callback);
 /**
  * @brief Initialize the UART1 module by setting the baud rate and enabling the
  *        transmitter and receiver. The UART1 module is configured for 8-bit
- *        with no parity and 1 stop bit. Also, the Receive Complete Interrupt is
+ *        with no parity and 1 stop bit. The Receive Complete Interrupt is
  *        enabled.
  *
- * @param[in] baudRate The baud rate register value
+ * @param[in] baudRate The baud rate
+ * @param[in] receiveCallback The callback function to be called when a byte is
+ *                        received
  **/
-static void UART1_Initialize(uint32_t const baudRate, uart_receive_t const enableReceive);
+static void UART1_InitializeWithReceive(uint32_t const baudRate, uart_callback_t const receiveCallback);
+
+/**
+ * @brief Initialize the UART1 module by setting the baud rate and enabling the
+ *        transmitter. The UART1 module is configured for 8-bit with no parity
+ *        and 1 stop bit.
+ *
+ * @param[in] baudRate The baud rate
+ **/
+static void UART1_Initialize(uint32_t const baudRate);
 
 /**
  * @brief Sends a null-terminated string over UART1.
