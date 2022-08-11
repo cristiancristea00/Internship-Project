@@ -31,6 +31,7 @@
 #define	HC05_H
 
 #include "config.h"
+#include "vector.h"
 #include "uart.h"
 
 #include <stddef.h>
