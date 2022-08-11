@@ -28,10 +28,11 @@
 
 
 #include "config.h"
+#include "vector.h"
 #include "bme280.h"
+#include "hc-05.h"
 #include "uart.h"
 #include "i2c.h"
-#include "hc-05.h"
 
 #include <avr/cpufunc.h>
 #include <util/delay.h>

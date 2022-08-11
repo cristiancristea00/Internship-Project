@@ -47,6 +47,9 @@ typedef struct HC05_DEVICE
 {
     // UART device
     uart_t const * uartDevice;
+    
+    // Buffer for data
+    vector_t buffer;
 } hc05_device_t;
 
 

@@ -34,7 +34,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#define MAX_SIZE 16
+#define MAX_BUFFER_SIZE 16
 
 #define VECTOR_BYTES_BYTES          1
 #define VECTOR_WORD_BYTES           2
@@ -44,7 +44,7 @@
 typedef struct VECTOR
 {
     // Internal buffer
-    uint8_t internalBuffer[MAX_SIZE];
+    uint8_t internalBuffer[MAX_BUFFER_SIZE];
 
     // Current buffer size
     uint8_t bufferSize;
@@ -88,34 +88,90 @@ typedef union QUAD_WORD
     } bytes;
 } quad_word_t;
 
-#endif // VECTOR_H
-
-/* TODO */
+/**
+ * @brief Sets the internal buffer to zeros.
+ *
+ * @param[in, out] vector The vector to initialized
+ **/
 void Vector_Initialize(vector_t * const vector);
 
-/* TODO */
+/**
+ * @brief Checks if the vector can accommodate a certain amount of bytes.
+ *
+ * @param[in] vector The vector to be checked
+ * @param[in] numberBytes The number of bytes to be checked
+ *
+ * @return true If the vector can accommodate the number of bytes
+ * @return false If the vector can not accommodate the number of bytes
+ **/
 static bool Vector_IsSpaceAvailable(vector_t * const vector, uint8_t const numberBytes);
 
-/* TODO */
+/**
+ * @brief Adds a byte to the vector.
+ *
+ * @param[in, out] vector The vector to be added to
+ * @param[in] byteToAdd The byte to be added
+ **/
 void Vector_AddByte(vector_t * const vector, uint8_t const byteToAdd);
 
-/* TODO */
+/**
+ * @brief Adds a word (2 bytes) to the vector.
+ *
+ * @param[in, out] vector The vector to be added to
+ * @param[in] wordToAdd The word to be added
+ **/
 void Vector_AddWord(vector_t * const vector, uint16_t const wordToAdd);
 
-/* TODO */
+/**
+ * @brief Adds a double word (4 bytes) to the vector.
+ *
+ * @param[in, out] vector The vector to be added to
+ * @param[in] doubleWordToAdd The double word to be added
+ **/
 void Vector_AddDoubleWord(vector_t * const vector, uint32_t const doubleWordToAdd);
 
-/* TODO */
+/**
+ * @brief Adds a quad word (8 bytes) to the vector.
+ *
+ * @param[in, out] vector The vector to be added to
+ * @param[in] quadWordToAdd The quad word to be added
+ **/
 void Vector_AddQuadWord(vector_t * const vector, uint64_t const quadWordToAdd);
 
-/* TODO */
+/**
+ * @brief Removes a byte from the vector and returns it.
+ *
+ * @param[in, out] vector The vector to be removed from
+ *
+ * @return uint8_t The byte removed from the vector
+ **/
 uint8_t Vector_RemoveByte(vector_t * const vector);
 
-/* TODO */
+/**
+ * @brief Removes a word (2 bytes) from the vector and returns it.
+ *
+ * @param[in, out] vector The vector to be removed from
+ *
+ * @return uint16_t The word removed from the vector
+ **/
 uint16_t Vector_RemoveWord(vector_t * const vector);
 
-/* TODO */
+/**
+ * @brief Removes a double word (4 bytes) from the vector and returns it.
+ *
+ * @param[in, out] vector The vector to be removed from
+ *
+ * @return uint32_t The double word removed from the vector
+ **/
 uint32_t Vector_RemoveDoubleWord(vector_t * const vector);
 
-/* TODO */
+/**
+ * @brief Removes a quad word (8 bytes) from the vector and returns it.
+ *
+ * @param[in, out] vector The vector to be removed from
+ *
+ * @return uint64_t The quad word removed from the vector
+ **/
 uint64_t Vector_RemoveQuadWord(vector_t * const vector);
+
+#endif // VECTOR_H

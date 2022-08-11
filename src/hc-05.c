@@ -28,7 +28,6 @@
 
 
 #include "hc-05.h"
-#include "config.h"
 
 hc05_error_code HC05_Initialize(hc05_device_t * const device, uart_t const * const uartDevice)
 {
@@ -37,6 +36,8 @@ hc05_error_code HC05_Initialize(hc05_device_t * const device, uart_t const * con
     device->uartDevice = uartDevice;
 
     hc05_error_code initResult = HC05_CheckNull(device);
+
+    Vector_Initialize(&device->buffer);
 
     if (initResult == HC05_OK)
     {

@@ -3,7 +3,7 @@
  *  @author Cristian Cristea - M70957
  *  @date 11 August 2022
  *
- *  @brief TODO: Short summary
+ *  @brief Source file for the Vector module
  *
  *  @copyright (c) 2022 Microchip Technology Inc. and its subsidiaries.
  *
@@ -31,7 +31,7 @@
 
 void Vector_Initialize(vector_t * const vector)
 {
-    memset(vector->internalBuffer, 0, MAX_SIZE);
+    memset(vector->internalBuffer, 0, MAX_BUFFER_SIZE);
 
     vector->bufferSize = 0;
 
@@ -40,7 +40,7 @@ void Vector_Initialize(vector_t * const vector)
 
 static bool Vector_IsSpaceAvailable(vector_t * const vector, uint8_t const numberBytes)
 {
-    return (vector->bufferSize + numberBytes) <= MAX_SIZE;
+    return (vector->bufferSize + numberBytes) <= MAX_BUFFER_SIZE;
 }
 
 void Vector_AddByte(vector_t * const vector, uint8_t const byteToAdd)
