@@ -31,12 +31,15 @@
 #include "bme280.h"
 #include "uart.h"
 #include "i2c.h"
+#include "hc-05.h"
 
 #include <avr/cpufunc.h>
 #include <util/delay.h>
 
 #include <stdbool.h>
 
+
+extern uart_t const uart_0;
 extern uart_t const uart_1;
 extern i2c_t const i2c_0;
 extern bme280_handler_t const BME280_I2C0_Handler;
@@ -47,6 +50,8 @@ static void SensorRead(bme280_device_t * const device);
 void main(void)
 {
     SetClockFrequency(CLKCTRL_FRQSEL_24M_gc);
+
+    uart_0.Initialize(460800);
 
     uart_1.Initialize(460800);
 
@@ -68,6 +73,10 @@ void main(void)
     };
 
     BME280_Init(&weatherClick, &BME280_I2C0_Handler, &i2c_0, BME280_I2C_ADDRESS, &settings);
+
+    hc05_device_t sensorStation;
+
+    HC05_Initialize(&sensorStation, &uart_0);
 
     while (true)
     {

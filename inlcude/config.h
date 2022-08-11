@@ -34,8 +34,6 @@
 
 #include <avr/io.h>
 
-#include <stdarg.h>
-
 #define F_CPU 24000000UL           // The CPU frequency. To be set manuallly.
 
 #define UART_PRINTF                // Uncomment to enable printf functionality on UART.
