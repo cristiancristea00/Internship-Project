@@ -199,3 +199,16 @@ uint64_t Vector_RemoveQuadWord(vector_t * const vector)
 
     return quadWord.value;
 }
+
+uint8_t Vector_FirstByte(vector_t const * const vector)
+{
+    return vector->internalBuffer[0];
+}
+
+uint8_t Vector_LastByte(vector_t const * const vector)
+{
+    return vector->internalBuffer[vector->bufferSize - 1];
+}
+
+// TODO: First function for the rest
+// TODO: Last function for the rest

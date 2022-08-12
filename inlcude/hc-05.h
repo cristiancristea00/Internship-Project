@@ -35,33 +35,96 @@
 #include "uart.h"
 #include "crc8.h"
 
+#include <util/delay.h>
+
 #include <stddef.h>
+#include <stdbool.h>
 
 
 typedef enum HC05_ERROR_CODE
 {
     HC05_OK           = 0x00,
-    HC05_NULL_POINTER = 0x01
+    HC05_NULL_POINTER = 0x01,
+    HC05_SEND_FAILED  = 0x02
 } hc05_error_code;
+
+typedef enum HC05_STATUS
+{
+    HC05_IDLE        = 0x00,
+    HC05_IN_PROGRESS = 0x01,
+    HC05_FINISHED    = 0x02,
+} hc05_status_t;
+
+typedef enum HC05_RESPONSE
+{
+    HC05_EMPTY   = 0x00,
+    HC05_ACKED  = 0x01,
+    HC05_NACKED = 0x02
+} hc05_response_t;
 
 typedef struct HC05_DEVICE
 {
     // UART device
     uart_t const * uartDevice;
-    
-    // Buffer for data
-    vector_t buffer;
 } hc05_device_t;
 
+typedef void (* struct_interpret_t) (void * const, vector_t * const);
 
-/* TODO */
+
+/* 
+ * TODO 
+ */
 hc05_error_code HC05_Initialize(hc05_device_t * const device, uart_t const * const uartDevice);
 
-/* TODO */
+/* 
+ * TODO 
+ */
 static hc05_error_code HC05_CheckNull(hc05_device_t const * const device);
 
-/* TODO */
-static void HC05_SendData(hc05_device_t const * const device, uint8_t const * const buffer, uint8_t const bufferSize);
+/* 
+ * TODO 
+ */
+static hc05_error_code HC05_SendData(hc05_device_t const * const device, uint8_t const * const buffer, uint8_t const bufferSize);
+
+/* 
+ * TODO 
+ */
+static hc05_response_t HC05_WaitForConfirmation(void);
+
+/* 
+ * TODO 
+ */
+static void HC05_ReceiveCallback(uint8_t const data);
+
+/* 
+ * TODO 
+ */
+static bool HC05_IsLastByte(void);
+
+/* 
+ * TODO 
+ */
+static uint8_t HC05_GetNumberOfBytesToReceive(void);
+
+/* 
+ * TODO 
+ */
+hc05_error_code HC05_ReceiveData(hc05_device_t const * const device, void * const dataStructure, struct_interpret_t structInterpreter);
+
+/* 
+ * TODO 
+ */
+static hc05_error_code HC05_VerifyChecksum(void);
+
+/* 
+ * TODO 
+ */
+static void HC05_SendAcknowledge(void);
+
+/* 
+ * TODO 
+ */
+static void HC05_SendNotAcknowledge(void);
 
 #endif // HC05_H
 

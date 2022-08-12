@@ -76,6 +76,8 @@ static void UART0_InitializeWithReceive(uint32_t const baudRate, uart_callback_t
     }
 
     USART0.CTRLB |= USART_RXEN_bm;
+
+    sei();
 }
 
 static void UART0_Initialize(uint32_t const baudRate)

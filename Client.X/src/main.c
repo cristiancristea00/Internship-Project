@@ -46,74 +46,84 @@ extern uart_t const uart_1;
 extern i2c_t const i2c_0;
 extern bme280_handler_t const BME280_I2C0_Handler;
 
-static void BusScan(void);
-static void SensorRead(bme280_device_t * const device);
+// DEBUG
+extern vector_t HC05_BUFFER;
+
+//static void BusScan(void);
+//static void SensorRead(bme280_device_t * const device);
 
 void main(void)
 {
     SetClockFrequency(CLKCTRL_FRQSEL_24M_gc);
 
-    uart_0.Initialize(460800);
-
     uart_1.Initialize(460800);
 
-    i2c_0.Initialize(I2C_FAST_MODE_PLUS);
-
-    BusScan();
-
-    bme280_device_t weatherClick;
-
-    bme280_settings_t settings = {
-        .temperatureOversampling = BME280_OVERSAMPLING_16X,
-        .pressureOversampling = BME280_OVERSAMPLING_16X,
-        .humidityOversampling = BME280_OVERSAMPLING_16X,
-        .iirFilterCoefficients = BME280_IIR_FILTER_8,
-        .powerMode = BME280_NORMAL_MODE,
-        .standbyTime = BME280_STANDBY_TIME_500_MS
-    };
-
-    BME280_Init(&weatherClick, &BME280_I2C0_Handler, &i2c_0, BME280_I2C_ADDRESS, &settings);
-
+    //    i2c_0.Initialize(I2C_FAST_MODE_PLUS);
+    //
+    //    BusScan();
+    //
+    //    bme280_device_t weatherClick;
+    //
+    //    bme280_settings_t settings = {
+    //        .temperatureOversampling = BME280_OVERSAMPLING_16X,
+    //        .pressureOversampling = BME280_OVERSAMPLING_16X,
+    //        .humidityOversampling = BME280_OVERSAMPLING_16X,
+    //        .iirFilterCoefficients = BME280_IIR_FILTER_8,
+    //        .powerMode = BME280_NORMAL_MODE,
+    //        .standbyTime = BME280_STANDBY_TIME_500_MS
+    //    };
+    //
+    //    BME280_Init(&weatherClick, &BME280_I2C0_Handler, &i2c_0, BME280_I2C_ADDRESS, &settings);
+    //
     hc05_device_t sensorStation;
 
     HC05_Initialize(&sensorStation, &uart_0);
 
+    bme280_data_t temp;
+
     while (true)
     {
-        SensorRead(&weatherClick);
-        _delay_ms(60000);
-    }
-}
+        HC05_ReceiveData(&sensorStation, &temp, BME280_StructInterpret);
 
-static void SensorRead(bme280_device_t * const device)
-{
-    bme280_error_code_t readResult = BME280_GetSensorData(device);
-
-    if (readResult != BME280_OK)
-    {
-        return;
-    }
-
-    printf("Temperature: %0.2lf °C\n\r", BME280_GetDisplayTemperature(device));
-    printf("Pressure: %0.2lf hPa\n\r", BME280_GetDisplayPressure(device));
-    printf("Relative humidity: %0.2lf%c\n\r", BME280_GetDisplayHumidity(device), '%');
-
-    return;
-}
-
-static void BusScan(void)
-{
-    uart_1.Print("I2C Scan started from 0x00 to 0x7F");
-
-    for (uint8_t clientAddress = I2C_ADRESS_MIN; clientAddress <= I2C_ADRESS_MAX; ++clientAddress)
-    {
-        printf("\n\rScanning client address: 0x%02X", clientAddress);
-        if (i2c_0.ClientAvailable(clientAddress))
+        uart_1.Print("\n\rData: ");
+        for (uint8_t i = 0; i < HC05_BUFFER.bufferSize; ++i)
         {
-            uart_1.Print(" --> client ACKED");
+            printf("0x%02X ", HC05_BUFFER.internalBuffer[i]);
         }
+        uart_1.Print("\n\r");
+        _delay_ms(5000);
     }
-    uart_1.Print("\n\rI2C Scan ended\n\r");
-
-    return;
 }
+
+//static void SensorRead(bme280_device_t * const device)
+//{
+//    bme280_error_code_t readResult = BME280_GetSensorData(device);
+//
+//    if (readResult != BME280_OK)
+//    {
+//        return;
+//    }
+//
+//    printf("Temperature: %0.2lf °C\n\r", BME280_GetDisplayTemperature(device));
+//    printf("Pressure: %0.2lf hPa\n\r", BME280_GetDisplayPressure(device));
+//    printf("Relative humidity: %0.2lf%c\n\r", BME280_GetDisplayHumidity(device), '%');
+//
+//    return;
+//}
+//
+//static void BusScan(void)
+//{
+//    uart_1.Print("I2C Scan started from 0x00 to 0x7F");
+//
+//    for (uint8_t clientAddress = I2C_ADRESS_MIN; clientAddress <= I2C_ADRESS_MAX; ++clientAddress)
+//    {
+//        printf("\n\rScanning client address: 0x%02X", clientAddress);
+//        if (i2c_0.ClientAvailable(clientAddress))
+//        {
+//            uart_1.Print(" --> client ACKED");
+//        }
+//    }
+//    uart_1.Print("\n\rI2C Scan ended\n\r");
+//
+//    return;
+//}

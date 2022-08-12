@@ -36,7 +36,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#define MAX_BUFFER_SIZE 16
+#define MAX_BUFFER_SIZE 64
 
 #define VECTOR_BYTES_BYTES          1
 #define VECTOR_WORD_BYTES           2
@@ -182,5 +182,18 @@ uint32_t Vector_RemoveDoubleWord(vector_t * const vector);
  * @return uint64_t The quad word removed from the vector
  **/
 uint64_t Vector_RemoveQuadWord(vector_t * const vector);
+
+/* 
+ * TODO 
+ */
+uint8_t Vector_FirstByte(vector_t const * const vector);
+
+/* 
+ * TODO 
+ */
+uint8_t Vector_LastByte(vector_t const * const vector);
+
+// TODO: First function for the rest
+// TODO: Last function for the rest
 
 #endif // VECTOR_H

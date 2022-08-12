@@ -586,9 +586,6 @@ bme280_error_code_t BME280_Init(bme280_device_t * const device, bme280_handler_t
 
     bme280_error_code_t initResult = BME280_OK;
 
-    uint8_t tryCount = 10;
-    uint8_t chipId = 0;
-
     LOG_INFO("Started BME280 initialization");
 
     initResult = BME280_CheckNull(device);
@@ -596,6 +593,9 @@ bme280_error_code_t BME280_Init(bme280_device_t * const device, bme280_handler_t
     if (initResult == BME280_OK)
     {
         device->i2cDevice = i2cDevice;
+
+        uint8_t tryCount = 10;
+        uint8_t chipId = 0;
 
         while (tryCount != 0)
         {
@@ -709,4 +709,16 @@ double BME280_GetDisplayPressure(bme280_device_t const * const device)
 double BME280_GetDisplayHumidity(bme280_device_t const * const device)
 {
     return (1.0f / 1024.0f) * (double) BME280_GetHuimidity(device);
+}
+
+void BME280_StructInterpret(void * const data, vector_t * const vector)
+{
+    bme280_data_t * const sensorData = (bme280_data_t *) data;
+
+    // Remove the checksum byte
+    Vector_RemoveByte(vector);
+
+    sensorData->temperature = (int32_t) Vector_RemoveDoubleWord(vector);
+    sensorData->pressure = (uint32_t) Vector_RemoveDoubleWord(vector);
+    sensorData->humidity = (uint32_t) Vector_RemoveDoubleWord(vector);
 }

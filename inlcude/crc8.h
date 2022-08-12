@@ -44,8 +44,8 @@
  *        - The initial value is 0xFF
  *        - The final XOR value is 0xFF
  *
- * @param data The data buffer to compute the CRC-8 of
- * @param dataLength The length of the data buffer
+ * @param[in] data The data buffer to compute the CRC-8 of
+ * @param[in] dataLength The length of the data buffer
  *
  * @return uint8_t The CRC-8-AUTOSAR value of the data buffer
  **/

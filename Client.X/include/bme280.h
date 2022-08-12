@@ -31,6 +31,7 @@
 #define	BME280_H
 
 #include "config.h"
+#include "vector.h"
 #include "uart.h"
 #include "i2c.h"
 
@@ -575,5 +576,10 @@ double BME280_GetDisplayPressure(bme280_device_t const * const device);
  * @return double The humidity
  **/
 double BME280_GetDisplayHumidity(bme280_device_t const * const device);
+
+/* 
+ * TODO 
+ */
+void BME280_StructInterpret(void * const data, vector_t * const vector);
 
 #endif // BME280_H
