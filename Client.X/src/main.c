@@ -32,6 +32,7 @@
 #include "bme280.h"
 #include "hc-05.h"
 #include "uart.h"
+#include "crc8.h"
 #include "i2c.h"
 
 #include <avr/cpufunc.h>
@@ -57,8 +58,6 @@ void main(void)
     uart_1.Initialize(460800);
 
     i2c_0.Initialize(I2C_FAST_MODE_PLUS);
-
-    _delay_ms(5000);
 
     BusScan();
 

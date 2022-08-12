@@ -10,6 +10,7 @@
       <itemPath>C:/Users/M70957/Documents/Internship-Project/inlcude/config.h</itemPath>
       <itemPath>C:/Users/M70957/Documents/Internship-Project/inlcude/hc-05.h</itemPath>
       <itemPath>C:/Users/M70957/Documents/Internship-Project/inlcude/vector.h</itemPath>
+      <itemPath>C:/Users/M70957/Documents/Internship-Project/inlcude/crc8.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -25,6 +26,7 @@
       <itemPath>C:/Users/M70957/Documents/Internship-Project/src/config.c</itemPath>
       <itemPath>C:/Users/M70957/Documents/Internship-Project/src/hc-05.c</itemPath>
       <itemPath>C:/Users/M70957/Documents/Internship-Project/src/vector.c</itemPath>
+      <itemPath>C:/Users/M70957/Documents/Internship-Project/src/crc8.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

@@ -199,11 +199,23 @@ static void UART1_InitializeWithReceive(uint32_t const baudRate, uart_callback_t
     USART1.CTRLB |= USART_RXEN_bm;
 }
 
+#ifdef UART_PRINTF
+
+static int8_t UART1_SendChar(char const character, __attribute__((unused)) FILE * const stream)
+{
+    UART1_PrintChar(character);
+
+    return 0;
+}
+
+FILE uart_1_stream = FDEV_SETUP_STREAM(UART1_SendChar, NULL, _FDEV_SETUP_WRITE);
+
+#endif // UART_PRINTF
+
 static void UART1_Initialize(uint32_t const baudRate)
 {
 #ifdef UART_PRINTF
 
-    FILE uart_1_stream = FDEV_SETUP_STREAM(UART1_SendChar, NULL, _FDEV_SETUP_WRITE);
     stdout = &uart_1_stream;
 
 #endif // UART_PRINTF
@@ -216,17 +228,6 @@ static void UART1_Initialize(uint32_t const baudRate)
 
     return;
 }
-
-#ifdef UART_PRINTF
-
-static int8_t UART1_SendChar(char const character, __attribute__((unused)) FILE * const stream)
-{
-    UART1_PrintChar(character);
-
-    return 0;
-}
-
-#endif // UART_PRINTF
 
 static void UART1_Print(char const * const string)
 {

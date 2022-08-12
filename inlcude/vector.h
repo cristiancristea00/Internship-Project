@@ -30,6 +30,8 @@
 #ifndef VECTOR_H
 #define	VECTOR_H
 
+#include "config.h"
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
@@ -105,6 +107,13 @@ void Vector_Initialize(vector_t * const vector);
  * @return false If the vector can not accommodate the number of bytes
  **/
 static bool Vector_IsSpaceAvailable(vector_t * const vector, uint8_t const numberBytes);
+
+/**
+ * @brief Clears the internal buffer.
+ *
+ * @param vector The vector to be cleared
+ **/
+void Vector_Clear(vector_t * const vector);
 
 /**
  * @brief Adds a byte to the vector.

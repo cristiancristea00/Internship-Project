@@ -40,7 +40,22 @@ void Vector_Initialize(vector_t * const vector)
 
 static bool Vector_IsSpaceAvailable(vector_t * const vector, uint8_t const numberBytes)
 {
-    return (vector->bufferSize + numberBytes) <= MAX_BUFFER_SIZE;
+    if ((vector->bufferSize + numberBytes) <= MAX_BUFFER_SIZE)
+    {
+        return true;
+    }
+    else
+    {
+        LOG_ERROR_PRINTF("Failed to add %d bytes to vector", numberBytes);
+        return false;
+    }
+}
+
+void Vector_Clear(vector_t * const vector)
+{
+    vector->bufferSize = 0;
+
+    return;
 }
 
 void Vector_AddByte(vector_t * const vector, uint8_t const byteToAdd)

@@ -1,9 +1,9 @@
 /**
- *  @file hc-05.h
+ *  @file crc8.h
  *  @author Cristian Cristea - M70957
- *  @date 11 August 2022
+ *  @date 12 August 2022
  *
- *  @brief Header file for the HC-05 module
+ *  @brief Header file for the CRC8 module
  *
  *  @copyright (c) 2022 Microchip Technology Inc. and its subsidiaries.
  *
@@ -27,41 +27,28 @@
  **/
 
 
-#ifndef HC05_H
-#define	HC05_H
+#ifndef CRC8_H
+#define	CRC8_H
 
-#include "config.h"
-#include "vector.h"
-#include "uart.h"
-#include "crc8.h"
+#include <stdint.h>
 
-#include <stddef.h>
+#define CRC8_LOOKUP_SIZE      256
 
+#define CRC8_INITIAL_VALUE    0xFF
+#define CRC8_XOR_VALUE        0xFF
 
-typedef enum HC05_ERROR_CODE
-{
-    HC05_OK           = 0x00,
-    HC05_NULL_POINTER = 0x01
-} hc05_error_code;
+/**
+ * @brief Computes the CRC-8 of a given data buffer using the CRC-8-AUTOSAR
+ *        version. The CRC-8-AUTOSAR algorithm has the following properties:
+ *        - The polynomial is x^8 + x^5 + x^3 + x^2 + x + 1 (i.e. 0x2F)
+ *        - The initial value is 0xFF
+ *        - The final XOR value is 0xFF
+ *
+ * @param data The data buffer to compute the CRC-8 of
+ * @param dataLength The length of the data buffer
+ *
+ * @return uint8_t The CRC-8-AUTOSAR value of the data buffer
+ **/
+uint8_t CRC8_Compute(uint8_t const * const data, uint8_t const dataLength);
 
-typedef struct HC05_DEVICE
-{
-    // UART device
-    uart_t const * uartDevice;
-    
-    // Buffer for data
-    vector_t buffer;
-} hc05_device_t;
-
-
-/* TODO */
-hc05_error_code HC05_Initialize(hc05_device_t * const device, uart_t const * const uartDevice);
-
-/* TODO */
-static hc05_error_code HC05_CheckNull(hc05_device_t const * const device);
-
-/* TODO */
-static void HC05_SendData(hc05_device_t const * const device, uint8_t const * const buffer, uint8_t const bufferSize);
-
-#endif // HC05_H
-
+#endif // CRC8_H
