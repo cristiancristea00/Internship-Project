@@ -217,12 +217,12 @@ static void BME280_ParseHumidityCalibration(bme280_calibration_data_t * const ca
     calibrationData->humidityCoef2 = (int16_t) BME280_CONCAT_BYTES(rawData[1], rawData[0]);
     calibrationData->humidityCoef3 = (uint8_t) rawData[2];
 
-    int16_t coefHumidity4_MSB = (int16_t) ((int8_t) rawData[3] << 4);
-    int16_t coefHumidity4_LSB = (int16_t) (rawData[4] & 0x0F);
+    int16_t coefHumidity4_MSB      = (int16_t) ((int8_t) rawData[3] << 4);
+    int16_t coefHumidity4_LSB      = (int16_t) (rawData[4] & 0x0F);
     calibrationData->humidityCoef4 = (int16_t) (coefHumidity4_MSB | coefHumidity4_LSB);
 
-    int16_t coefHumidity5_MSB = (int16_t) ((int8_t) rawData[5] << 4);
-    int16_t coefHumidity5_LSB = (int16_t) (rawData[4] >> 4);
+    int16_t coefHumidity5_MSB      = (int16_t) ((int8_t) rawData[5] << 4);
+    int16_t coefHumidity5_LSB      = (int16_t) (rawData[4] >> 4);
     calibrationData->humidityCoef5 = (int16_t) (coefHumidity5_MSB | coefHumidity5_LSB);
 
     calibrationData->humidityCoef6 = (int8_t) rawData[6];
@@ -265,10 +265,13 @@ static bme280_error_code_t BME280_GetCalibrationData(bme280_device_t * const dev
 static int32_t BME280_CompensateTemperature(bme280_uncompensated_data_t const * const uncompensatedData, bme280_calibration_data_t * const calibrationData)
 {
     int32_t temperature = 0;
+    
+    int32_t temp1 = 0;
+    int32_t temp2 = 0;
 
-    int32_t temp1 = (int32_t) ((uncompensatedData->temperature >> 3) - ((int32_t) calibrationData->temperatureCoef1 << 1));
+    temp1 = (int32_t) ((uncompensatedData->temperature >> 3) - ((int32_t) calibrationData->temperatureCoef1 << 1));
     temp1 = (temp1 * ((int32_t) calibrationData->temperatureCoef2)) >> 11;
-    int32_t temp2 = (int32_t) ((uncompensatedData->temperature >> 4) - ((int32_t) calibrationData->temperatureCoef1));
+    temp2 = (int32_t) ((uncompensatedData->temperature >> 4) - ((int32_t) calibrationData->temperatureCoef1));
     temp2 = (((temp2 * temp2) >> 12) * ((int32_t) calibrationData->temperatureCoef3)) >> 14;
     calibrationData->temperatureTemporary = temp1 + temp2;
 
@@ -291,9 +294,13 @@ static int32_t BME280_CompensateTemperature(bme280_uncompensated_data_t const * 
 static uint32_t BME280_CompensatePressure(bme280_uncompensated_data_t const * const uncompensatedData, bme280_calibration_data_t const * const calibrationData)
 {
     uint32_t pressure = 0;
+    
+    int64_t temp1 = 0;
+    int64_t temp2 = 0;
+    int64_t temp3 = 0;
 
-    int64_t temp1 = ((int64_t) calibrationData->temperatureTemporary) - 128000;
-    int64_t temp2 = temp1 * temp1 * (int64_t) calibrationData->pressureCoef6;
+    temp1 = ((int64_t) calibrationData->temperatureTemporary) - 128000;
+    temp2 = temp1 * temp1 * (int64_t) calibrationData->pressureCoef6;
     temp2 = temp2 + ((temp1 * (int64_t) calibrationData->pressureCoef5) << 17);
     temp2 = temp2 + (((int64_t) calibrationData->pressureCoef4) << 35);
     temp1 = ((temp1 * temp1 * (int64_t) calibrationData->pressureCoef3) >> 8) + (temp1 * ((int64_t) calibrationData->pressureCoef2) << 12);
@@ -301,7 +308,7 @@ static uint32_t BME280_CompensatePressure(bme280_uncompensated_data_t const * co
 
     if (temp1 != 0)
     {
-        int64_t temp3 = ((int64_t) 1 << 20) - uncompensatedData->pressure;
+        temp3 = ((int64_t) 1 << 20) - uncompensatedData->pressure;
         temp3 = (((temp3 * ((int64_t) 1 << 31)) - temp2) * 3125) / temp1;
         temp1 = (((int64_t) calibrationData->pressureCoef9) * (temp3 >> 13) * (temp3 >> 13)) >> 25;
         temp2 = (((int64_t) calibrationData->pressureCoef8) * temp3) >> 19;
@@ -331,12 +338,18 @@ static uint32_t BME280_CompensatePressure(bme280_uncompensated_data_t const * co
 static uint32_t BME280_CompensateHumidity(bme280_uncompensated_data_t const * const uncompensatedData, bme280_calibration_data_t const * const calibrationData)
 {
     uint32_t humidity = 0;
+    
+    int32_t temp1 = 0;
+    int32_t temp2 = 0;
+    int32_t temp3 = 0;
+    int32_t temp4 = 0;
+    int32_t temp5 = 0;
 
-    int32_t temp1 = calibrationData->temperatureTemporary - ((int32_t) 76800);
-    int32_t temp2 = (int32_t) (uncompensatedData->humidity << 14);
-    int32_t temp3 = (int32_t) (((int32_t) calibrationData->humidityCoef4) << 20);
-    int32_t temp4 = ((int32_t) calibrationData->humidityCoef5) * temp1;
-    int32_t temp5 = ((temp2 - temp3 - temp4) + ((int32_t) 1 << 14)) >> 15;
+    temp1 = calibrationData->temperatureTemporary - ((int32_t) 76800);
+    temp2 = (int32_t) (uncompensatedData->humidity << 14);
+    temp3 = (int32_t) (((int32_t) calibrationData->humidityCoef4) << 20);
+    temp4 = ((int32_t) calibrationData->humidityCoef5) * temp1;
+    temp5 = ((temp2 - temp3 - temp4) + ((int32_t) 1 << 14)) >> 15;
     temp2 = (temp1 * ((int32_t) calibrationData->humidityCoef6)) >> 10;
     temp3 = (temp1 * ((int32_t) calibrationData->humidityCoef3)) >> 11;
     temp4 = ((temp2 * (temp3 + ((int32_t) 1 << 15))) >> 10) + ((int32_t) 1 << 21);
@@ -366,8 +379,8 @@ static bme280_error_code_t BME280_CompensateData(bme280_device_t * const device,
     if (uncompensatedData != NULL)
     {
         device->data.temperature = BME280_CompensateTemperature(uncompensatedData, &device->calibrationData);
-        device->data.pressure = BME280_CompensatePressure(uncompensatedData, &device->calibrationData);
-        device->data.humidity = BME280_CompensateHumidity(uncompensatedData, &device->calibrationData);
+        device->data.pressure    = BME280_CompensatePressure(uncompensatedData, &device->calibrationData);
+        device->data.humidity    = BME280_CompensateHumidity(uncompensatedData, &device->calibrationData);
 
         LOG_INFO("Compensated BME280 data successfully");
     }
@@ -383,15 +396,15 @@ static bme280_error_code_t BME280_CompensateData(bme280_device_t * const device,
 static void BME280_ParseSensorData(bme280_uncompensated_data_t * const uncompensatedData, uint8_t const * const data)
 {
     // Store the parsed register values for temperature data
-    uint32_t temperatureMSB = (uint32_t) data[3] << 12;
-    uint32_t temperatureLSB = (uint32_t) data[4] << 4;
+    uint32_t temperatureMSB  = (uint32_t) data[3] << 12;
+    uint32_t temperatureLSB  = (uint32_t) data[4] << 4;
     uint32_t temperatureXLSB = (uint32_t) data[5] >> 4;
 
     uncompensatedData->temperature = temperatureMSB | temperatureLSB | temperatureXLSB;
 
     // Store the parsed register values for pressure data
-    uint32_t pressureMSB = (uint32_t) data[0] << 12;
-    uint32_t pressureLSB = (uint32_t) data[1] << 4;
+    uint32_t pressureMSB  = (uint32_t) data[0] << 12;
+    uint32_t pressureLSB  = (uint32_t) data[1] << 4;
     uint32_t pressureXLSB = (uint32_t) data[2] >> 4;
 
     uncompensatedData->pressure = pressureMSB | pressureLSB | pressureXLSB;
@@ -719,6 +732,6 @@ void BME280_StructInterpret(void * const data, vector_t * const vector)
     Vector_RemoveByte(vector);
 
     sensorData->temperature = (int32_t) Vector_RemoveDoubleWord(vector);
-    sensorData->pressure = (uint32_t) Vector_RemoveDoubleWord(vector);
-    sensorData->humidity = (uint32_t) Vector_RemoveDoubleWord(vector);
+    sensorData->pressure    = (uint32_t) Vector_RemoveDoubleWord(vector);
+    sensorData->humidity    = (uint32_t) Vector_RemoveDoubleWord(vector);
 }

@@ -96,11 +96,11 @@ static hc05_error_code HC05_SendData(hc05_device_t const * const device, uint8_t
             }
             else if (transsmitionResponse == HC05_NACKED)
             {
-                LOG_WARNING("HC-05 transsmition partener NACKED. Retrying...");
+                LOG_WARNING("HC-05 transsmition partner NACKED. Retrying...");
             }
             else
             {
-                LOG_WARNING("HC-05 transsmition partener is not responding. Retrying...");
+                LOG_WARNING("HC-05 transsmition partner is not responding. Retrying...");
             }
 
             --tryCount;

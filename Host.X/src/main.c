@@ -44,8 +44,6 @@ void main(void)
     uart_0.InitializeWithReceive(460800, UART0_Callback);
     uart_1.Initialize(460800);
 
-    sei();
-
     _delay_ms(5000);
 
     uart_1.Print("Ready to receive data!\n\r");
