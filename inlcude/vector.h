@@ -30,18 +30,34 @@
 #ifndef VECTOR_H
 #define	VECTOR_H
 
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                                  Includes                                  //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
 #include "config.h"
 
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
 
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                             Macros and defines                             //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
 #define MAX_BUFFER_SIZE 64
 
-#define VECTOR_BYTES_BYTES          1
-#define VECTOR_WORD_BYTES           2
-#define VECTOR_DOUBLE_WORD_BYTES    4
-#define VECTOR_QUAD_WORD_BYTES      8
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                        Typedefs, enums and structs                         //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
 
 typedef struct VECTOR
 {
@@ -52,43 +68,12 @@ typedef struct VECTOR
     uint8_t bufferSize;
 } vector_t;
 
-typedef union WORD
-{
-    uint16_t value;
-    struct
-    {
-        uint8_t byte0;
-        uint8_t byte1;
-    } bytes;
-} word_t;
 
-typedef union DOUBLE_WORD
-{
-    uint32_t value;
-    struct
-    {
-        uint8_t byte0;
-        uint8_t byte1;
-        uint8_t byte2;
-        uint8_t byte3;
-    } bytes;
-} double_word_t;
-
-typedef union QUAD_WORD
-{
-    uint64_t value;
-    struct
-    {
-        uint8_t byte0;
-        uint8_t byte1;
-        uint8_t byte2;
-        uint8_t byte3;
-        uint8_t byte4;
-        uint8_t byte5;
-        uint8_t byte6;
-        uint8_t byte7;
-    } bytes;
-} quad_word_t;
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                                 Public API                                 //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
 
 /**
  * @brief Sets the internal buffer to zeros.
@@ -96,17 +81,6 @@ typedef union QUAD_WORD
  * @param[in, out] vector The vector to initialized
  **/
 void Vector_Initialize(vector_t * const vector);
-
-/**
- * @brief Checks if the vector can accommodate a certain amount of bytes.
- *
- * @param[in] vector The vector to be checked
- * @param[in] numberBytes The number of bytes to be checked
- *
- * @return true If the vector can accommodate the number of bytes
- * @return false If the vector can not accommodate the number of bytes
- **/
-static bool Vector_IsSpaceAvailable(vector_t * const vector, uint8_t const numberBytes);
 
 /**
  * @brief Clears the internal buffer.

@@ -28,5 +28,15 @@
                 <project-formatting-style>false</project-formatting-style>
             </formatting>
         </data>
+        <spellchecker-wordlist xmlns="http://www.netbeans.org/ns/spellchecker-wordlist/1">
+            <word>Config</word>
+            <word>enums</word>
+            <word>initialization</word>
+            <word>Initialize</word>
+            <word>initialized</word>
+            <word>prescaler</word>
+            <word>uart</word>
+            <word>uint</word>
+        </spellchecker-wordlist>
     </configuration>
 </project>

@@ -29,9 +29,14 @@
             </formatting>
         </data>
         <spellchecker-wordlist xmlns="http://www.netbeans.org/ns/spellchecker-wordlist/1">
+            <word>bme</word>
+            <word>enums</word>
             <word>initialization</word>
+            <word>Initializes</word>
             <word>prescaler</word>
+            <word>struct</word>
             <word>transsmition</word>
+            <word>Uncompensated</word>
         </spellchecker-wordlist>
     </configuration>
 </project>

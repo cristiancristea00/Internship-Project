@@ -29,9 +29,16 @@
 
 #include "config.h"
 
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                             Public definitions                             //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
 extern uart_t const uart_1;
 
-void SetClockFrequencyWithPrescaler(uint8_t const frequency, uint8_t const prescaler)
+__attribute__((always_inline)) inline void SetClockFrequencyWithPrescaler(uint8_t const frequency, uint8_t const prescaler)
 {
     SetClockFrequency(frequency);
 
@@ -41,7 +48,7 @@ void SetClockFrequencyWithPrescaler(uint8_t const frequency, uint8_t const presc
     return;
 }
 
-void SetClockFrequency(uint8_t const frequency)
+__attribute__((always_inline)) inline void SetClockFrequency(uint8_t const frequency)
 {
     // Enable external crystal oscillator
     _PROTECTED_WRITE(CLKCTRL.XOSC32KCTRLA, CLKCTRL_ENABLE_bm);
@@ -55,12 +62,12 @@ void SetClockFrequency(uint8_t const frequency)
     return;
 }
 
-void TightLoopContents(void)
+__attribute__((always_inline)) inline void TightLoopContents(void)
 {
     return;
 }
 
-void PrintForLogging(char const * const message)
+__attribute__((always_inline)) inline void PrintForLogging(char const * const message)
 {
     uart_1.Print(message);
 

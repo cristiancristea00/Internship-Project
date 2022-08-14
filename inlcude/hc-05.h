@@ -30,6 +30,13 @@
 #ifndef HC05_H
 #define	HC05_H
 
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                                  Includes                                  //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
 #include "config.h"
 #include "vector.h"
 #include "uart.h"
@@ -41,12 +48,18 @@
 #include <stdbool.h>
 
 
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                        Typedefs, enums and structs                         //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
 typedef enum HC05_ERROR_CODE
 {
     HC05_OK           = 0x00,
     HC05_NULL_POINTER = 0x01,
     HC05_SEND_FAILED  = 0x02
-} hc05_error_code;
+} hc05_error_code_t;
 
 typedef enum HC05_STATUS
 {
@@ -57,7 +70,7 @@ typedef enum HC05_STATUS
 
 typedef enum HC05_RESPONSE
 {
-    HC05_EMPTY   = 0x00,
+    HC05_EMPTY  = 0x00,
     HC05_ACKED  = 0x01,
     HC05_NACKED = 0x02
 } hc05_response_t;
@@ -71,60 +84,25 @@ typedef struct HC05_DEVICE
 typedef void (* struct_interpret_t) (void * const, vector_t * const);
 
 
-/* 
- * TODO 
- */
-hc05_error_code HC05_Initialize(hc05_device_t * const device, uart_t const * const uartDevice);
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                                 Public API                                 //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
 
-/* 
- * TODO 
+/*
+ * TODO
  */
-static hc05_error_code HC05_CheckNull(hc05_device_t const * const device);
+hc05_error_code_t HC05_Initialize(hc05_device_t * const device, uart_t const * const uartDevice);
 
-/* 
- * TODO 
+/*
+ * TODO
  */
-static hc05_error_code HC05_SendData(hc05_device_t const * const device, uint8_t const * const buffer, uint8_t const bufferSize);
+hc05_error_code_t HC05_ReceiveData(hc05_device_t const * const device, void * const dataStructure, struct_interpret_t structInterpreter);
 
-/* 
- * TODO 
+/*
+ * TODO
  */
-static hc05_response_t HC05_WaitForConfirmation(void);
-
-/* 
- * TODO 
- */
-static void HC05_ReceiveCallback(uint8_t const data);
-
-/* 
- * TODO 
- */
-static bool HC05_IsLastByte(void);
-
-/* 
- * TODO 
- */
-static uint8_t HC05_GetNumberOfBytesToReceive(void);
-
-/* 
- * TODO 
- */
-hc05_error_code HC05_ReceiveData(hc05_device_t const * const device, void * const dataStructure, struct_interpret_t structInterpreter);
-
-/* 
- * TODO 
- */
-static hc05_error_code HC05_VerifyChecksum(void);
-
-/* 
- * TODO 
- */
-static void HC05_SendAcknowledge(void);
-
-/* 
- * TODO 
- */
-static void HC05_SendNotAcknowledge(void);
+hc05_error_code_t HC05_SendData(hc05_device_t const * const device, uint8_t const * const buffer, uint8_t const bufferSize);
 
 #endif // HC05_H
-

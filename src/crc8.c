@@ -30,6 +30,24 @@
 #include "crc8.h"
 
 
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                             Macros and defines                             //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+#define CRC8_LOOKUP_SIZE      256
+
+#define CRC8_INITIAL_VALUE    0xFF
+#define CRC8_XOR_VALUE        0xFF
+
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                        Private (static) definitions                        //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
 static uint8_t const CRC8_LOOKUP_TABLE[CRC8_LOOKUP_SIZE] = {
     0x00, 0x2F, 0x5E, 0x71, 0xBC, 0x93, 0xE2, 0xCD, 0x57, 0x78, 0x09, 0x26, 0xEB, 0xC4, 0xB5, 0x9A,
     0xAE, 0x81, 0xF0, 0xDF, 0x12, 0x3D, 0x4C, 0x63, 0xF9, 0xD6, 0xA7, 0x88, 0x45, 0x6A, 0x1B, 0x34,
@@ -48,6 +66,13 @@ static uint8_t const CRC8_LOOKUP_TABLE[CRC8_LOOKUP_SIZE] = {
     0x76, 0x59, 0x28, 0x07, 0xCA, 0xE5, 0x94, 0xBB, 0x21, 0x0E, 0x7F, 0x50, 0x9D, 0xB2, 0xC3, 0xEC,
     0xD8, 0xF7, 0x86, 0xA9, 0x64, 0x4B, 0x3A, 0x15, 0x8F, 0xA0, 0xD1, 0xFE, 0x33, 0x1C, 0x6D, 0x42
 };
+
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                             Public definitions                             //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
 
 uint8_t CRC8_Compute(uint8_t const * const data, uint8_t const dataLength)
 {

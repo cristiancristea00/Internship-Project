@@ -29,14 +29,87 @@
 
 #include "vector.h"
 
-void Vector_Initialize(vector_t * const vector)
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                             Macros and defines                             //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+#define VECTOR_BYTES_BYTES          1
+#define VECTOR_WORD_BYTES           2
+#define VECTOR_DOUBLE_WORD_BYTES    4
+#define VECTOR_QUAD_WORD_BYTES      8
+
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                        Typedefs, enums and structs                         //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+typedef union WORD
 {
-    memset(vector->internalBuffer, 0, MAX_BUFFER_SIZE);
+    uint16_t value;
+    struct
+    {
+        uint8_t byte0;
+        uint8_t byte1;
+    } bytes;
+} word_t;
 
-    vector->bufferSize = 0;
+typedef union DOUBLE_WORD
+{
+    uint32_t value;
+    struct
+    {
+        uint8_t byte0;
+        uint8_t byte1;
+        uint8_t byte2;
+        uint8_t byte3;
+    } bytes;
+} double_word_t;
 
-    return;
-}
+typedef union QUAD_WORD
+{
+    uint64_t value;
+    struct
+    {
+        uint8_t byte0;
+        uint8_t byte1;
+        uint8_t byte2;
+        uint8_t byte3;
+        uint8_t byte4;
+        uint8_t byte5;
+        uint8_t byte6;
+        uint8_t byte7;
+    } bytes;
+} quad_word_t;
+
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                            Private (static) API                            //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * @brief Checks if the vector can accommodate a certain amount of bytes.
+ *
+ * @param[in] vector The vector to be checked
+ * @param[in] numberBytes The number of bytes to be checked
+ *
+ * @return true If the vector can accommodate the number of bytes
+ * @return false If the vector can not accommodate the number of bytes
+ **/
+static bool Vector_IsSpaceAvailable(vector_t * const vector, uint8_t const numberBytes);
+
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                        Private (static) definitions                        //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
 
 static bool Vector_IsSpaceAvailable(vector_t * const vector, uint8_t const numberBytes)
 {
@@ -51,7 +124,23 @@ static bool Vector_IsSpaceAvailable(vector_t * const vector, uint8_t const numbe
     }
 }
 
-void Vector_Clear(vector_t * const vector)
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                             Public definitions                             //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+__attribute__((always_inline)) inline void Vector_Initialize(vector_t * const vector)
+{
+    memset(vector->internalBuffer, 0, MAX_BUFFER_SIZE);
+
+    vector->bufferSize = 0;
+
+    return;
+}
+
+__attribute__((always_inline)) inline void Vector_Clear(vector_t * const vector)
 {
     vector->bufferSize = 0;
 

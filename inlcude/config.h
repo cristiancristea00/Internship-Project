@@ -30,19 +30,37 @@
 #ifndef CONFIG_H
 #define	CONFIG_H
 
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                                  Includes                                  //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
 #include "uart.h"
 
 #include <avr/io.h>
 
 #include <stdint.h>
 
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                             Macros and defines                             //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
 #define F_CPU 24000000UL           // The CPU frequency. To be set manuallly.
 
 #define UART_PRINTF                // Uncomment to enable printf functionality on UART.
 #define LOGGING                    // Uncomment to enable logging
 
-#define PRESCALE_ENABLED  true     // Enable the CPU prescaler
-#define PRESCALE_DISABLED false    // Disable the CPU prescaler
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                                 Public API                                 //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
 
 #ifdef LOGGING
 

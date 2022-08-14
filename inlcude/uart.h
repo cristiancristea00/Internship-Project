@@ -30,6 +30,13 @@
 #ifndef UART_H
 #define	UART_H
 
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                                  Includes                                  //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
 #include "config.h"
 
 #include <avr/interrupt.h>
@@ -41,16 +48,14 @@
 #include <stdint.h>
 #include <stdio.h>
 
-/**
- * @brief Macro to convert UART baud rate to the value to be used in the BAUD
- *        register of the USART.
- *
- **/
-#define UART_BAUD_RATE(x) ((uint16_t) ((4UL * F_CPU) / (x)))
 
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                        Typedefs, enums and structs                         //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
 
 typedef void (* uart_callback_t) (uint8_t const);
-
 typedef void (* uart_initialize_t) (uint32_t const);
 typedef void (* uart_initialize_receive_t) (uint32_t const, uart_callback_t const);
 typedef void (* uart_send_byte_t) (uint8_t const);
@@ -69,166 +74,5 @@ typedef struct UART
     uart_print_t Print;
     uart_register_callback_t RegisterCallback;
 } uart_t;
-
-
-////////////////////////////////////////////////////////////////////////////////
-//                                                                            //
-//                            UART0 Declarations                              //
-//                                                                            //
-////////////////////////////////////////////////////////////////////////////////
-
-/**
- * @brief Initialize the UART0 module by setting the baud rate and enabling the
- *        transmitter and receiver. The UART0 module is configured for 8-bit
- *        with no parity and 1 stop bit. The Receive Complete Interrupt is
- *        enabled.
- *
- * @param[in] baudRate The baud rate
- * @param[in] receiveCallback The callback function to be called when a byte is
- *                        received
- **/
-static void UART0_InitializeWithReceive(uint32_t const baudRate, uart_callback_t const receiveCallback);
-
-/**
- * @brief Initialize the UART0 module by setting the baud rate and enabling the
- *        transmitter. The UART1 module is configured for 8-bit with no parity
- *        and 1 stop bit.
- *
- * @param[in] baudRate The baud rate
- **/
-static void UART0_Initialize(uint32_t const baudRate);
-
-/**
- * @brief Sends a null-terminated string over UART0.
- *
- * @param[in] string The null-terminated string to be sent
- **/
-static void UART0_Print(char const * const string);
-
-/**
- * @brief Send a single character over UART0.
- *
- * @param[in] character The character to be sent
- */
-static void UART0_PrintChar(char const character);
-
-/**
- * @brief Sends a number of bytes over UART0.
- *
- * @param[in] buffer The buffer containing the bytes to be sent
- * @param[in] bufferSize The number of bytes to be sent
- **/
-static void UART0_SendData(uint8_t const * const buffer, uint8_t const bufferSize);
-
-/**
- * @brief Sends a byte over UART0.
- *
- * @param[in] dataByte The byte to be sent
- **/
-static void UART0_SendByte(uint8_t const dataByte);
-
-/**
- * @brief Checks if the UART0 module is busy sending data.
- *
- * @return true The UART1 module is busy.
- * @return false The UART1 module is ready.
- **/
-static bool UART0_TXBusy(void);
-
-/**
- * @brief Registers a callback function to be called when a byte is received
- *        over UART0.
- *
- * @param[in] callback The callback function to be registered
- **/
-static void UART0_RegisterCallback(uart_callback_t const callback);
-
-
-////////////////////////////////////////////////////////////////////////////////
-//                                                                            //
-//                            UART1 Declarations                              //
-//                                                                            //
-////////////////////////////////////////////////////////////////////////////////
-
-/**
- * @brief Initialize the UART1 module by setting the baud rate and enabling the
- *        transmitter and receiver. The UART1 module is configured for 8-bit
- *        with no parity and 1 stop bit. The Receive Complete Interrupt is
- *        enabled.
- *
- * @param[in] baudRate The baud rate
- * @param[in] receiveCallback The callback function to be called when a byte is
- *                        received
- **/
-static void UART1_InitializeWithReceive(uint32_t const baudRate, uart_callback_t const receiveCallback);
-
-/**
- * @brief Initialize the UART1 module by setting the baud rate and enabling the
- *        transmitter. The UART1 module is configured for 8-bit with no parity
- *        and 1 stop bit.
- *
- * @param[in] baudRate The baud rate
- **/
-static void UART1_Initialize(uint32_t const baudRate);
-
-/**
- * @brief Sends a null-terminated string over UART1.
- *
- * @param[in] string The null-terminated string to be sent
- **/
-static void UART1_Print(char const * const string);
-
-/**
- * @brief Send a single character over UART1.
- *
- * @param[in] character The character to be sent
- */
-static void UART1_PrintChar(char const character);
-
-/**
- * @brief Sends a number of bytes over UART1.
- *
- * @param[in] buffer The buffer containing the bytes to be sent
- * @param[in] bufferSize The number of bytes to be sent
- **/
-static void UART1_SendData(uint8_t const * const buffer, uint8_t const bufferSize);
-
-/**
- * @brief Sends a byte over UART1.
- *
- * @param[in] dataByte The byte to be sent
- **/
-static void UART1_SendByte(uint8_t const dataByte);
-
-/**
- * @brief Checks if the UART1 module is busy sending data.
- *
- * @return true The UART1 module is busy.
- * @return false The UART1 module is ready.
- **/
-static bool UART1_TXBusy(void);
-
-/**
- * @brief Registers a callback function to be called when a byte is received
- *        over UART1.
- *
- * @param[in] callback The callback function to be registered
- **/
-static void UART1_RegisterCallback(uart_callback_t const callback);
-
-#ifdef UART_PRINTF
-
-/**
- * @brief Wrapper around the @ref UART1_PrintChar function to make it compatible
- *        with the C stream interface.
- *
- * @param[in] character The character to be sent
- * @param[in] stream The stream used to send the character
- *
- * @return int8_t Always returns 0
- **/
-static int8_t UART1_SendChar(char const character, FILE * const stream);
-
-#endif // UART_PRINTF
 
 #endif // UART_H
