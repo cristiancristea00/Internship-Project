@@ -13,10 +13,10 @@
             <sourceEncoding>UTF-8</sourceEncoding>
             <make-dep-projects/>
             <sourceRootList>
-                <sourceRootElem>C:/Users/M70957/Documents/Internship-Project/src</sourceRootElem>
-                <sourceRootElem>C:/Users/M70957/Documents/Internship-Project/inlcude</sourceRootElem>
                 <sourceRootElem>src</sourceRootElem>
                 <sourceRootElem>include</sourceRootElem>
+                <sourceRootElem>../src</sourceRootElem>
+                <sourceRootElem>../inlcude</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>

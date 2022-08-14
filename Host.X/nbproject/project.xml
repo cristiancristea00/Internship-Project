@@ -15,8 +15,8 @@
             <sourceRootList>
                 <sourceRootElem>src</sourceRootElem>
                 <sourceRootElem>include</sourceRootElem>
-                <sourceRootElem>C:/Users/M70957/Documents/Internship-Project/src</sourceRootElem>
-                <sourceRootElem>C:/Users/M70957/Documents/Internship-Project/inlcude</sourceRootElem>
+                <sourceRootElem>../inlcude</sourceRootElem>
+                <sourceRootElem>../src</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>
