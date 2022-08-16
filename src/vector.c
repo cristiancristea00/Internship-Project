@@ -50,9 +50,12 @@
 
 typedef union WORD
 {
+
     uint16_t value;
+
     struct
     {
+
         uint8_t byte0;
         uint8_t byte1;
     } bytes;
@@ -60,9 +63,12 @@ typedef union WORD
 
 typedef union DOUBLE_WORD
 {
+
     uint32_t value;
+
     struct
     {
+
         uint8_t byte0;
         uint8_t byte1;
         uint8_t byte2;
@@ -72,9 +78,12 @@ typedef union DOUBLE_WORD
 
 typedef union QUAD_WORD
 {
+
     uint64_t value;
+
     struct
     {
+
         uint8_t byte0;
         uint8_t byte1;
         uint8_t byte2;
@@ -133,9 +142,7 @@ static bool Vector_IsSpaceAvailable(vector_t * const vector, uint8_t const numbe
 
 __attribute__((always_inline)) inline void Vector_Initialize(vector_t * const vector)
 {
-    memset(vector->internalBuffer, 0, MAX_BUFFER_SIZE);
-
-    vector->bufferSize = 0;
+    Vector_Clear(vector);
 
     return;
 }

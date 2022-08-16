@@ -32,6 +32,15 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
+//                             Macros and defines                             //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+#define UINT8(X)    ((uint8_t) (X))
+
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
 //                            Private (static) API                            //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
@@ -89,7 +98,7 @@ static hc05_status_t transsmitionStatus = HC05_IDLE;
 
 static hc05_error_code_t HC05_CheckNull(hc05_device_t const * const device)
 {
-    if (device == NULL || device->uartDevice == NULL)
+    if ((device == NULL) || (device->uartDevice == NULL))
     {
         LOG_ERROR("Found NULL pointer in HC-05 check");
         return HC05_NULL_POINTER;
@@ -131,7 +140,7 @@ static void HC05_ReceiveCallback(uint8_t const data)
 
 static bool HC05_IsLastByte(void)
 {
-    return (HC05_GetNumberOfBytesToReceive() - 1) == HC05_BUFFER.bufferSize;
+    return (HC05_GetNumberOfBytesToReceive() - UINT8(1)) == HC05_BUFFER.bufferSize;
 }
 
 static uint8_t HC05_GetNumberOfBytesToReceive(void)
@@ -201,7 +210,7 @@ hc05_error_code_t HC05_SendData(hc05_device_t const * const device, uint8_t cons
         uint8_t tryCount = 10;
         hc05_response_t transsmitionResponse = HC05_EMPTY;
 
-        while (tryCount != 0)
+        while (tryCount != UINT8(0))
         {
             device->uartDevice->SendData(buffer, bufferSize);
 
