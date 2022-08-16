@@ -36,7 +36,10 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-#define UINT8(X)    ((uint8_t) (X))
+#define UINT8(X)          ((uint8_t) (X))
+
+#define ACK_NACK_SIZE     UINT8(3)
+#define ACK_NACK_BYTES    UINT8(1)
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -53,7 +56,17 @@ static hc05_error_code_t HC05_CheckNull(hc05_device_t const * const device);
 /*
  * TODO
  */
+__attribute__((always_inline)) inline static void HC05_SendPreparedData(hc05_device_t const * const device, uint8_t const * const buffer, uint8_t const bufferSize);
+
+/*
+ * TODO
+ */
 static hc05_response_t HC05_WaitForConfirmation(void);
+
+/*
+ * TODO
+ */
+static hc05_response_t HC05_GetResponseReceived(void);
 
 /*
  * TODO
@@ -63,27 +76,47 @@ static void HC05_ReceiveCallback(uint8_t const data);
 /*
  * TODO
  */
-static bool HC05_IsLastByte(void);
+__attribute__((always_inline)) inline static bool HC05_IsLastByte(void);
 
 /*
  * TODO
  */
-static uint8_t HC05_GetNumberOfBytesToReceive(void);
+__attribute__((always_inline)) inline static uint8_t HC05_GetNumberOfBytesToReceive(void);
 
 /*
  * TODO
  */
-static hc05_error_code_t HC05_VerifyChecksum(void);
+static hc05_error_code_t HC05_VerifyReceiveChecksum(void);
 
 /*
  * TODO
  */
-static void HC05_SendAcknowledge(void);
+static hc05_error_code_t HC05_VerifyChecksum(uint8_t const * const data, uint8_t const dataLength, uint8_t const checksum);
 
 /*
  * TODO
  */
-static void HC05_SendNotAcknowledge(void);
+static void HC05_SendAcknowledge(hc05_device_t const * const device);
+
+/*
+ * TODO
+ */
+static void HC05_SendNotAcknowledge(hc05_device_t const * const device);
+
+/*
+ * TODO
+ */
+__attribute__((always_inline)) inline static void HC05_SendResponse(hc05_device_t const * const device, hc05_response_t const response);
+
+/*
+ * TODO
+ */
+__attribute__((always_inline)) inline static uint8_t HC05_ComputeChecksum(uint8_t const * const data, uint8_t const dataLength);
+
+/*
+ * TODO
+ */
+__attribute__((always_inline)) inline static void HC05_EndTransmission(void);
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -109,6 +142,26 @@ static hc05_error_code_t HC05_CheckNull(hc05_device_t const * const device)
     }
 }
 
+__attribute__((always_inline)) inline static void HC05_SendPreparedData(hc05_device_t const * const device, uint8_t const * const buffer, uint8_t const bufferSize)
+{
+    uint8_t const newLength = bufferSize + 2;
+
+    // Please forgive me for the sin that I'm committing
+    uint8_t * preparedData = (uint8_t *) calloc(newLength, sizeof (uint8_t));
+
+    preparedData[0] = bufferSize;
+    memcpy(preparedData + 1, buffer, bufferSize);
+    preparedData[newLength - 1] = HC05_ComputeChecksum(preparedData, bufferSize);
+
+    device->uartDevice->SendData(preparedData, newLength);
+
+    // My soul is finally free
+    free(preparedData);
+    preparedData = NULL;
+
+    return;
+}
+
 static hc05_response_t HC05_WaitForConfirmation(void)
 {
     while (transsmitionStatus != HC05_FINISHED)
@@ -116,7 +169,25 @@ static hc05_response_t HC05_WaitForConfirmation(void)
         TightLoopContents();
     }
 
-    return (hc05_response_t) Vector_LastByte(&HC05_BUFFER);
+    return HC05_GetResponseReceived();
+}
+
+static hc05_response_t HC05_GetResponseReceived(void)
+{
+    uint8_t response[ACK_NACK_SIZE] = { 0 };
+
+    response[2] = Vector_RemoveByte(&HC05_BUFFER);
+    response[1] = Vector_RemoveByte(&HC05_BUFFER);
+    response[0] = Vector_RemoveByte(&HC05_BUFFER);
+
+    if (HC05_VerifyChecksum(response, ACK_NACK_SIZE, response[2]) == HC05_OK)
+    {
+        return (hc05_response_t) response[1];
+    }
+    else
+    {
+        return HC05_FAILED_CHECKSUM;
+    }
 }
 
 static void HC05_ReceiveCallback(uint8_t const data)
@@ -138,33 +209,74 @@ static void HC05_ReceiveCallback(uint8_t const data)
     return;
 }
 
-static bool HC05_IsLastByte(void)
+__attribute__((always_inline)) inline static bool HC05_IsLastByte(void)
 {
-    return (HC05_GetNumberOfBytesToReceive() - UINT8(1)) == HC05_BUFFER.bufferSize;
+    return HC05_GetNumberOfBytesToReceive() == HC05_BUFFER.bufferSize;
 }
 
-static uint8_t HC05_GetNumberOfBytesToReceive(void)
+__attribute__((always_inline)) inline static uint8_t HC05_GetNumberOfBytesToReceive(void)
 {
-    return Vector_FirstByte(&HC05_BUFFER);
+    return Vector_FirstByte(&HC05_BUFFER) + UINT8(1);
 }
 
-static hc05_error_code_t HC05_VerifyChecksum(void)
+static hc05_error_code_t HC05_VerifyReceiveChecksum(void)
 {
-    // TODO
+    uint8_t const * const data = HC05_BUFFER.internalBuffer;
+    uint8_t const dataLength = Vector_FirstByte(&HC05_BUFFER);
+    uint8_t const checksum = Vector_LastByte(&HC05_BUFFER);
 
-    return HC05_OK;
+    return HC05_VerifyChecksum(data, dataLength, checksum);
 }
 
-static void HC05_SendAcknowledge(void)
+static hc05_error_code_t HC05_VerifyChecksum(uint8_t const * const data, uint8_t const dataLength, uint8_t const checksum)
 {
-    // TODO
+    uint8_t const computedChecksum = CRC8_Compute(data, dataLength + 1);
+
+    if (checksum == computedChecksum)
+    {
+        return HC05_OK;
+    }
+    else
+    {
+        return HC05_FAILED_CHECKSUM;
+    }
+}
+
+static void HC05_SendAcknowledge(hc05_device_t const * const device)
+{
+    HC05_SendResponse(device, HC05_ACKED);
 
     return;
 }
 
-static void HC05_SendNotAcknowledge(void)
+static void HC05_SendNotAcknowledge(hc05_device_t const * const device)
 {
-    // TODO
+    HC05_SendResponse(device, HC05_NACKED);
+
+    return;
+}
+
+__attribute__((always_inline)) inline static void HC05_SendResponse(hc05_device_t const * const device, hc05_response_t const response)
+{
+    uint8_t packet[ACK_NACK_SIZE] = { 0 };
+
+    packet[0] = ACK_NACK_BYTES;
+    packet[1] = UINT8(response);
+    packet[2] = HC05_ComputeChecksum(packet, ACK_NACK_BYTES);
+
+    device->uartDevice->SendData(packet, ACK_NACK_SIZE);
+
+    return;
+}
+
+__attribute__((always_inline)) inline static uint8_t HC05_ComputeChecksum(uint8_t const * const data, uint8_t const dataLength)
+{
+    return CRC8_Compute(data, dataLength);
+}
+
+__attribute__((always_inline)) inline static void HC05_EndTransmission(void)
+{
+    transsmitionStatus = HC05_IDLE;
 
     return;
 }
@@ -212,7 +324,7 @@ hc05_error_code_t HC05_SendData(hc05_device_t const * const device, uint8_t cons
 
         while (tryCount != UINT8(0))
         {
-            device->uartDevice->SendData(buffer, bufferSize);
+            HC05_SendPreparedData(device, buffer, bufferSize);
 
             transsmitionResponse = HC05_WaitForConfirmation();
 
@@ -235,7 +347,7 @@ hc05_error_code_t HC05_SendData(hc05_device_t const * const device, uint8_t cons
         }
     }
 
-    transsmitionStatus = HC05_IDLE;
+    HC05_EndTransmission();
 
     return sendResult;
 }
@@ -253,23 +365,21 @@ hc05_error_code_t HC05_ReceiveData(hc05_device_t const * const device, void * co
             TightLoopContents();
         }
 
-        receiveResult = HC05_VerifyChecksum();
+        receiveResult = HC05_VerifyReceiveChecksum();
 
         if (receiveResult == HC05_OK)
         {
             structInterpreter(dataStructure, &HC05_BUFFER);
 
-            HC05_SendAcknowledge();
+            HC05_SendAcknowledge(device);
         }
         else
         {
-            HC05_SendNotAcknowledge();
+            HC05_SendNotAcknowledge(device);
         }
-
-        Vector_Clear(&HC05_BUFFER);
     }
 
-    transsmitionStatus = HC05_IDLE;
+    HC05_EndTransmission();
 
     return receiveResult;
 }

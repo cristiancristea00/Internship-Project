@@ -28,6 +28,8 @@
 
 
 #include "bme280.h"
+#include "i2c.h"
+#include "vector.h"
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -275,7 +277,7 @@ static bme280_error_code_t BME280_CompensateData(bme280_device_t * const device,
 
 /**
  * @brief Concatenates the register values to uncompensated data.
- * 
+ *
  * @param[out] uncompensatedData The uncompensated data
  * @param[in]  data The register values
  **/
@@ -587,7 +589,7 @@ static bme280_error_code_t BME280_GetCalibrationData(bme280_device_t * const dev
 static int32_t BME280_CompensateTemperature(bme280_uncompensated_data_t const * const uncompensatedData, bme280_calibration_data_t * const calibrationData)
 {
     int32_t temperature = 0;
-    
+
     int32_t temp1 = 0;
     int32_t temp2 = 0;
 
@@ -616,7 +618,7 @@ static int32_t BME280_CompensateTemperature(bme280_uncompensated_data_t const * 
 static uint32_t BME280_CompensatePressure(bme280_uncompensated_data_t const * const uncompensatedData, bme280_calibration_data_t const * const calibrationData)
 {
     uint32_t pressure = 0;
-    
+
     int64_t temp1 = 0;
     int64_t temp2 = 0;
     int64_t temp3 = 0;
@@ -660,7 +662,7 @@ static uint32_t BME280_CompensatePressure(bme280_uncompensated_data_t const * co
 static uint32_t BME280_CompensateHumidity(bme280_uncompensated_data_t const * const uncompensatedData, bme280_calibration_data_t const * const calibrationData)
 {
     uint32_t humidity = 0;
-    
+
     int32_t temp1 = 0;
     int32_t temp2 = 0;
     int32_t temp3 = 0;
@@ -701,8 +703,8 @@ static bme280_error_code_t BME280_CompensateData(bme280_device_t * const device,
     if (uncompensatedData != NULL)
     {
         device->data.temperature = BME280_CompensateTemperature(uncompensatedData, &device->calibrationData);
-        device->data.pressure    = BME280_CompensatePressure(uncompensatedData, &device->calibrationData);
-        device->data.humidity    = BME280_CompensateHumidity(uncompensatedData, &device->calibrationData);
+        device->data.pressure = BME280_CompensatePressure(uncompensatedData, &device->calibrationData);
+        device->data.humidity = BME280_CompensateHumidity(uncompensatedData, &device->calibrationData);
 
         LOG_INFO("Compensated BME280 data successfully");
     }
@@ -926,6 +928,8 @@ bme280_error_code_t BME280_Init(bme280_device_t * const device, bme280_handler_t
     device->i2cAddress = i2cAddress;
     device->handler = handler;
 
+    device->i2cDevice->Initialize(I2C_FAST_MODE_PLUS);
+
     bme280_error_code_t initResult = BME280_OK;
 
     LOG_INFO("Started BME280 initialization");
@@ -1063,6 +1067,18 @@ void BME280_StructInterpret(void * const data, vector_t * const vector)
     sensorData->humidity    = (uint32_t) Vector_RemoveDoubleWord(vector);
 }
 
+void BME280_SerializeSensorData(bme280_device_t const * const device, uint8_t * const buffer)
+{
+    vector_t serializedBuffer;
+
+    Vector_AddDoubleWord(&serializedBuffer, (uint32_t) BME280_GetHuimidity(device));
+    Vector_AddDoubleWord(&serializedBuffer, (uint32_t) BME280_GetPressure(device));
+    Vector_AddDoubleWord(&serializedBuffer, (uint32_t) BME280_GetTemperature(device));
+
+    memcpy(buffer, serializedBuffer.internalBuffer, BME280_SERIALIZED_SIZE);
+
+    return;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //

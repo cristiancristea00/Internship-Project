@@ -64,6 +64,10 @@
 #define BME280_I2C_ADDRESS                 UINT8(0x76)
 #define BME280_I2C_ADDRESS_SEC             UINT8(0x77)
 
+// Serialized data length
+
+#define BME280_SERIALIZED_SIZE             UINT8(12)
+
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -306,5 +310,10 @@ double BME280_GetDisplayHumidity(bme280_device_t const * const device);
  * TODO 
  */
 void BME280_StructInterpret(void * const data, vector_t * const vector);
+
+/* 
+ * TODO 
+ */
+void BME280_SerializeSensorData(bme280_device_t const * const device, uint8_t * const buffer);
 
 #endif // BME280_H

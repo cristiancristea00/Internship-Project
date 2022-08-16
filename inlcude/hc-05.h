@@ -46,6 +46,9 @@
 
 #include <stddef.h>
 #include <stdbool.h>
+#include <stdint.h>
+#include <string.h>
+#include <stdlib.h>
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -56,9 +59,10 @@
 
 typedef enum HC05_ERROR_CODE
 {
-    HC05_OK           = 0x00,
-    HC05_NULL_POINTER = 0x01,
-    HC05_SEND_FAILED  = 0x02
+    HC05_OK              = 0x00,
+    HC05_NULL_POINTER    = 0x01,
+    HC05_SEND_FAILED     = 0x02,
+    HC05_FAILED_CHECKSUM = 0x03
 } hc05_error_code_t;
 
 typedef enum HC05_STATUS

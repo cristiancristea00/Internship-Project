@@ -28,6 +28,8 @@
 
 
 #include "config.h"
+#include "bme280.h"
+#include "hc-05.h"
 #include "uart.h"
 
 #include <util/delay.h>
@@ -41,20 +43,20 @@ void main(void)
 {
     SetClockFrequency(CLKCTRL_FRQSEL_24M_gc);
 
-    uart_0.InitializeWithReceive(460800, UART0_Callback);
     uart_1.Initialize(460800);
+
+    hc05_device_t baseStation;
+    HC05_Initialize(&baseStation, &uart_0);
+
+    bme280_data_t sensorsData;
 
     _delay_ms(5000);
 
     uart_1.Print("Ready to receive data!\n\r");
 
-    while (1)
+    while (true)
     {
-        TightLoopContents();
+        HC05_ReceiveData(&baseStation, &sensorsData, BME280_StructInterpret);
+        _delay_ms(10000);
     }
-}
-
-void UART0_Callback(uint8_t const byte)
-{
-    uart_1.SendByte(byte);
 }
