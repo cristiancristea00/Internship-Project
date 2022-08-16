@@ -92,9 +92,9 @@ static void SensorRead(bme280_device_t * const device)
         return;
     }
 
-    printf("Temperature: %0.2lf °C\n\r", BME280_GetDisplayTemperature(device));
-    printf("Pressure: %0.2lf hPa\n\r", BME280_GetDisplayPressure(device));
-    printf("Relative humidity: %0.2lf%c\n\r", BME280_GetDisplayHumidity(device), '%');
+    printf("Temperature: %0.2lf °C\n\r", BME280_GetDisplayTemperature(&device->data));
+    printf("Pressure: %0.2lf hPa\n\r", BME280_GetDisplayPressure(&device->data));
+    printf("Relative humidity: %0.2lf%c\n\r", BME280_GetDisplayHumidity(&device->data), '%');
 
     return;
 }

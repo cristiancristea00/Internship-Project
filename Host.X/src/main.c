@@ -37,7 +37,7 @@
 extern uart_t const uart_0;
 extern uart_t const uart_1;
 
-void UART0_Callback(uint8_t const byte);
+static void DisplayData(bme280_data_t * const sensorsData);
 
 void main(void)
 {
@@ -57,6 +57,16 @@ void main(void)
     while (true)
     {
         HC05_ReceiveData(&baseStation, &sensorsData, BME280_StructInterpret);
+        DisplayData(&sensorsData);
         _delay_ms(10000);
     }
+}
+
+static void DisplayData(bme280_data_t * const sensorsData)
+{
+    printf("Temperature: %0.2lf °C\n\r", BME280_GetDisplayTemperature(sensorsData));
+    printf("Pressure: %0.2lf hPa\n\r", BME280_GetDisplayPressure(sensorsData));
+    printf("Relative humidity: %0.2lf%c\n\r", BME280_GetDisplayHumidity(sensorsData), '%');
+
+    return;
 }

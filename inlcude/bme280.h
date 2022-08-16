@@ -252,59 +252,59 @@ bme280_error_code_t BME280_GetSensorData(bme280_device_t * const device);
 /**
  * @brief Returns the temperature from the last measurement.
  *
- * @param[in] device BME280 device
+ * @param[in] deviceData BME280 device sensor data
  *
  * @return int32_t The temperature
  **/
-int32_t BME280_GetTemperature(bme280_device_t const * const device);
+int32_t BME280_GetTemperature(bme280_data_t const * const deviceData);
 
 /**
  * @brief Returns the pressure from the last measurement.
  *
- * @param[in] device BME280 device
+ * @param[in] deviceData BME280 device sensor data
  *
  * @return uint32_t The pressure
  **/
-uint32_t BME280_GetPressure(bme280_device_t const * const device);
+uint32_t BME280_GetPressure(bme280_data_t const * const deviceData);
 
 /**
  * @brief Returns the humidity from the last measurement.
  *
- * @param[in] device BME280 device
+ * @param[in] deviceData BME280 device sensor data
  *
  * @return uint32_t The humidity
  **/
-uint32_t BME280_GetHuimidity(bme280_device_t const * const device);
+uint32_t BME280_GetHuimidity(bme280_data_t const * const deviceData);
 
 /**
  * @brief Returns the temperature from the last measurement in display format
  *        (as a floating point number).
  *
- * @param[in] device BME280 device
+ * @param[in] deviceData BME280 device sensor data
  *
  * @return double The temperature
  **/
-double BME280_GetDisplayTemperature(bme280_device_t const * const device);
+double BME280_GetDisplayTemperature(bme280_data_t const * const deviceData);
 
 /**
  * @brief Returns the pressure from the last measurement in display format
  *        (as a floating point number).
  *
- * @param[in] device BME280 device
+ * @param[in] deviceData BME280 device sensor data
  *
  * @return double The pressure
  **/
-double BME280_GetDisplayPressure(bme280_device_t const * const device);
+double BME280_GetDisplayPressure(bme280_data_t const * const deviceData);
 
 /**
  * @brief Returns the humidity from the last measurement in display format
  *        (as a floating point number).
  *
- * @param[in] device BME280 device
+ * @param[in] deviceData BME280 device sensor data
  *
  * @return double The humidity
  **/
-double BME280_GetDisplayHumidity(bme280_device_t const * const device);
+double BME280_GetDisplayHumidity(bme280_data_t const * const deviceData);
 
 /* 
  * TODO 

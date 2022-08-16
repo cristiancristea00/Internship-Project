@@ -1025,34 +1025,34 @@ bme280_error_code_t BME280_GetSensorData(bme280_device_t * const device)
     return acquisitionResult;
 }
 
-int32_t BME280_GetTemperature(bme280_device_t const * const device)
+int32_t BME280_GetTemperature(bme280_data_t const * const deviceData)
 {
-    return device->data.temperature;
+    return deviceData->temperature;
 }
 
-uint32_t BME280_GetPressure(bme280_device_t const * const device)
+uint32_t BME280_GetPressure(bme280_data_t const * const deviceData)
 {
-    return device->data.pressure;
+    return deviceData->pressure;
 }
 
-uint32_t BME280_GetHuimidity(bme280_device_t const * const device)
+uint32_t BME280_GetHuimidity(bme280_data_t const * const deviceData)
 {
-    return device->data.humidity;
+    return deviceData->humidity;
 }
 
-double BME280_GetDisplayTemperature(bme280_device_t const * const device)
+double BME280_GetDisplayTemperature(bme280_data_t const * const deviceData)
 {
-    return 0.01f * (double) BME280_GetTemperature(device);
+    return 0.01f * (double) BME280_GetTemperature(deviceData);
 }
 
-double BME280_GetDisplayPressure(bme280_device_t const * const device)
+double BME280_GetDisplayPressure(bme280_data_t const * const deviceData)
 {
-    return 0.0001f * (double) BME280_GetPressure(device);
+    return 0.0001f * (double) BME280_GetPressure(deviceData);
 }
 
-double BME280_GetDisplayHumidity(bme280_device_t const * const device)
+double BME280_GetDisplayHumidity(bme280_data_t const * const deviceData)
 {
-    return (1.0f / 1024.0f) * (double) BME280_GetHuimidity(device);
+    return (1.0f / 1024.0f) * (double) BME280_GetHuimidity(deviceData);
 }
 
 void BME280_StructInterpret(void * const data, vector_t * const vector)
