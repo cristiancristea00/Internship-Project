@@ -1070,10 +1070,11 @@ void BME280_StructInterpret(void * const data, vector_t * const vector)
 void BME280_SerializeSensorData(bme280_device_t const * const device, uint8_t * const buffer)
 {
     vector_t serializedBuffer;
+    Vector_Initialize(&serializedBuffer);
 
-    Vector_AddDoubleWord(&serializedBuffer, (uint32_t) BME280_GetHuimidity(device));
-    Vector_AddDoubleWord(&serializedBuffer, (uint32_t) BME280_GetPressure(device));
-    Vector_AddDoubleWord(&serializedBuffer, (uint32_t) BME280_GetTemperature(device));
+    Vector_AddDoubleWord(&serializedBuffer, (uint32_t) BME280_GetHuimidity(&device->data));
+    Vector_AddDoubleWord(&serializedBuffer, (uint32_t) BME280_GetPressure(&device->data));
+    Vector_AddDoubleWord(&serializedBuffer, (uint32_t) BME280_GetTemperature(&device->data));
 
     memcpy(buffer, serializedBuffer.internalBuffer, BME280_SERIALIZED_SIZE);
 

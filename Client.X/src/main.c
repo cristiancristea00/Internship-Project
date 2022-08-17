@@ -36,10 +36,10 @@
 #include "i2c.h"
 
 #include <avr/cpufunc.h>
-#include <util/delay.h>
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
 
 extern uart_t const uart_0;
@@ -74,12 +74,14 @@ void main(void)
 
     uint8_t serializedSensorData[BME280_SERIALIZED_SIZE] = { 0 };
 
+    PauseMiliseconds(5000);
+
     while (true)
     {
         SensorRead(&weatherClick);
         BME280_SerializeSensorData(&weatherClick, &serializedSensorData);
         HC05_SendData(&sensorStation, &serializedSensorData, BME280_SERIALIZED_SIZE);
-        _delay_ms(10000);
+        PauseMiliseconds(5000);
     }
 }
 
@@ -92,9 +94,11 @@ static void SensorRead(bme280_device_t * const device)
         return;
     }
 
-    printf("Temperature: %0.2lf °C\n\r", BME280_GetDisplayTemperature(&device->data));
-    printf("Pressure: %0.2lf hPa\n\r", BME280_GetDisplayPressure(&device->data));
-    printf("Relative humidity: %0.2lf%c\n\r", BME280_GetDisplayHumidity(&device->data), '%');
+    bme280_data_t sensorData = device->data;
+
+    printf("Temperature: %0.2lf °C\n\r", BME280_GetDisplayTemperature(&sensorData));
+    printf("Pressure: %0.2lf hPa\n\r", BME280_GetDisplayPressure(&sensorData));
+    printf("Relative humidity: %0.2lf%c\n\r", BME280_GetDisplayHumidity(&sensorData), '%');
 
     return;
 }

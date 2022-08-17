@@ -224,7 +224,6 @@ __attribute__((always_inline)) inline static int8_t UART1_SendChar(char const ch
 
 static uart_callback_t uart_0_callback = NULL;
 
-
 __attribute__((always_inline)) inline static void UART0_InitializeWithReceive(uint32_t const baudRate, uart_callback_t const receiveCallback)
 {
     UART0_RegisterCallback(receiveCallback);
@@ -248,6 +247,8 @@ __attribute__((always_inline)) inline static void UART0_InitializeWithReceive(ui
 __attribute__((always_inline)) inline static void UART0_Initialize(uint32_t const baudRate)
 {
     PORTA.DIRSET = PIN0_bm;
+
+    PORTA.OUTSET = PIN0_bm;
 
     USART0.BAUD = UART_BAUD_RATE(baudRate);
 
@@ -326,7 +327,6 @@ __attribute__((always_inline)) inline static void UART0_RegisterCallback(uart_ca
 
 static uart_callback_t uart_1_callback = NULL;
 
-
 __attribute__((always_inline)) inline static void UART1_InitializeWithReceive(uint32_t const baudRate, uart_callback_t const receiveCallback)
 {
     UART1_RegisterCallback(receiveCallback);
@@ -367,6 +367,8 @@ __attribute__((always_inline)) inline static void UART1_Initialize(uint32_t cons
 #endif // UART_PRINTF
 
     PORTC.DIRSET = PIN0_bm;
+
+    PORTC.OUTSET = PIN0_bm;
 
     USART1.BAUD = UART_BAUD_RATE(baudRate);
 

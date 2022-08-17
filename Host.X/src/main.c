@@ -32,7 +32,6 @@
 #include "hc-05.h"
 #include "uart.h"
 
-#include <util/delay.h>
 
 extern uart_t const uart_0;
 extern uart_t const uart_1;
@@ -50,15 +49,10 @@ void main(void)
 
     bme280_data_t sensorsData;
 
-    _delay_ms(5000);
-
-    uart_1.Print("Ready to receive data!\n\r");
-
     while (true)
     {
         HC05_ReceiveData(&baseStation, &sensorsData, BME280_StructInterpret);
         DisplayData(&sensorsData);
-        _delay_ms(10000);
     }
 }
 

@@ -105,7 +105,7 @@ typedef union QUAD_WORD
  * @return true If the vector can accommodate the number of bytes
  * @return false If the vector can not accommodate the number of bytes
  **/
-static bool Vector_IsSpaceAvailable(vector_t * const vector, uint8_t const numberBytes);
+static void Vector_CheckAvailableSpace(vector_t * const vector, uint8_t const numberBytes);
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -114,16 +114,12 @@ static bool Vector_IsSpaceAvailable(vector_t * const vector, uint8_t const numbe
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-static bool Vector_IsSpaceAvailable(vector_t * const vector, uint8_t const numberBytes)
+static void Vector_CheckAvailableSpace(vector_t * const vector, uint8_t const numberBytes)
 {
-    if ((vector->bufferSize + numberBytes) <= MAX_BUFFER_SIZE)
+    if ((vector->bufferSize + numberBytes) > MAX_BUFFER_SIZE)
     {
-        return true;
-    }
-    else
-    {
-        LOG_ERROR_PRINTF("Failed to add %d bytes to vector", numberBytes);
-        return false;
+        LOG_WARNING_PRINTF("Failed to add %d bytes to vector. Clearing the vector...", numberBytes);
+        Vector_Clear(vector);
     }
 }
 
@@ -150,10 +146,7 @@ __attribute__((always_inline)) inline void Vector_Clear(vector_t * const vector)
 
 void Vector_AddByte(vector_t * const vector, uint8_t const byteToAdd)
 {
-    if (!Vector_IsSpaceAvailable(vector, VECTOR_BYTES_BYTES))
-    {
-        return;
-    }
+    Vector_CheckAvailableSpace(vector, VECTOR_BYTES_BYTES);
 
     vector->internalBuffer[vector->bufferSize] = byteToAdd;
 
@@ -164,10 +157,7 @@ void Vector_AddByte(vector_t * const vector, uint8_t const byteToAdd)
 
 void Vector_AddWord(vector_t * const vector, uint16_t const wordToAdd)
 {
-    if (!Vector_IsSpaceAvailable(vector, VECTOR_WORD_BYTES))
-    {
-        return;
-    }
+    Vector_CheckAvailableSpace(vector, VECTOR_WORD_BYTES);
 
     word_t const word = { .value = wordToAdd };
 
@@ -184,10 +174,7 @@ void Vector_AddWord(vector_t * const vector, uint16_t const wordToAdd)
 
 void Vector_AddDoubleWord(vector_t * const vector, uint32_t const doubleWordToAdd)
 {
-    if (!Vector_IsSpaceAvailable(vector, VECTOR_DOUBLE_WORD_BYTES))
-    {
-        return;
-    }
+    Vector_CheckAvailableSpace(vector, VECTOR_DOUBLE_WORD_BYTES);
 
     double_word_t doubleWord = { .value = doubleWordToAdd };
 
@@ -206,10 +193,7 @@ void Vector_AddDoubleWord(vector_t * const vector, uint32_t const doubleWordToAd
 
 void Vector_AddQuadWord(vector_t * const vector, uint64_t const quadWordToAdd)
 {
-    if (!Vector_IsSpaceAvailable(vector, VECTOR_QUAD_WORD_BYTES))
-    {
-        return;
-    }
+    Vector_CheckAvailableSpace(vector, VECTOR_QUAD_WORD_BYTES);
 
     quad_word_t quadWord = { .value = quadWordToAdd };
 

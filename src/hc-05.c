@@ -147,6 +147,7 @@ __attribute__((always_inline)) inline static void HC05_SendPreparedData(hc05_dev
     uint8_t const newLength = bufferSize + 2;
 
     // Please forgive me for the sin that I'm committing
+
     uint8_t * preparedData = (uint8_t *) calloc(newLength, sizeof (uint8_t));
 
     preparedData[0] = bufferSize;
@@ -156,6 +157,7 @@ __attribute__((always_inline)) inline static void HC05_SendPreparedData(hc05_dev
     device->uartDevice->SendData(preparedData, newLength);
 
     // My soul is finally free
+
     free(preparedData);
     preparedData = NULL;
 
@@ -164,12 +166,16 @@ __attribute__((always_inline)) inline static void HC05_SendPreparedData(hc05_dev
 
 static hc05_response_t HC05_WaitForConfirmation(void)
 {
-    while (transsmitionStatus != HC05_FINISHED)
-    {
-        TightLoopContents();
-    }
+    PauseMiliseconds(500);
 
-    return HC05_GetResponseReceived();
+    if (transsmitionStatus == HC05_FINISHED)
+    {
+        return HC05_GetResponseReceived();
+    }
+    else
+    {
+        return HC05_EMPTY;
+    }
 }
 
 static hc05_response_t HC05_GetResponseReceived(void)
@@ -180,19 +186,19 @@ static hc05_response_t HC05_GetResponseReceived(void)
     response[1] = Vector_RemoveByte(&HC05_BUFFER);
     response[0] = Vector_RemoveByte(&HC05_BUFFER);
 
-    if (HC05_VerifyChecksum(response, ACK_NACK_SIZE, response[2]) == HC05_OK)
+    if (HC05_VerifyChecksum(response, ACK_NACK_BYTES, response[2]) == HC05_OK)
     {
         return (hc05_response_t) response[1];
     }
     else
     {
-        return HC05_FAILED_CHECKSUM;
+        return HC05_EMPTY;
     }
 }
 
 static void HC05_ReceiveCallback(uint8_t const data)
 {
-    if (transsmitionStatus == HC05_IDLE)
+    if ((transsmitionStatus == HC05_IDLE) && (data != 0))
     {
         transsmitionStatus = HC05_IN_PROGRESS;
         Vector_AddByte(&HC05_BUFFER, data);
@@ -230,7 +236,7 @@ static hc05_error_code_t HC05_VerifyReceiveChecksum(void)
 
 static hc05_error_code_t HC05_VerifyChecksum(uint8_t const * const data, uint8_t const dataLength, uint8_t const checksum)
 {
-    uint8_t const computedChecksum = CRC8_Compute(data, dataLength + 1);
+    uint8_t const computedChecksum = HC05_ComputeChecksum(data, dataLength);
 
     if (checksum == computedChecksum)
     {
@@ -271,12 +277,13 @@ __attribute__((always_inline)) inline static void HC05_SendResponse(hc05_device_
 
 __attribute__((always_inline)) inline static uint8_t HC05_ComputeChecksum(uint8_t const * const data, uint8_t const dataLength)
 {
-    return CRC8_Compute(data, dataLength);
+    return CRC8_Compute(data, dataLength + 1);
 }
 
 __attribute__((always_inline)) inline static void HC05_EndTransmission(void)
 {
     transsmitionStatus = HC05_IDLE;
+    Vector_Clear(&HC05_BUFFER);
 
     return;
 }
@@ -315,11 +322,14 @@ hc05_error_code_t HC05_SendData(hc05_device_t const * const device, uint8_t cons
 {
     hc05_error_code_t sendResult = HC05_OK;
 
+    uint8_t tryCount = 10;
+
     sendResult = HC05_CheckNull(device);
 
     if (sendResult == HC05_OK)
     {
-        uint8_t tryCount = 10;
+        LOG_INFO("Started HC-05 send transmission");
+
         hc05_response_t transsmitionResponse = HC05_EMPTY;
 
         while (tryCount != UINT8(0))
@@ -335,16 +345,25 @@ hc05_error_code_t HC05_SendData(hc05_device_t const * const device, uint8_t cons
             }
             else if (transsmitionResponse == HC05_NACKED)
             {
-                LOG_WARNING("HC-05 transmission partner NACKED. Retrying...");
+                LOG_WARNING("HC-05 send transmission partner NACKED. Retrying...");
             }
             else
             {
-                LOG_WARNING("HC-05 transmission partner is not responding. Retrying...");
+                LOG_WARNING("HC-05 send transmission partner is not responding. Retrying...");
             }
 
             --tryCount;
-            _delay_ms(1);
+            _delay_ms(10);
         }
+    }
+
+    if (tryCount == UINT8(0))
+    {
+        LOG_ERROR("HC-05 send transmission failed");
+    }
+    else
+    {
+        LOG_INFO("Finished HC-05 send transmission");
     }
 
     HC05_EndTransmission();
@@ -360,6 +379,8 @@ hc05_error_code_t HC05_ReceiveData(hc05_device_t const * const device, void * co
 
     if (receiveResult == HC05_OK)
     {
+        LOG_INFO("Started HC-05 receive transmission");
+
         while (transsmitionStatus != HC05_FINISHED)
         {
             TightLoopContents();
@@ -372,10 +393,14 @@ hc05_error_code_t HC05_ReceiveData(hc05_device_t const * const device, void * co
             structInterpreter(dataStructure, &HC05_BUFFER);
 
             HC05_SendAcknowledge(device);
+
+            LOG_INFO("Finished HC-05 receive transmission");
         }
         else
         {
             HC05_SendNotAcknowledge(device);
+
+            LOG_ERROR("HC-05 receive transmission failed");
         }
     }
 

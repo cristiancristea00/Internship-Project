@@ -30,6 +30,11 @@
 #ifndef CONFIG_H
 #define	CONFIG_H
 
+/**
+ * @brief This must be defined at the top to have other includes working
+ **/
+#define F_CPU 24000000UL           // The CPU frequency. To be set manuallly.
+
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -39,6 +44,7 @@
 
 #include "uart.h"
 
+#include <util/delay.h>
 #include <avr/io.h>
 
 #include <stdint.h>
@@ -50,10 +56,11 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-#define F_CPU 24000000UL           // The CPU frequency. To be set manuallly.
-
 #define UART_PRINTF                // Uncomment to enable printf functionality on UART.
 #define LOGGING                    // Uncomment to enable logging
+
+#define PauseMiliseconds(MILIS)          (_delay_ms((MILIS)))
+#define PauseMicroseconds(MICROS)        (_delay_us((MILIS)))
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -113,7 +120,6 @@ void SetClockFrequency(uint8_t const frequency);
 
 /**
  * @brief Empty function that should be used in loops for better readability.
- *
  **/
 void TightLoopContents(void);
 
