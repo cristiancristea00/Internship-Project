@@ -137,7 +137,7 @@ typedef struct BME280_UNCOMPENSATED_DATA
 ////////////////////////////////////////////////////////////////////////////////
 
 /**
- * @brief Checks if the device and its bus handler are valid.
+ * @brief Checks if the device, its bus handler and I2C device are valid.
  *
  * @param[in] device BME280 device
  *
@@ -1065,6 +1065,8 @@ void BME280_StructInterpret(void * const data, vector_t * const vector)
     sensorData->temperature = (int32_t) Vector_RemoveDoubleWord(vector);
     sensorData->pressure    = (uint32_t) Vector_RemoveDoubleWord(vector);
     sensorData->humidity    = (uint32_t) Vector_RemoveDoubleWord(vector);
+
+    return;
 }
 
 void BME280_SerializeSensorData(bme280_device_t const * const device, uint8_t * const buffer)

@@ -307,14 +307,20 @@ double BME280_GetDisplayPressure(bme280_data_t const * const deviceData);
  **/
 double BME280_GetDisplayHumidity(bme280_data_t const * const deviceData);
 
-/* 
- * TODO 
- */
+/**
+ * @brief Converts a vector to a @ref bme280_data_t structure.
+ *
+ * @param[out] data BME280 structure to fill
+ * @param[in]  vector Vector to convert
+ **/
 void BME280_StructInterpret(void * const data, vector_t * const vector);
 
-/* 
- * TODO 
- */
+/**
+ * @brief Converts a @ref bme280_data_t structure to serialized array of bytes.
+ *
+ * @param[in]  device BME280 device
+ * @param[out] buffer Buffer to fill
+ **/
 void BME280_SerializeSensorData(bme280_device_t const * const device, uint8_t * const buffer);
 
 #endif // BME280_H

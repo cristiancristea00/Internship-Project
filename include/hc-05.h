@@ -74,9 +74,11 @@ typedef enum HC05_STATUS
 
 typedef enum HC05_RESPONSE
 {
-    HC05_EMPTY  = 0x00,
-    HC05_ACKED  = 0x01,
-    HC05_NACKED = 0x02
+    HC05_EMPTY            = 0x00,
+    HC05_ACKED            = 0x01,
+    HC05_NACKED           = 0x02,
+    HC05_INVALID_CHECKSUM = 0x03,
+    HC05_NOT_CONFIRMED    = 0x04
 } hc05_response_t;
 
 typedef struct HC05_DEVICE
@@ -94,19 +96,39 @@ typedef void (* struct_interpret_t) (void * const, vector_t * const);
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-/*
- * TODO
- */
+/**
+ * @brief Initializes the HC-05 device.
+ *
+ * @param[in, out] device HC-05 device
+ * @param[in]      uartDevice UART device
+ *
+ * @return hc05_error_code_t Error code
+ **/
 hc05_error_code_t HC05_Initialize(hc05_device_t * const device, uart_t const * const uartDevice);
 
-/*
- * TODO
- */
+/**
+ * @brief Receives data from the HC-05 device and stores it in the given data
+ *        structure using the given interpret function. Receives just one packet
+ *        at a time and should be called within a loop.
+ *
+ * @param[in]  device HC-05 device
+ * @param[out] dataStructure Data structure to store the received data
+ * @param[in]  structInterpreter Interpret function to use on the data
+ *
+ * @return hc05_error_code_t Error code
+ **/
 hc05_error_code_t HC05_ReceiveData(hc05_device_t const * const device, void * const dataStructure, struct_interpret_t structInterpreter);
 
-/*
- * TODO
- */
+/**
+ * @brief  Sends data to the HC-05 device from a buffer. Sends just one packet
+ *         at a time and should be called within a loop.
+ *
+ * @param[in] device HC-05 device
+ * @param[in] buffer Buffer containing the data to send
+ * @param[in] bufferSize Size of the buffer
+ *
+ * @return hc05_error_code_t Error code
+ **/
 hc05_error_code_t HC05_SendData(hc05_device_t const * const device, uint8_t const * const buffer, uint8_t const bufferSize);
 
 #endif // HC05_H

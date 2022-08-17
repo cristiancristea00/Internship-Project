@@ -48,74 +48,126 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-/*
- * TODO
- */
+/**
+ * @brief Checks if the device and its UART device are valid.
+ *
+ * @param[in] device HC-05 device
+ *
+ * @return hc05_error_code_t Error code
+ **/
 static hc05_error_code_t HC05_CheckNull(hc05_device_t const * const device);
 
-/*
- * TODO
- */
+/**
+ * @brief Sends a prepared packet using the UART device. A prepared packet is
+ *        composed of a byte that specifies the length of the buffer, followed
+ *        by the buffer itself and finally a byte that specifies the checksum.
+ *
+ *        ┌───────────┬───────────────────┬──────────┐
+ *        │ NUMBER OF │     BUFFER OF     │          │
+ *        │           │ ...           ... │ CHECKSUM │
+ *        │   BYTES   │       BYTES       │          │
+ *        └───────────┴───────────────────┴──────────┘
+ *
+ * @param[in] device HC-05 device
+ * @param[in] buffer Buffer to be sent
+ * @param[in] bufferSize Size of the buffer
+ **/
 __attribute__((always_inline)) inline static void HC05_SendPreparedData(hc05_device_t const * const device, uint8_t const * const buffer, uint8_t const bufferSize);
 
-/*
- * TODO
- */
+/**
+ * @brief Waits for 500 miliseconds to receive a packet containing an ACK or
+ *        a NACK and returns the result.
+ *
+ * @return hc05_response_t ACK, NACK or NOT_CONFIRMED
+ **/
 static hc05_response_t HC05_WaitForConfirmation(void);
 
-/*
- * TODO
- */
+/**
+ * @brief Returns ACK or NACK if the checksum is valid based on the received
+ *        packet in the vector or an error code if the checksum is invalid.
+ *
+ * @return hc05_response_t ACK, NACK or INVALID_CHECKSUM
+ **/
 static hc05_response_t HC05_GetResponseReceived(void);
 
-/*
- * TODO
- */
+/**
+ * @brief Callback function for the UART device that that stores received data
+ *        in the vector.
+ *
+ * @param[in] data Byte received
+ **/
 static void HC05_ReceiveCallback(uint8_t const data);
 
-/*
- * TODO
- */
+/**
+ * @brief Checks if the received byte is the last byte of the packet.
+ *
+ * @return true The byte is the last byte of the packet
+ * @return false The byte is not the last byte of the packet
+ **/
 __attribute__((always_inline)) inline static bool HC05_IsLastByte(void);
 
-/*
- * TODO
- */
+/**
+ * @brief Computes the number of reamining bytes to be received.
+ *
+ * @return uint8_t Number of remaining bytes
+ **/
 __attribute__((always_inline)) inline static uint8_t HC05_GetNumberOfBytesToReceive(void);
 
-/*
- * TODO
- */
+/**
+ * @brief Computes the checksum of the received packet.
+ *
+ * @return hc05_error_code_t Error code
+ **/
 static hc05_error_code_t HC05_VerifyReceiveChecksum(void);
 
-/*
- * TODO
- */
+/**
+ * @brief Computes the checksum of a byte buffer and checks it against the
+ *        received checksum.
+ *
+ * @param[in] data Byte buffer
+ * @param[in] dataLength Length of the byte buffer
+ * @param[in] checksum Received checksum
+ *
+ * @return hc05_error_code_t Error code
+ **/
 static hc05_error_code_t HC05_VerifyChecksum(uint8_t const * const data, uint8_t const dataLength, uint8_t const checksum);
 
-/*
- * TODO
- */
+/**
+ * @brief Sends an ACK packet.
+ *
+ * @param[in] device HC-05 device
+ **/
 static void HC05_SendAcknowledge(hc05_device_t const * const device);
 
-/*
- * TODO
- */
+/**
+ * @brief Sends a NACK packet.
+ *
+ * @param[in] device HC-05 device
+ **/
 static void HC05_SendNotAcknowledge(hc05_device_t const * const device);
 
-/*
- * TODO
- */
+/**
+ * @brief Sends a packet containing an ACK or a NACK.
+ *
+ * @param[in] device HC-05 device
+ * @param[in] response ACK or NACK
+ **/
 __attribute__((always_inline)) inline static void HC05_SendResponse(hc05_device_t const * const device, hc05_response_t const response);
 
-/*
- * TODO
- */
+/**
+ * @brief Computes the checksum of a byte buffer.
+ *
+ * @param[in] data Byte buffer
+ * @param[in] dataLength Length of the byte buffer
+ *
+ * @return uint8_t Checksum
+ **/
 __attribute__((always_inline)) inline static uint8_t HC05_ComputeChecksum(uint8_t const * const data, uint8_t const dataLength);
 
-/*
- * TODO
- */
+/**
+ * @brief Ends the current transmission by clearing the vector and trasmission
+ *        flag.
+ **/
 __attribute__((always_inline)) inline static void HC05_EndTransmission(void);
 
 
@@ -156,10 +208,10 @@ __attribute__((always_inline)) inline static void HC05_SendPreparedData(hc05_dev
 
     device->uartDevice->SendData(preparedData, newLength);
 
-    // My soul is finally free
-
     free(preparedData);
     preparedData = NULL;
+
+    // My soul is finally free
 
     return;
 }
@@ -174,7 +226,7 @@ static hc05_response_t HC05_WaitForConfirmation(void)
     }
     else
     {
-        return HC05_EMPTY;
+        return HC05_NOT_CONFIRMED;
     }
 }
 
@@ -192,7 +244,7 @@ static hc05_response_t HC05_GetResponseReceived(void)
     }
     else
     {
-        return HC05_EMPTY;
+        return HC05_INVALID_CHECKSUM;
     }
 }
 
