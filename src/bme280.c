@@ -28,18 +28,342 @@
 
 
 #include "bme280.h"
+#include "i2c.h"
+#include "vector.h"
 
 
-bme280_handler_t const BME280_I2C0_Handler = {
-    .Read = BME280_ReadRegisters,
-    .Write = BME280_WriteRegisters,
-};
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                             Macros and defines                             //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * @brief Concatenate two bytes into a 16-bit value.
+ **/
+#define BME280_CONCAT_BYTES(MSB, LSB) (((uint16_t) (MSB) << 8) | (uint16_t) (LSB))
+
+/**
+ * @brief Sets the bits of a register.
+ **/
+#define BME280_SET_BITS(REGISTER_DATA, BITNAME, DATA) ((REGISTER_DATA & ~(BITNAME ## _MSK)) | ((DATA << BITNAME ## _POS) & BITNAME ## _MSK))
+
+/**
+ * @brief Gets the bits of a register.
+ **/
+#define BME280_GET_BITS(REGISTER_DATA, BITNAME) ((REGISTER_DATA & (BITNAME ## _MSK)) >> (BITNAME ## _POS))
+
+// The BME280 chip identifier
+
+#define BME280_CHIP_ID                     UINT8(0x60)
+
+// Register addresses
+
+#define BME280_CHIP_ID_ADDRESS             UINT8(0xD0)
+#define BME280_RESET_ADDRESS               UINT8(0xE0)
+#define BME280_TEMP_PRESS_CALIB_ADDRESS    UINT8(0x88)
+#define BME280_HUMIDITY_CALIB_ADDRESS      UINT8(0xE1)
+#define BME280_DATA_ADDRESS                UINT8(0xF7)
+#define BME280_POWER_CONTROL_ADDRESS       UINT8(0xF4)
+#define BME280_CONTROL_HUMIDITY_ADDRESS    UINT8(0xF2)
+#define BME280_CONTROL_MEAS_ADDRESS        UINT8(0xF4)
+#define BME280_CONFIG_ADDRESS              UINT8(0xF5)
+
+// Values related to sizes
+
+#define BME280_TEMP_PRESS_CALIB_LENGTH     UINT8(26)
+#define BME280_HUMIDITY_CALIB_LENGTH       UINT8(7)
+#define BME280_DATA_LENGTH                 UINT8(8)
+#define BME280_CONFIG_REGISTERS_LENGTH     UINT8(4)
+
+// Status info
+
+#define BME280_STATUS_REGISTER_ADDRESS     UINT8(0xF3)
+#define BME280_SOFT_RESET_COMMAND          UINT8(0xB6)
+#define BME280_STATUS_UPDATE               UINT8(0x01)
+
+// Value limits for measurements
+
+#define BME280_MIN_TEMPERATURE             INT32(-4000)
+#define BME280_MAX_TEMPERATURE             INT32(8500)
+#define BME280_MIN_PRESSURE                UINT32(3000000)
+#define BME280_MAX_PRESSURE                UINT32(11000000)
+#define BME280_MAX_HUMIDITY                UINT32(102400)
+
+// Bit masks and bit positions
+
+#define BME280_CONTROL_TEMPERATURE_MSK     UINT8(0xE0)
+#define BME280_CONTROL_TEMPERATURE_POS     UINT8(0x05)
+
+#define BME280_CONTROL_PRESSURE_MSK        UINT8(0x1C)
+#define BME280_CONTROL_PRESSURE_POS        UINT8(0x02)
+
+#define BME280_CONTROL_HUMIDITY_MSK        UINT8(0x07)
+#define BME280_CONTROL_HUMIDITY_POS        UINT8(0x00)
+
+#define BME280_SENSOR_MODE_MSK             UINT8(0x03)
+#define BME280_SENSOR_MODE_POS             UINT8(0x00)
+
+#define BME280_FILTER_MSK                  UINT8(0x1C)
+#define BME280_FILTER_POS                  UINT8(0x02)
+
+#define BME280_STANDBY_MSK                 UINT8(0xE0)
+#define BME280_STANDBY_POS                 UINT8(0x05)
+
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                        Typedefs, enums and structs                         //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+typedef struct BME280_UNCOMPENSATED_DATA
+{
+    // Uncompensated data for the temperature sensor
+    uint32_t temperature;
+
+    // Uncompensated data for the pressure sensor
+    uint32_t pressure;
+
+    // Uncompensated data for the humidity sensor
+    uint32_t humidity;
+} bme280_uncompensated_data_t;
+
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                            Private (static) API                            //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * @brief Checks if the device, its bus handler and I2C device are valid.
+ *
+ * @param[in] device BME280 device
+ *
+ * @return bme280_error_code_t Error code
+ **/
+static bme280_error_code_t BME280_CheckNull(bme280_device_t const * const device);
+
+/**
+ * @brief Reads a number of one byte registers from the device using I2C and
+ *        stores the data in a buffer.
+ *
+ * @param[in]  i2c The I2C device to use
+ * @param[in]  address The address of the device
+ * @param[in]  registerAddress The address of the first register to read
+ * @param[out] dataBuffer The buffer to store the data in
+ * @param[in]  bufferLength The number of bytes to read
+ *
+ * @return bme280_error_code_t Error code
+ **/
+static bme280_error_code_t BME280_I2C_ReadRegisters(i2c_t const * const i2c, uint8_t const address, uint8_t const registerAddress, uint8_t * const dataBuffer, uint8_t const bufferLength);
+
+/**
+ * @brief Writes a number of one byte registers to the device using I2C from a
+ *        buffer.
+ *
+ * @param[in] i2c The I2C device to use
+ * @param[in] address The address of the device
+ * @param[in] registerAddresses The addresses of the registers to write
+ * @param[in] dataBuffer The buffer containing the data to write
+ * @param[in] bufferLength The number of bytes to write
+ *
+ * @return bme280_error_code_t Error code
+ **/
+static bme280_error_code_t BME280_I2C_WriteRegisters(i2c_t const * const i2c, uint8_t const address, uint8_t const * const registerAddresses, uint8_t const * const dataBuffer, uint8_t const bufferLength);
+
+/**
+ * @brief Reads a number of one byte registers from the device and stores the
+ *        data in a buffer.
+ *
+ * @param[in]  device BME280 device
+ * @param[in]  registerAddress The address of the register to read
+ * @param[out] dataBuffer The buffer to store the data in
+ * @param[in]  bufferLength The number of bytes to read
+ *
+ * @return bme280_error_code_t Error code
+ **/
+static bme280_error_code_t BME280_GetRegisters(bme280_device_t const * const device, uint8_t const registerAddress, uint8_t * const dataBuffer, uint8_t const bufferLength);
+
+/**
+ * @brief Writes a number of one byte registers to the device from a buffer.
+ *
+ * @param[in] device BME280 device
+ * @param[in] registerAddresses The addresses of the registers to write
+ * @param[in] dataBuffer The buffer containing the data to write
+ * @param[in] bufferLength The number of bytes to write
+ *
+ * @return bme280_error_code_t Error code
+ **/
+static bme280_error_code_t BME280_SetRegisters(bme280_device_t const * const device, uint8_t const * const registerAddresses, uint8_t const * const dataBuffer, uint8_t const bufferLength);
+
+/**
+ * @brief Soft resets the device to default settings and to sleep mode.
+ *
+ * @param[in] device BME280 device
+ *
+ * @return bme280_error_code_t Error code
+ **/
+static bme280_error_code_t BME280_SoftReset(bme280_device_t const * const device);
+
+/**
+ * @brief Parses the temperature and pressure calibration data from the device
+ *        and stores it in the calibration data structure.
+ *
+ * @param[out] calibrationData The calibration data structure
+ * @param[in]  rawData The raw calibration data
+ **/
+static void BME280_ParseTemperatureAndPressureCalibration(bme280_calibration_data_t * const calibrationData, uint8_t const * const rawData);
+
+/**
+ * @brief Parses the humidity calibration data from the device and stores it in
+ *        the calibration data structure.
+ *
+ * @param[out] calibrationData The calibration data structure
+ * @param[in]  rawData The raw calibration data
+ **/
+static void BME280_ParseHumidityCalibration(bme280_calibration_data_t * const calibrationData, uint8_t const * const rawData);
+
+/**
+ * @brief Reads the calibration data from the device.
+ *
+ * @param[in, out] device BME280 device
+ *
+ * @return bme280_error_code_t Error code
+ **/
+static bme280_error_code_t BME280_GetCalibrationData(bme280_device_t * const device);
+
+/**
+ * @brief Compensates the raw temperature data using the calibration parameters.
+ *
+ * @param[in] uncompensatedData The raw temperature data
+ * @param[in] calibrationData The calibration data
+ *
+ * @return double The real temperature value
+ **/
+static int32_t BME280_CompensateTemperature(bme280_uncompensated_data_t const * const uncompensatedData, bme280_calibration_data_t * const calibrationData);
+
+/**
+ * @brief Compensates the raw pressure data using the calibration parameters.
+ *
+ * @param[in] uncompensatedData The raw pressure data
+ * @param[in] calibrationData The calibration data
+ *
+ * @return double The real pressure value
+ **/
+static uint32_t BME280_CompensatePressure(bme280_uncompensated_data_t const * const uncompensatedData, bme280_calibration_data_t const * const calibrationData);
+
+/**
+ * @brief Compensates the raw humidity data using the calibration parameters.
+ *
+ * @param[in] uncompensatedData The raw humidity data
+ * @param[in] calibrationData The calibration data
+ *
+ * @return double The real humidity value
+ **/
+static uint32_t BME280_CompensateHumidity(bme280_uncompensated_data_t const * const uncompensatedData, bme280_calibration_data_t const * const calibrationData);
+
+/**
+ * @brief Compensates the raw sensor data using the calibration parameters and
+ *        stores the real sensor values in the sensor data structure.
+ *
+ * @param[in, out] device BME280 device
+ * @param[in]      uncompensatedData The raw sensor data
+ *
+ * @return bme280_error_code_t Error code
+ **/
+static bme280_error_code_t BME280_CompensateData(bme280_device_t * const device, bme280_uncompensated_data_t const * const uncompensatedData);
+
+/**
+ * @brief Concatenates the register values to uncompensated data.
+ *
+ * @param[out] uncompensatedData The uncompensated data
+ * @param[in]  data The register values
+ **/
+static void BME280_ParseSensorData(bme280_uncompensated_data_t * const uncompensatedData, uint8_t const * const data);
+
+/**
+ * @brief Sets the device temperature and pressure oversampling settings.
+ *
+ * @param[in, out] device BME280 device
+ * @param[in]      settings The settings to set
+ *
+ * @return bme280_error_code_t Error code
+ **/
+static bme280_error_code_t BME280_SetOversamplingTemperaturePressure(bme280_device_t * const device, bme280_settings_t const * const settings);
+
+/**
+ * @brief Sets the device humidity oversampling settings.
+ *
+ * @param[in, out] device BME280 device
+ * @param[in]      settings The settings to set
+ *
+ * @return bme280_error_code_t Error code
+ **/
+static bme280_error_code_t BME280_SetOversamplingHumidity(bme280_device_t * const device, bme280_settings_t const * const settings);
+
+/**
+ * @brief Sets the device oversampling settings.
+ *
+ * @param[in, out] device BME280 device
+ * @param[in]      settings The settings to set
+ *
+ * @return bme280_error_code_t Error code
+ **/
+static bme280_error_code_t BME280_SetOversamplingSettings(bme280_device_t * const device, bme280_settings_t const * const settings);
+
+/**
+ * @brief Sets the device filter and standby settings.
+ *
+ * @param[in, out] device BME280 device
+ * @param[in]      settings The settings to set
+ * @return bme280_error_code_t Error code
+ **/
+static bme280_error_code_t BME280_SetFilterStandbySettings(bme280_device_t * const device, bme280_settings_t const * const settings);
+
+/**
+ * @brief Writes the power mode to the device.
+ *
+ * @param[in, out] device BME280 device
+ * @param[in]      powerMode The power mode to set
+ *
+ * @return bme280_error_code_t Error code
+ **/
+static bme280_error_code_t BME280_WritePowerMode(bme280_device_t * const device, bme280_power_mode_t const powerMode);
+
+/**
+ * @brief Sets the device power mode.
+ *
+ * @param[in, out] device BME280 device
+ * @param[in]      settings The settings to set
+ *
+ * @return bme280_error_code_t Error code
+ **/
+static bme280_error_code_t BME280_SetSensorPowerMode(bme280_device_t * const device, bme280_settings_t const * const settings);
+
+/**
+ * @brief Sets the device settings.
+ *
+ * @param[in, out] device BME280 device
+ * @param[in]      settings The settings to set
+ *
+ * @return bme280_error_code_t Error code
+ **/
+static bme280_error_code_t BME280_SetSensorSettings(bme280_device_t * const device, bme280_settings_t const * const settings);
+
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                        Private (static) definitions                        //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
 
 static bme280_error_code_t BME280_CheckNull(bme280_device_t const * const device)
 {
-    if (device == NULL || device->handler == NULL)
+    if (device == NULL || device->handler == NULL || device->i2cDevice == NULL)
     {
-        LOG_ERROR("Found NULL pointer");
+        LOG_ERROR("Found NULL pointer on BME280");
         return BME280_NULL_POINTER;
     }
     else
@@ -48,7 +372,7 @@ static bme280_error_code_t BME280_CheckNull(bme280_device_t const * const device
     }
 }
 
-static bme280_error_code_t BME280_ReadRegisters(i2c_t const * const i2c, uint8_t const address, uint8_t const registerAddress, uint8_t * const dataBuffer, uint8_t const bufferLength)
+static bme280_error_code_t BME280_I2C_ReadRegisters(i2c_t const * const i2c, uint8_t const address, uint8_t const registerAddress, uint8_t * const dataBuffer, uint8_t const bufferLength)
 {
     bme280_error_code_t readResult = BME280_OK;
 
@@ -67,7 +391,7 @@ static bme280_error_code_t BME280_ReadRegisters(i2c_t const * const i2c, uint8_t
     return readResult;
 }
 
-static bme280_error_code_t BME280_WriteRegisters(i2c_t const * const i2c, uint8_t const address, uint8_t const * const registerAddresses, uint8_t const * const dataBuffer, uint8_t const bufferLength)
+static bme280_error_code_t BME280_I2C_WriteRegisters(i2c_t const * const i2c, uint8_t const address, uint8_t const * const registerAddresses, uint8_t const * const dataBuffer, uint8_t const bufferLength)
 {
     bme280_error_code_t writeResult = BME280_OK;
 
@@ -98,7 +422,7 @@ static bme280_error_code_t BME280_GetRegisters(bme280_device_t const * const dev
 
     if (getResult == BME280_OK && dataBuffer != NULL)
     {
-        if (device->handler->Read(device->i2cDevice, device->i2cAddress, registerAddress, dataBuffer, bufferLength) != BME280_OK)
+        if (device->handler->I2C_Read(device->i2cDevice, device->i2cAddress, registerAddress, dataBuffer, bufferLength) != BME280_OK)
         {
             getResult = BME280_COMMUNICATION_ERROR;
         }
@@ -121,7 +445,7 @@ static bme280_error_code_t BME280_SetRegisters(bme280_device_t const * const dev
     {
         if (bufferLength != 0)
         {
-            if (device->handler->Write(device->i2cDevice, device->i2cAddress, registerAddresses, dataBuffer, bufferLength) != BME280_OK)
+            if (device->handler->I2C_Write(device->i2cDevice, device->i2cAddress, registerAddresses, dataBuffer, bufferLength) != BME280_OK)
             {
                 setResult = BME280_COMMUNICATION_ERROR;
             }
@@ -217,12 +541,12 @@ static void BME280_ParseHumidityCalibration(bme280_calibration_data_t * const ca
     calibrationData->humidityCoef2 = (int16_t) BME280_CONCAT_BYTES(rawData[1], rawData[0]);
     calibrationData->humidityCoef3 = (uint8_t) rawData[2];
 
-    int16_t coefHumidity4_MSB = (int16_t) ((int8_t) rawData[3] << 4);
-    int16_t coefHumidity4_LSB = (int16_t) (rawData[4] & 0x0F);
+    int16_t coefHumidity4_MSB      = (int16_t) ((int8_t) rawData[3] << 4);
+    int16_t coefHumidity4_LSB      = (int16_t) (rawData[4] & 0x0F);
     calibrationData->humidityCoef4 = (int16_t) (coefHumidity4_MSB | coefHumidity4_LSB);
 
-    int16_t coefHumidity5_MSB = (int16_t) ((int8_t) rawData[5] << 4);
-    int16_t coefHumidity5_LSB = (int16_t) (rawData[4] >> 4);
+    int16_t coefHumidity5_MSB      = (int16_t) ((int8_t) rawData[5] << 4);
+    int16_t coefHumidity5_LSB      = (int16_t) (rawData[4] >> 4);
     calibrationData->humidityCoef5 = (int16_t) (coefHumidity5_MSB | coefHumidity5_LSB);
 
     calibrationData->humidityCoef6 = (int8_t) rawData[6];
@@ -266,9 +590,12 @@ static int32_t BME280_CompensateTemperature(bme280_uncompensated_data_t const * 
 {
     int32_t temperature = 0;
 
-    int32_t temp1 = (int32_t) ((uncompensatedData->temperature >> 3) - ((int32_t) calibrationData->temperatureCoef1 << 1));
+    int32_t temp1 = 0;
+    int32_t temp2 = 0;
+
+    temp1 = (int32_t) ((uncompensatedData->temperature >> 3) - ((int32_t) calibrationData->temperatureCoef1 << 1));
     temp1 = (temp1 * ((int32_t) calibrationData->temperatureCoef2)) >> 11;
-    int32_t temp2 = (int32_t) ((uncompensatedData->temperature >> 4) - ((int32_t) calibrationData->temperatureCoef1));
+    temp2 = (int32_t) ((uncompensatedData->temperature >> 4) - ((int32_t) calibrationData->temperatureCoef1));
     temp2 = (((temp2 * temp2) >> 12) * ((int32_t) calibrationData->temperatureCoef3)) >> 14;
     calibrationData->temperatureTemporary = temp1 + temp2;
 
@@ -292,8 +619,12 @@ static uint32_t BME280_CompensatePressure(bme280_uncompensated_data_t const * co
 {
     uint32_t pressure = 0;
 
-    int64_t temp1 = ((int64_t) calibrationData->temperatureTemporary) - 128000;
-    int64_t temp2 = temp1 * temp1 * (int64_t) calibrationData->pressureCoef6;
+    int64_t temp1 = 0;
+    int64_t temp2 = 0;
+    int64_t temp3 = 0;
+
+    temp1 = ((int64_t) calibrationData->temperatureTemporary) - 128000;
+    temp2 = temp1 * temp1 * (int64_t) calibrationData->pressureCoef6;
     temp2 = temp2 + ((temp1 * (int64_t) calibrationData->pressureCoef5) << 17);
     temp2 = temp2 + (((int64_t) calibrationData->pressureCoef4) << 35);
     temp1 = ((temp1 * temp1 * (int64_t) calibrationData->pressureCoef3) >> 8) + (temp1 * ((int64_t) calibrationData->pressureCoef2) << 12);
@@ -301,7 +632,7 @@ static uint32_t BME280_CompensatePressure(bme280_uncompensated_data_t const * co
 
     if (temp1 != 0)
     {
-        int64_t temp3 = ((int64_t) 1 << 20) - uncompensatedData->pressure;
+        temp3 = ((int64_t) 1 << 20) - uncompensatedData->pressure;
         temp3 = (((temp3 * ((int64_t) 1 << 31)) - temp2) * 3125) / temp1;
         temp1 = (((int64_t) calibrationData->pressureCoef9) * (temp3 >> 13) * (temp3 >> 13)) >> 25;
         temp2 = (((int64_t) calibrationData->pressureCoef8) * temp3) >> 19;
@@ -332,11 +663,17 @@ static uint32_t BME280_CompensateHumidity(bme280_uncompensated_data_t const * co
 {
     uint32_t humidity = 0;
 
-    int32_t temp1 = calibrationData->temperatureTemporary - ((int32_t) 76800);
-    int32_t temp2 = (int32_t) (uncompensatedData->humidity << 14);
-    int32_t temp3 = (int32_t) (((int32_t) calibrationData->humidityCoef4) << 20);
-    int32_t temp4 = ((int32_t) calibrationData->humidityCoef5) * temp1;
-    int32_t temp5 = ((temp2 - temp3 - temp4) + ((int32_t) 1 << 14)) >> 15;
+    int32_t temp1 = 0;
+    int32_t temp2 = 0;
+    int32_t temp3 = 0;
+    int32_t temp4 = 0;
+    int32_t temp5 = 0;
+
+    temp1 = calibrationData->temperatureTemporary - ((int32_t) 76800);
+    temp2 = (int32_t) (uncompensatedData->humidity << 14);
+    temp3 = (int32_t) (((int32_t) calibrationData->humidityCoef4) << 20);
+    temp4 = ((int32_t) calibrationData->humidityCoef5) * temp1;
+    temp5 = ((temp2 - temp3 - temp4) + ((int32_t) 1 << 14)) >> 15;
     temp2 = (temp1 * ((int32_t) calibrationData->humidityCoef6)) >> 10;
     temp3 = (temp1 * ((int32_t) calibrationData->humidityCoef3)) >> 11;
     temp4 = ((temp2 * (temp3 + ((int32_t) 1 << 15))) >> 10) + ((int32_t) 1 << 21);
@@ -383,15 +720,15 @@ static bme280_error_code_t BME280_CompensateData(bme280_device_t * const device,
 static void BME280_ParseSensorData(bme280_uncompensated_data_t * const uncompensatedData, uint8_t const * const data)
 {
     // Store the parsed register values for temperature data
-    uint32_t temperatureMSB = (uint32_t) data[3] << 12;
-    uint32_t temperatureLSB = (uint32_t) data[4] << 4;
+    uint32_t temperatureMSB  = (uint32_t) data[3] << 12;
+    uint32_t temperatureLSB  = (uint32_t) data[4] << 4;
     uint32_t temperatureXLSB = (uint32_t) data[5] >> 4;
 
     uncompensatedData->temperature = temperatureMSB | temperatureLSB | temperatureXLSB;
 
     // Store the parsed register values for pressure data
-    uint32_t pressureMSB = (uint32_t) data[0] << 12;
-    uint32_t pressureLSB = (uint32_t) data[1] << 4;
+    uint32_t pressureMSB  = (uint32_t) data[0] << 12;
+    uint32_t pressureLSB  = (uint32_t) data[1] << 4;
     uint32_t pressureXLSB = (uint32_t) data[2] >> 4;
 
     uncompensatedData->pressure = pressureMSB | pressureLSB | pressureXLSB;
@@ -457,7 +794,7 @@ static bme280_error_code_t BME280_SetOversamplingHumidity(bme280_device_t * cons
     return oversamplingResult;
 }
 
-bme280_error_code_t BME280_SetOversamplingSettings(bme280_device_t * const device, bme280_settings_t const * const settings)
+static bme280_error_code_t BME280_SetOversamplingSettings(bme280_device_t * const device, bme280_settings_t const * const settings)
 {
     bme280_error_code_t oversamplingResult = BME280_OK;
 
@@ -468,7 +805,7 @@ bme280_error_code_t BME280_SetOversamplingSettings(bme280_device_t * const devic
     return oversamplingResult;
 }
 
-bme280_error_code_t BME280_SetFilterStandbySettings(bme280_device_t * const device, bme280_settings_t const * const settings)
+static bme280_error_code_t BME280_SetFilterStandbySettings(bme280_device_t * const device, bme280_settings_t const * const settings)
 {
     bme280_error_code_t standbyFilterResult = BME280_OK;
 
@@ -578,16 +915,22 @@ static bme280_error_code_t BME280_SetSensorSettings(bme280_device_t * const devi
     return settingsResult;
 }
 
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                             Public definitions                             //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
 bme280_error_code_t BME280_Init(bme280_device_t * const device, bme280_handler_t const * const handler, i2c_t const * const i2cDevice, uint8_t const i2cAddress, bme280_settings_t const * const settings)
 {
-    device->i2cDevice = NULL;
+    device->i2cDevice = i2cDevice;
     device->i2cAddress = i2cAddress;
     device->handler = handler;
 
-    bme280_error_code_t initResult = BME280_OK;
+    device->i2cDevice->Initialize(I2C_FAST_MODE_PLUS);
 
-    uint8_t tryCount = 10;
-    uint8_t chipId = 0;
+    bme280_error_code_t initResult = BME280_OK;
 
     LOG_INFO("Started BME280 initialization");
 
@@ -595,7 +938,8 @@ bme280_error_code_t BME280_Init(bme280_device_t * const device, bme280_handler_t
 
     if (initResult == BME280_OK)
     {
-        device->i2cDevice = i2cDevice;
+        uint8_t tryCount = 10;
+        uint8_t chipId = 0;
 
         while (tryCount != 0)
         {
@@ -646,7 +990,7 @@ bme280_error_code_t BME280_Init(bme280_device_t * const device, bme280_handler_t
     return initResult;
 }
 
-bme280_error_code_t BME280_GetSensorData(bme280_device_t const * const device)
+bme280_error_code_t BME280_GetSensorData(bme280_device_t * const device)
 {
     bme280_error_code_t acquisitionResult = BME280_OK;
 
@@ -681,32 +1025,71 @@ bme280_error_code_t BME280_GetSensorData(bme280_device_t const * const device)
     return acquisitionResult;
 }
 
-int32_t BME280_GetTemperature(bme280_device_t const * const device)
+int32_t BME280_GetTemperature(bme280_data_t const * const deviceData)
 {
-    return device->data.temperature;
+    return deviceData->temperature;
 }
 
-uint32_t BME280_GetPressure(bme280_device_t const * const device)
+uint32_t BME280_GetPressure(bme280_data_t const * const deviceData)
 {
-    return device->data.pressure;
+    return deviceData->pressure;
 }
 
-uint32_t BME280_GetHuimidity(bme280_device_t const * const device)
+uint32_t BME280_GetHuimidity(bme280_data_t const * const deviceData)
 {
-    return device->data.humidity;
+    return deviceData->humidity;
 }
 
-double BME280_GetDisplayTemperature(bme280_device_t const * const device)
+double BME280_GetDisplayTemperature(bme280_data_t const * const deviceData)
 {
-    return 0.01f * (double) BME280_GetTemperature(device);
+    return 0.01f * (double) BME280_GetTemperature(deviceData);
 }
 
-double BME280_GetDisplayPressure(bme280_device_t const * const device)
+double BME280_GetDisplayPressure(bme280_data_t const * const deviceData)
 {
-    return 0.0001f * (double) BME280_GetPressure(device);
+    return 0.0001f * (double) BME280_GetPressure(deviceData);
 }
 
-double BME280_GetDisplayHumidity(bme280_device_t const * const device)
+double BME280_GetDisplayHumidity(bme280_data_t const * const deviceData)
 {
-    return (1.0f / 1024.0f) * (double) BME280_GetHuimidity(device);
+    return (1.0f / 1024.0f) * (double) BME280_GetHuimidity(deviceData);
 }
+
+void BME280_StructInterpret(void * const data, vector_t * const vector)
+{
+    bme280_data_t * const sensorData = (bme280_data_t *) data;
+
+    // Remove the checksum byte
+    Vector_RemoveByte(vector);
+
+    sensorData->temperature = (int32_t) Vector_RemoveDoubleWord(vector);
+    sensorData->pressure    = (uint32_t) Vector_RemoveDoubleWord(vector);
+    sensorData->humidity    = (uint32_t) Vector_RemoveDoubleWord(vector);
+
+    return;
+}
+
+void BME280_SerializeSensorData(bme280_device_t const * const device, uint8_t * const buffer)
+{
+    vector_t serializedBuffer;
+    Vector_Initialize(&serializedBuffer);
+
+    Vector_AddDoubleWord(&serializedBuffer, (uint32_t) BME280_GetHuimidity(&device->data));
+    Vector_AddDoubleWord(&serializedBuffer, (uint32_t) BME280_GetPressure(&device->data));
+    Vector_AddDoubleWord(&serializedBuffer, (uint32_t) BME280_GetTemperature(&device->data));
+
+    memcpy(buffer, serializedBuffer.internalBuffer, BME280_SERIALIZED_SIZE);
+
+    return;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                                  Modules                                   //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+bme280_handler_t const BME280_I2C0_Handler = {
+    .I2C_Read = BME280_I2C_ReadRegisters,
+    .I2C_Write = BME280_I2C_WriteRegisters,
+};

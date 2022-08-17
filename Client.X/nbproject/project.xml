@@ -3,7 +3,7 @@
     <type>com.microchip.mplab.nbide.embedded.makeproject</type>
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/make-project/1">
-            <name>InternProject</name>
+            <name>Client</name>
             <creation-uuid>e256b56a-1d50-46c0-a4c2-fd68265d7d6a</creation-uuid>
             <make-project-type>0</make-project-type>
             <c-extensions>c</c-extensions>
@@ -15,6 +15,8 @@
             <sourceRootList>
                 <sourceRootElem>src</sourceRootElem>
                 <sourceRootElem>include</sourceRootElem>
+                <sourceRootElem>../src</sourceRootElem>
+                <sourceRootElem>../include</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>
@@ -26,5 +28,17 @@
                 <project-formatting-style>false</project-formatting-style>
             </formatting>
         </data>
+        <spellchecker-wordlist xmlns="http://www.netbeans.org/ns/spellchecker-wordlist/1">
+            <word>bme</word>
+            <word>enums</word>
+            <word>initialization</word>
+            <word>Initializes</word>
+            <word>lf</word>
+            <word>prescaler</word>
+            <word>struct</word>
+            <word>structs</word>
+            <word>transsmition</word>
+            <word>Uncompensated</word>
+        </spellchecker-wordlist>
     </configuration>
 </project>

@@ -29,9 +29,26 @@
 
 #include "config.h"
 
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                             Public definitions                             //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
 extern uart_t const uart_1;
 
-void SetClockFrequency(uint8_t const frequency, uint8_t const prescalerEnabled, ...)
+__attribute__((always_inline)) inline void SetClockFrequencyWithPrescaler(uint8_t const frequency, uint8_t const prescaler)
+{
+    SetClockFrequency(frequency);
+
+    // Enable the prescaler and set it to the specified value
+    _PROTECTED_WRITE(CLKCTRL.MCLKCTRLB, CLKCTRL_PEN_bm | prescaler);
+
+    return;
+}
+
+__attribute__((always_inline)) inline void SetClockFrequency(uint8_t const frequency)
 {
     // Enable external crystal oscillator
     _PROTECTED_WRITE(CLKCTRL.XOSC32KCTRLA, CLKCTRL_ENABLE_bm);
@@ -42,31 +59,15 @@ void SetClockFrequency(uint8_t const frequency, uint8_t const prescalerEnabled, 
     // Set OSCHF clock to the specified frequency and enable auto-tune
     _PROTECTED_WRITE(CLKCTRL.OSCHFCTRLA, frequency | CLKCTRL_AUTOTUNE_bm);
 
-    if (prescalerEnabled)
-    {
-        va_list argument;
-        va_start(argument, prescalerEnabled);
-
-        uint8_t prescaler = (uint8_t) va_arg(argument, int);
-
-        // Enable the prescaler and set it to the specified value
-        _PROTECTED_WRITE(CLKCTRL.MCLKCTRLB, CLKCTRL_PEN_bm | prescaler);
-
-        va_end(argument);
-    }
-
-    // Lock the frequency and prescaler from changing
-    _PROTECTED_WRITE(CLKCTRL.MCLKLOCK, CLKCTRL_LOCKEN_bm);
-
     return;
 }
 
-void TightLoopContents(void)
+__attribute__((always_inline)) inline void TightLoopContents(void)
 {
     return;
 }
 
-void PrintForLogging(char const * const message)
+__attribute__((always_inline)) inline void PrintForLogging(char const * const message)
 {
     uart_1.Print(message);
 

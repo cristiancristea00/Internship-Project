@@ -1,9 +1,9 @@
 /**
- *  @file config.h
+ *  @file hc-05.h
  *  @author Cristian Cristea - M70957
- *  @date July 20, 2022
+ *  @date 11 August 2022
  *
- *  @brief Configuration file for the project that contains definitions
+ *  @brief Header file for the HC-05 module
  *
  *  @copyright (c) 2022 Microchip Technology Inc. and its subsidiaries.
  *
@@ -27,13 +27,8 @@
  **/
 
 
-#ifndef CONFIG_H
-#define	CONFIG_H
-
-/**
- * @brief This must be defined at the top to have other includes working
- **/
-#define F_CPU 24000000UL           // The CPU frequency. To be set manuallly.
+#ifndef HC05_H
+#define	HC05_H
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -42,25 +37,57 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include "config.h"
+#include "vector.h"
 #include "uart.h"
+#include "crc8.h"
 
 #include <util/delay.h>
-#include <avr/io.h>
 
+#include <stddef.h>
+#include <stdbool.h>
 #include <stdint.h>
+#include <string.h>
+#include <stdlib.h>
 
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
-//                             Macros and defines                             //
+//                        Typedefs, enums and structs                         //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-#define UART_PRINTF                // Uncomment to enable printf functionality on UART.
-#define LOGGING                    // Uncomment to enable logging
+typedef enum HC05_ERROR_CODE
+{
+    HC05_OK              = 0x00,
+    HC05_NULL_POINTER    = 0x01,
+    HC05_SEND_FAILED     = 0x02,
+    HC05_FAILED_CHECKSUM = 0x03
+} hc05_error_code_t;
 
-#define PauseMiliseconds(MILIS)          (_delay_ms((MILIS)))
-#define PauseMicroseconds(MICROS)        (_delay_us((MILIS)))
+typedef enum HC05_STATUS
+{
+    HC05_IDLE        = 0x00,
+    HC05_IN_PROGRESS = 0x01,
+    HC05_FINISHED    = 0x02,
+} hc05_status_t;
+
+typedef enum HC05_RESPONSE
+{
+    HC05_EMPTY            = 0x00,
+    HC05_ACKED            = 0x01,
+    HC05_NACKED           = 0x02,
+    HC05_INVALID_CHECKSUM = 0x03,
+    HC05_NOT_CONFIRMED    = 0x04
+} hc05_response_t;
+
+typedef struct HC05_DEVICE
+{
+    // UART device
+    uart_t const * uartDevice;
+} hc05_device_t;
+
+typedef void (* struct_interpret_t) (void * const, vector_t * const);
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -69,58 +96,39 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifdef LOGGING
-
-#include <stdio.h>
-
 /**
- * @brief TODO
+ * @brief Initializes the HC-05 device.
  *
- **/
-void PrintForLogging(char const * const message);
-
-#define LOG_DEBUG_PRINTF(STRING, ...)    (printf("[DEBUG]: " STRING "\n\r", ##__VA_ARGS__))
-#define LOG_INFO_PRINTF(STRING, ...)     (printf("[INFO]: " STRING "\n\r", ##__VA_ARGS__))
-#define LOG_WARNING_PRINTF(STRING, ...)  (printf("[WARNING]: " STRING "\n\r", ##__VA_ARGS__))
-#define LOG_ERROR_PRINTF(STRING, ...)    (printf("[ERROR]: " STRING "\n\r", ##__VA_ARGS__))
-
-#define LOG_DEBUG(STRING)                (PrintForLogging("[DEBUG]: " STRING "\n\r"))
-#define LOG_INFO(STRING)                 (PrintForLogging("[INFO]: " STRING "\n\r"))
-#define LOG_WARNING(STRING)              (PrintForLogging("[WARNING]: " STRING "\n\r"))
-#define LOG_ERROR(STRING)                (PrintForLogging("[ERROR]: " STRING "\n\r"))
-
-#else
-
-#define LOG_DEBUG_PRINTF
-#define LOG_INFO_PRINTF
-#define LOG_WARNING_PRINTF
-#define LOG_ERROR_PRINTF
-
-#define LOG_DEBUG
-#define LOG_INFO
-#define LOG_WARNING
-#define LOG_ERROR
-
-#endif // LOGGING
-
-/**
- * @brief Sets the CPU's clock frequency and the prescaler factor.
+ * @param[in, out] device HC-05 device
+ * @param[in]      uartDevice UART device
  *
- * @param[in] frequency The desired frequency of the CPU's clock
- * @param[in] prescaler The prescaler factor
+ * @return hc05_error_code_t Error code
  **/
-void SetClockFrequencyWithPrescaler(uint8_t const frequency, uint8_t const prescaler);
+hc05_error_code_t HC05_Initialize(hc05_device_t * const device, uart_t const * const uartDevice);
 
 /**
- * @brief Sets the CPU's clock frequency and optionally the prescaler factor.
+ * @brief Receives data from the HC-05 device and stores it in the given data
+ *        structure using the given interpret function. Receives just one packet
+ *        at a time and should be called within a loop.
  *
- * @param[in] frequency The desired frequency of the CPU's clock
+ * @param[in]  device HC-05 device
+ * @param[out] dataStructure Data structure to store the received data
+ * @param[in]  structInterpreter Interpret function to use on the data
+ *
+ * @return hc05_error_code_t Error code
  **/
-void SetClockFrequency(uint8_t const frequency);
+hc05_error_code_t HC05_ReceiveData(hc05_device_t const * const device, void * const dataStructure, struct_interpret_t structInterpreter);
 
 /**
- * @brief Empty function that should be used in loops for better readability.
+ * @brief  Sends data to the HC-05 device from a buffer. Sends just one packet
+ *         at a time and should be called within a loop.
+ *
+ * @param[in] device HC-05 device
+ * @param[in] buffer Buffer containing the data to send
+ * @param[in] bufferSize Size of the buffer
+ *
+ * @return hc05_error_code_t Error code
  **/
-void TightLoopContents(void);
+hc05_error_code_t HC05_SendData(hc05_device_t const * const device, uint8_t const * const buffer, uint8_t const bufferSize);
 
-#endif // CONFIG_H
+#endif // HC05_H
