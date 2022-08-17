@@ -30,19 +30,123 @@
 #include "i2c.h"
 
 
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                             Macros and defines                             //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+#define UINT8(X) ((uint8_t) (X))
+
+#define I2C_DATA_bm    UINT8(0x01)
+
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                        Typedefs, enums and structs                         //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+typedef enum I2C_STATE
+{
+    I2C_INIT   = 0x00,
+    I2C_ACKED  = 0x01,
+    I2C_NACKED = 0x02,
+    I2C_READY  = 0x03,
+    I2C_ERROR  = 0x04
+} i2c_state_t;
+
+typedef enum I2C_DATA_DIRECTION
+{
+    I2C_DATA_SEND    = 0x00,
+    I2C_DATA_RECEIVE = 0x01
+} i2c_data_direction_t;
+
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                            Private (static) API                            //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
 /**
- * @brief Module for I2C0
+ * @brief Initialize the I2C module on the TWI0 bus with the given mode.
+ *
+ * @param[in] mode The mode of the I2C bus: Standard, Fast or Fast Plus
+ **/
+__attribute__((always_inline)) inline static void I2C0_Inititialize(i2c_mode_t const mode);
+
+/**
+ * @brief Sets the I2C bus address of the device based on the given chip address
+ *        and the read/write bit.
+ *
+ * @param[in] deviceAddress The chip address of the device
+ * @param[in] dataDirection The direction of the data: send or receive
+ *
+ * @return i2c_error_code_t The error code of the operation
+ **/
+static i2c_error_code_t I2C0_SetAdressDirectionBit(uint8_t const deviceAddress, i2c_data_direction_t const dataDirection);
+
+/**
+ * @brief Waits for the I2C bus to be ready after write operation.
+ *
+ * @return i2c_state_t The response of the device: ACK, NACK or ERROR
+ **/
+static i2c_state_t I2C0_WaitWrite(void);
+
+/**
+ * @brief Waits for the I2C bus to be ready after read operation.
+ *
+ * @return i2c_state_t The response of the device: ACK, NACK or ERROR
+ **/
+static i2c_state_t I2C0_WaitRead(void);
+
+/**
+ * @brief Sends a specific number of bytes to the device using the I2C bus.
+ *
+ * @param[in] address The address of the device
+ * @param[in] dataForSend Pointer to the data to be sent
+ * @param[in] length The length of the data to be sent
+ *
+ * @return i2c_error_code_t The error code of the operation
+ **/
+static i2c_error_code_t I2C0_SendData(uint8_t const address, uint8_t const * const dataForSend, uint8_t const initialLength);
+
+/**
+ * @brief Receives a specific number of bytes from the device using the I2C bus.
+ *
+ * @param[in]  address The address of the device
+ * @param[out] dataForReceive Pointer to the data to be received
+ * @param[in]  length The length of the data to be received
+ *
+ * @return i2c_error_code_t The error code of the operation
+ **/
+static i2c_error_code_t I2C0_ReceiveData(uint8_t const address, uint8_t * dataForReceive, uint8_t const initialLength);
+
+/**
+ * @brief Ends the I2C communication by sending a stop condition.
  *
  **/
-i2c_t const i2c_0 = {
-    .Initialize = I2C0_Inititialize,
-    .SendData = I2C0_SendData,
-    .ReceiveData = I2C0_ReceiveData,
-    .EndTransaction = I2C0_EndTransation,
-    .ClientAvailable = I2C0_ClientAvailable
-};
+__attribute__((always_inline)) inline static void I2C0_EndTransation(void);
 
-static void I2C0_Inititialize(i2c_mode_t const mode)
+/**
+ * @brief Checks if a device is available on the I2C bus.
+ *
+ * @param[in] address The address of the device
+ *
+ * @return true If the device is available
+ * @return false If the device is not available
+ **/
+static bool I2C0_ClientAvailable(uint8_t const clientAddress);
+
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                        Private (static) definitions                        //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+__attribute__((always_inline)) inline static void I2C0_Inititialize(i2c_mode_t const mode)
 {
     // Select I2C pins to PC2 - SDA and PC3 - SCL
     PORTMUX.TWIROUTEA = PORTMUX_TWI0_ALT2_gc;
@@ -52,7 +156,7 @@ static void I2C0_Inititialize(i2c_mode_t const mode)
     PORTC.PIN3CTRL = PORT_PULLUPEN_bm;
 
     // Host baud rate control
-    TWI0.MBAUD = mode;
+    TWI0.MBAUD = (uint8_t) mode;
 
     // Enable Fast Mode Plus
     if (mode == I2C_FAST_MODE_PLUS)
@@ -142,7 +246,7 @@ static i2c_state_t I2C0_WaitRead(void)
     return state;
 }
 
-static void I2C0_EndTransation(void)
+__attribute__((always_inline)) inline static void I2C0_EndTransation(void)
 {
     // Sends STOP condition to the bus and clears the internal state of the host
     TWI0.MCTRLB = TWI_MCMD_STOP_gc;
@@ -248,3 +352,21 @@ static bool I2C0_ClientAvailable(uint8_t const clientAddress)
     I2C0_EndTransation();
     return (returnValue != I2C_NACK_OF_ADDRESS);
 }
+
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                                  Modules                                   //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * @brief Module for I2C0
+ **/
+i2c_t const i2c_0 = {
+    .Initialize = I2C0_Inititialize,
+    .SendData = I2C0_SendData,
+    .ReceiveData = I2C0_ReceiveData,
+    .EndTransaction = I2C0_EndTransation,
+    .ClientAvailable = I2C0_ClientAvailable
+};

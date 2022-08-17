@@ -3,7 +3,7 @@
  *  @author Cristian Cristea - M70957
  *  @date 18 July 2022
  *
- *  @brief Main source file for the project
+ *  @brief Main source file for the Client program
  *
  *  @copyright (c) 2022 Microchip Technology Inc. and its subsidiaries.
  *
@@ -28,36 +28,33 @@
 
 
 #include "config.h"
-#include "uart.h"
-#include "i2c.h"
+#include "vector.h"
 #include "bme280.h"
+#include "hc-05.h"
+#include "uart.h"
+#include "crc8.h"
+#include "i2c.h"
 
-#include <avr/io.h>
 #include <avr/cpufunc.h>
-#include <util/delay.h>
 
 #include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
 
+
+extern uart_t const uart_0;
 extern uart_t const uart_1;
 extern i2c_t const i2c_0;
 extern bme280_handler_t const BME280_I2C0_Handler;
 
-void BusScan(void);
-void SensorRead(bme280_device_t const * const device);
+static void BusScan(void);
+static void SensorRead(bme280_device_t * const device);
 
 void main(void)
 {
-    PORTC.DIRSET = PIN0_bm;
+    SetClockFrequency(CLKCTRL_FRQSEL_24M_gc);
 
-    SetClockFrequency(CLKCTRL_FRQSEL_24M_gc, PRESCALE_DISABLED);
-
-    uart_1.Initialize(UART_BAUD_RATE(460800));
-
-    i2c_0.Initialize(I2C_FAST_MODE_PLUS);
-
-    _delay_ms(5000);
-
-    BusScan();
+    uart_1.Initialize(460800);
 
     bme280_device_t weatherClick;
 
@@ -72,14 +69,23 @@ void main(void)
 
     BME280_Init(&weatherClick, &BME280_I2C0_Handler, &i2c_0, BME280_I2C_ADDRESS, &settings);
 
+    hc05_device_t sensorStation;
+    HC05_Initialize(&sensorStation, &uart_0);
+
+    uint8_t serializedSensorData[BME280_SERIALIZED_SIZE] = { 0 };
+
+    PauseMiliseconds(5000);
+
     while (true)
     {
         SensorRead(&weatherClick);
-        _delay_ms(60000);
+        BME280_SerializeSensorData(&weatherClick, &serializedSensorData);
+        HC05_SendData(&sensorStation, &serializedSensorData, BME280_SERIALIZED_SIZE);
+        PauseMiliseconds(5000);
     }
 }
 
-void SensorRead(bme280_device_t const * const device)
+static void SensorRead(bme280_device_t * const device)
 {
     bme280_error_code_t readResult = BME280_GetSensorData(device);
 
@@ -88,26 +94,11 @@ void SensorRead(bme280_device_t const * const device)
         return;
     }
 
-    printf("Temperature: %0.2lf °C\n\r", BME280_GetDisplayTemperature(device));
-    printf("Pressure: %0.2lf hPa\n\r", BME280_GetDisplayPressure(device));
-    printf("Relative humidity: %0.2lf%c\n\r", BME280_GetDisplayHumidity(device), '%');
+    bme280_data_t sensorData = device->data;
 
-    return;
-}
-
-void BusScan(void)
-{
-    uart_1.Print("\n\rI2C Scan started from 0x00 to 0x7F");
-
-    for (uint8_t clientAddress = I2C_ADRESS_MIN; clientAddress <= I2C_ADRESS_MAX; ++clientAddress)
-    {
-        printf("\n\rScanning client address: 0x%02X", clientAddress);
-        if (i2c_0.ClientAvailable(clientAddress))
-        {
-            uart_1.Print(" --> client ACKED");
-        }
-    }
-    uart_1.Print("\n\rI2C Scan ended\n\r");
+    printf("Temperature: %0.2lf °C\n\r", BME280_GetDisplayTemperature(&sensorData));
+    printf("Pressure: %0.2lf hPa\n\r", BME280_GetDisplayPressure(&sensorData));
+    printf("Relative humidity: %0.2lf%c\n\r", BME280_GetDisplayHumidity(&sensorData), '%');
 
     return;
 }

@@ -1,9 +1,9 @@
 /**
- *  @file i2c.h
+ *  @file crc8.h
  *  @author Cristian Cristea - M70957
- *  @date 22 July 2022
+ *  @date 12 August 2022
  *
- *  @brief Header file for the I2C module
+ *  @brief Header file for the CRC8 module
  *
  *  @copyright (c) 2022 Microchip Technology Inc. and its subsidiaries.
  *
@@ -27,8 +27,8 @@
  **/
 
 
-#ifndef I2C_H
-#define	I2C_H
+#ifndef CRC8_H
+#define	CRC8_H
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -37,60 +37,27 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <avr/io.h>
-
-#include <stddef.h>
-#include <stdbool.h>
+#include <stdint.h>
 
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
-//                             Macros and defines                             //
+//                                 Public API                                 //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
-
-#define I2C_ADRESS_MIN    UINT8(0x00)
-#define I2C_ADRESS_MAX    UINT8(0x7F)
-
-
-////////////////////////////////////////////////////////////////////////////////
-//                                                                            //
-//                        Typedefs, enums and structs                         //
-//                                                                            //
-////////////////////////////////////////////////////////////////////////////////
-
-typedef enum I2C_ERROR_CODE
-{
-    I2C_OK                  = 0x00,
-    I2C_NULL_POINTER        = 0x01,
-    I2C_INVALID_ADDRESS     = 0x02,
-    I2C_NACK_OF_ADDRESS     = 0x03,
-    I2C_COMMUNICATION_ERROR = 0x04
-} i2c_error_code_t;
-
-typedef enum I2C_MODE
-{
-    I2C_STANDARD_MODE  = 101,
-    I2C_FAST_MODE      = 21,
-    I2C_FAST_MODE_PLUS = 6
-} i2c_mode_t;
-
-typedef void (* i2c_initialize_t) (i2c_mode_t const);
-typedef int8_t (* i2c_send_data_t) (uint8_t const, uint8_t const *, uint8_t);
-typedef int8_t (* i2c_receive_data_t) (uint8_t const, uint8_t *, uint8_t);
-typedef void (* i2c_end_transaction_t) (void);
-typedef bool (* i2c_client_available_t) (uint8_t const);
 
 /**
- * @brief Object struct for the I2C module
+ * @brief Computes the CRC-8 of a given data buffer using the CRC-8-AUTOSAR
+ *        version. The CRC-8-AUTOSAR algorithm has the following properties:
+ *        - The polynomial is x^8 + x^5 + x^3 + x^2 + x + 1 (i.e. 0x2F)
+ *        - The initial value is 0xFF
+ *        - The final XOR value is 0xFF
+ *
+ * @param[in] data The data buffer to compute the CRC-8 of
+ * @param[in] dataLength The length of the data buffer
+ *
+ * @return uint8_t The CRC-8-AUTOSAR value of the data buffer
  **/
-typedef struct I2C
-{
-    i2c_initialize_t Initialize;
-    i2c_send_data_t SendData;
-    i2c_receive_data_t ReceiveData;
-    i2c_end_transaction_t EndTransaction;
-    i2c_client_available_t ClientAvailable;
-} i2c_t;
+uint8_t CRC8_Compute(uint8_t const * const data, uint8_t const dataLength);
 
-#endif // I2C_H
+#endif // CRC8_H
