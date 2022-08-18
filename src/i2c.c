@@ -8,12 +8,12 @@
  *  @copyright (c) 2022 Microchip Technology Inc. and its subsidiaries.
  *
  *  Subject to your compliance with these terms, you may use Microchip software
- *  and any derivatives exclusively with Microchip products. You’re responsible
+ *  and any derivatives exclusively with Microchip products. Youâ€™re responsible
  *  for complying with 3rd party license terms applicable to your use of 3rd
  *  party software (including open source software) that may accompany
  *  Microchip software.
  *
- *  SOFTWARE IS “AS IS.” NO WARRANTIES, WHETHER EXPRESS, IMPLIED OR STATUTORY,
+ *  SOFTWARE IS â€œAS IS.â€� NO WARRANTIES, WHETHER EXPRESS, IMPLIED OR STATUTORY,
  *  APPLY TO THIS SOFTWARE, INCLUDING ANY IMPLIED WARRANTIES OF
  *  NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
  *
@@ -21,7 +21,7 @@
  *  INCIDENTAL OR CONSEQUENTIAL LOSS, DAMAGE, COST OR EXPENSE OF ANY KIND
  *  WHATSOEVER RELATED TO THE SOFTWARE, HOWEVER CAUSED, EVEN IF MICROCHIP HAS
  *  BEEN ADVISED OF THE POSSIBILITY OR THE DAMAGES ARE FORESEEABLE. TO THE
- *  FULLEST EXTENT ALLOWED BY LAW, MICROCHIP’S TOTAL LIABILITY ON ALL CLAIMS
+ *  FULLEST EXTENT ALLOWED BY LAW, MICROCHIPâ€™S TOTAL LIABILITY ON ALL CLAIMS
  *  RELATED TO THE SOFTWARE WILL NOT EXCEED AMOUNT OF FEES, IF ANY, YOU PAID
  *  DIRECTLY TO MICROCHIP FOR THIS SOFTWARE.
  **/
@@ -125,7 +125,6 @@ static i2c_error_code_t I2C0_ReceiveData(uint8_t const address, uint8_t * dataFo
 
 /**
  * @brief Ends the I2C communication by sending a stop condition.
- *
  **/
 __attribute__((always_inline)) inline static void I2C0_EndTransation(void);
 

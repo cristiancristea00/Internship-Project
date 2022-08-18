@@ -37,52 +37,76 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 /**
- * TODO
+ * @brief Initialize the SPI module on the SPI0 bus.
  **/
 __attribute__((always_inline)) inline static void SPI0_Inititialize(void);
 
 /**
- * TODO
+ * @brief Enables (active low) chip select on the SPI0 bus.
  **/
 __attribute__((always_inline)) inline static void SPI0_ClientSelect(void);
 
 /**
- * TODO
+ * @brief Disables (active low) chip select on the SPI0 bus.
  **/
 __attribute__((always_inline)) inline static void SPI0_ClientDeselect(void);
 
 /**
- * TODO
+ * @brief Waits for the SPI0 bus to be ready.
  **/
 __attribute__((always_inline)) inline static void SPI0_WaitDataReady(void);
 
 /**
- * TODO
+ * @brief Sends a byte over the SPI0 bus.
+ *
+ * @param[in] byte The byte to send
  **/
 __attribute__((always_inline)) inline static void SPI0_SendByte(uint8_t const byte);
 
 /**
- * TODO
+ * @brief Receives a byte over the SPI0 bus.
+ *
+ * @return uint8_t The byte received
  **/
 __attribute__((always_inline)) inline static uint8_t SPI0_ReceiveByte(void);
 
 /**
- * TODO
+ * @brief Sends a byte over the SPI0 bus and receives a byte back.
+ *
+ * @param[in] byte The byte to send
+ *
+ * @return uint8_t The byte received
  **/
 __attribute__((always_inline)) inline static uint8_t SPI0_ExchangeByte(uint8_t const byte);
 
 /**
- * TODO
+ * @brief Sends a specified number of bytes to the device using the SPI bus.
+ *
+ * @param[in] dataForSend Pointer to the data to be sent
+ * @param[in] initialLength The length of the data to be sent
+ *
+ * @return spi_error_code_t
  **/
 static spi_error_code_t SPI0_SendData(uint8_t const * const dataForSend, uint8_t const initialLength);
 
 /**
- * TODO
+ * @brief Receives a specified number of bytes from the device using the SPI bus.
+ *
+ * @param[out] dataForReceive Pointer to the data to be received
+ * @param[in]  initialLength The length of the data to be received
+ *
+ * @return spi_error_code_t
  **/
 static spi_error_code_t SPI0_ReceiveData(uint8_t * const dataForReceive, uint8_t const initialLength);
 
 /**
- * TODO
+ * @brief Sends a specified number of bytes to the device using the SPI bus and
+ *        receives the same number of bytes back.
+ *
+ * @param[in, out] dataForExchange Pointer to the data to be sent and received
+ * @param[in]      initialLength The length of the data to be sent and received
+ *
+ * @return spi_error_code_t
  **/
 static spi_error_code_t SPI0_ExchangeData(uint8_t * const dataForExchange, uint8_t const initialLength);
 
