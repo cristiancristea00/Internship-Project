@@ -1,9 +1,9 @@
 /**
- *  @file i2c.h
+ *  @file spi.h
  *  @author Cristian Cristea - M70957
- *  @date 22 July 2022
+ *  @date 17 August 2022
  *
- *  @brief Header file for the I2C module
+ *  @brief Header file for the SPI module
  *
  *  @copyright (c) 2022 Microchip Technology Inc. and its subsidiaries.
  *
@@ -27,8 +27,8 @@
  **/
 
 
-#ifndef I2C_H
-#define	I2C_H
+#ifndef SPI_H
+#define	SPI_H
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -37,21 +37,13 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include "config.h"
+
 #include <avr/io.h>
 
-#include <stddef.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
-
-
-////////////////////////////////////////////////////////////////////////////////
-//                                                                            //
-//                             Macros and defines                             //
-//                                                                            //
-////////////////////////////////////////////////////////////////////////////////
-
-#define I2C_ADRESS_MIN    UINT8(0x00)
-#define I2C_ADRESS_MAX    UINT8(0x7F)
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -60,38 +52,27 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-typedef enum I2C_ERROR_CODE
+typedef enum SPI_ERROR_CODE
 {
-    I2C_OK                  = 0x00,
-    I2C_NULL_POINTER        = 0x01,
-    I2C_INVALID_ADDRESS     = 0x02,
-    I2C_NACK_OF_ADDRESS     = 0x03,
-    I2C_COMMUNICATION_ERROR = 0x04
-} i2c_error_code_t;
+    SPI_OK                  = 0x00,
+    SPI_NULL_POINTER        = 0x01
+} spi_error_code_t;
 
-typedef enum I2C_MODE
-{
-    I2C_STANDARD_MODE  = 101,
-    I2C_FAST_MODE      = 21,
-    I2C_FAST_MODE_PLUS = 6
-} i2c_mode_t;
-
-typedef void (* i2c_initialize_t) (i2c_mode_t const);
-typedef i2c_error_code_t (* i2c_send_data_t) (uint8_t const, uint8_t const *, uint8_t);
-typedef i2c_error_code_t (* i2c_receive_data_t) (uint8_t const, uint8_t *, uint8_t);
-typedef void (* i2c_end_transaction_t) (void);
-typedef bool (* i2c_client_available_t) (uint8_t const);
+typedef void (* spi_inititialize_t) (void);
+typedef spi_error_code_t (* spi_send_data_t) (uint8_t const * const, uint8_t const);
+typedef spi_error_code_t (* spi_receive_data_t) (uint8_t * const, uint8_t const);
+typedef spi_error_code_t (* spi_exchange_data_t) (uint8_t * const, uint8_t const);
 
 /**
- * @brief Object struct for the I2C module
+ * @brief Object struct for the SPI module
  **/
-typedef struct I2C
+typedef struct SPI
 {
-    i2c_initialize_t Initialize;
-    i2c_send_data_t SendData;
-    i2c_receive_data_t ReceiveData;
-    i2c_end_transaction_t EndTransaction;
-    i2c_client_available_t ClientAvailable;
-} i2c_t;
+    spi_inititialize_t Initialize;
+    spi_send_data_t SendData;
+    spi_receive_data_t ReceiveData;
+    spi_exchange_data_t ExchangeData;
+} spi_t;
 
-#endif // I2C_H
+#endif // SPI_H
+

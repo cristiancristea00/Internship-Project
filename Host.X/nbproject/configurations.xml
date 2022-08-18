@@ -10,6 +10,7 @@
       <itemPath>../include/hc-05.h</itemPath>
       <itemPath>../include/crc8.h</itemPath>
       <itemPath>../include/vector.h</itemPath>
+      <itemPath>../include/spi.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -25,6 +26,7 @@
       <itemPath>../src/crc8.c</itemPath>
       <itemPath>../src/hc-05.c</itemPath>
       <itemPath>../src/vector.c</itemPath>
+      <itemPath>../src/spi.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
