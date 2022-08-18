@@ -31,6 +31,48 @@
 #define	SPI_H
 
 
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                                  Includes                                  //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+#include "config.h"
+
+#include <avr/io.h>
+
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                        Typedefs, enums and structs                         //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+typedef enum SPI_ERROR_CODE
+{
+    SPI_OK                  = 0x00,
+    SPI_NULL_POINTER        = 0x01
+} spi_error_code_t;
+
+typedef void (* spi_inititialize_t) (void);
+typedef spi_error_code_t (* spi_send_data_t) (uint8_t const * const, uint8_t const);
+typedef spi_error_code_t (* spi_receive_data_t) (uint8_t * const, uint8_t const);
+typedef spi_error_code_t (* spi_exchange_data_t) (uint8_t * const, uint8_t const);
+
+/**
+ * @brief Object struct for the SPI module
+ **/
+typedef struct SPI
+{
+    spi_inititialize_t Initialize;
+    spi_send_data_t SendData;
+    spi_receive_data_t ReceiveData;
+    spi_exchange_data_t ExchangeData;
+} spi_t;
 
 #endif // SPI_H
 

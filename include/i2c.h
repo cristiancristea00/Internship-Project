@@ -41,6 +41,7 @@
 
 #include <stddef.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -76,8 +77,8 @@ typedef enum I2C_MODE
 } i2c_mode_t;
 
 typedef void (* i2c_initialize_t) (i2c_mode_t const);
-typedef int8_t (* i2c_send_data_t) (uint8_t const, uint8_t const *, uint8_t);
-typedef int8_t (* i2c_receive_data_t) (uint8_t const, uint8_t *, uint8_t);
+typedef i2c_error_code_t (* i2c_send_data_t) (uint8_t const, uint8_t const *, uint8_t);
+typedef i2c_error_code_t (* i2c_receive_data_t) (uint8_t const, uint8_t *, uint8_t);
 typedef void (* i2c_end_transaction_t) (void);
 typedef bool (* i2c_client_available_t) (uint8_t const);
 

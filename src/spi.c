@@ -28,3 +28,232 @@
 
 
 #include "spi.h"
+
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                            Private (static) API                            //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * TODO
+ **/
+__attribute__((always_inline)) inline static void SPI0_Inititialize(void);
+
+/**
+ * TODO
+ **/
+__attribute__((always_inline)) inline static void SPI0_ClientSelect(void);
+
+/**
+ * TODO
+ **/
+__attribute__((always_inline)) inline static void SPI0_ClientDeselect(void);
+
+/**
+ * TODO
+ **/
+__attribute__((always_inline)) inline static void SPI0_WaitDataReady(void);
+
+/**
+ * TODO
+ **/
+__attribute__((always_inline)) inline static void SPI0_SendByte(uint8_t const byte);
+
+/**
+ * TODO
+ **/
+__attribute__((always_inline)) inline static uint8_t SPI0_ReceiveByte(void);
+
+/**
+ * TODO
+ **/
+__attribute__((always_inline)) inline static uint8_t SPI0_ExchangeByte(uint8_t const byte);
+
+/**
+ * TODO
+ **/
+static spi_error_code_t SPI0_SendData(uint8_t const * const dataForSend, uint8_t const initialLength);
+
+/**
+ * TODO
+ **/
+static spi_error_code_t SPI0_ReceiveData(uint8_t * const dataForReceive, uint8_t const initialLength);
+
+/**
+ * TODO
+ **/
+static spi_error_code_t SPI0_ExchangeData(uint8_t * const dataForExchange, uint8_t const initialLength);
+
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                        Private (static) definitions                        //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+__attribute__((always_inline)) inline static void SPI0_Inititialize(void)
+{
+    // PA4 - MOSI - OUT | PA5 - MISO - IN | PA6 - SCK - OUT | PA7 - CS - OUT
+    PORTA.DIRSET = PIN4_bm | PIN6_bm | PIN7_bm;
+    PORTA.DIRCLR = PIN5_bm;
+
+    // PA4 - MOSI - LOW | PA6 - SCK - HIGH | PA7 - CS - HIGH
+    PORTA.OUTCLR = PIN4_bm | PIN6_bm;
+    PORTA.OUTSET = PIN7_bm;
+
+    // Disable internal pull-ups
+    PORTA.PIN4CTRL &= ~PORT_PULLUPEN_bm;
+    PORTA.PIN5CTRL &= ~PORT_PULLUPEN_bm;
+    PORTA.PIN6CTRL &= ~PORT_PULLUPEN_bm;
+    PORTA.PIN7CTRL &= ~PORT_PULLUPEN_bm;
+
+
+    SPI0.CTRLA = SPI_MASTER_bm | SPI_CLK2X_bm | SPI_PRESC_DIV4_gc | SPI_ENABLE_bm;
+
+    SPI0.CTRLB = SPI_SSD_bm | SPI_MODE_0_gc;
+
+    return;
+}
+
+static spi_error_code_t SPI0_SendData(uint8_t const * const dataForSend, uint8_t const initialLength)
+{
+    if (dataForSend == NULL)
+    {
+        return SPI_NULL_POINTER;
+    }
+
+    uint8_t length = initialLength;
+    uint8_t const * dataPointer = dataForSend;
+
+    SPI0_ClientSelect();
+
+    while (length != 0)
+    {
+        SPI0_SendByte(*dataPointer);
+
+        SPI0_WaitDataReady();
+
+        ++dataPointer;
+
+        --length;
+    }
+
+    SPI0_ClientDeselect();
+
+    return SPI_OK;
+}
+
+static spi_error_code_t SPI0_ReceiveData(uint8_t * const dataForReceive, uint8_t const initialLength)
+{
+    if (dataForReceive == NULL)
+    {
+        return SPI_NULL_POINTER;
+    }
+
+    uint8_t length = initialLength;
+    uint8_t * dataPointer = dataForReceive;
+
+    SPI0_ClientSelect();
+
+    while (length != 0)
+    {
+        *dataPointer = SPI0_ExchangeByte(0x00);
+
+        ++dataPointer;
+
+        --length;
+    }
+
+    SPI0_ClientDeselect();
+
+    return SPI_OK;
+}
+
+static spi_error_code_t SPI0_ExchangeData(uint8_t * const dataForExchange, uint8_t const initialLength)
+{
+    if (dataForExchange == NULL)
+    {
+        return SPI_NULL_POINTER;
+    }
+
+    uint8_t length = initialLength;
+    uint8_t * dataPointer = dataForExchange;
+
+    SPI0_ClientSelect();
+
+    while (length != 0)
+    {
+        *dataPointer = SPI0_ExchangeByte(*dataPointer);
+
+        ++dataPointer;
+
+        --length;
+    }
+
+    SPI0_ClientDeselect();
+
+    return SPI_OK;
+}
+
+__attribute__((always_inline)) inline static void SPI0_ClientSelect(void)
+{
+    PORTA.OUTCLR = PIN7_bm;
+
+    return;
+}
+
+__attribute__((always_inline)) inline static void SPI0_ClientDeselect(void)
+{
+    PORTA.OUTSET = PIN7_bm;
+
+    return;
+}
+
+__attribute__((always_inline)) inline static void SPI0_WaitDataReady(void)
+{
+    while (!(SPI0.INTFLAGS & SPI_RXCIF_bm))
+    {
+        TightLoopContents();
+    }
+
+    return;
+}
+
+__attribute__((always_inline)) inline static void SPI0_SendByte(uint8_t const byte)
+{
+    SPI0.DATA = byte;
+
+    return;
+}
+
+__attribute__((always_inline)) inline static uint8_t SPI0_ReceiveByte(void)
+{
+    return SPI0.DATA;
+}
+
+__attribute__((always_inline)) inline static uint8_t SPI0_ExchangeByte(uint8_t const byte)
+{
+    SPI0_SendByte(byte);
+
+    SPI0_WaitDataReady();
+
+    return SPI0_ReceiveByte();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                                  Modules                                   //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * @brief Module for SPI0
+ **/
+spi_t const spi_0 = {
+    .Initialize = SPI0_Inititialize,
+    .SendData = SPI0_SendData,
+    .ReceiveData = SPI0_ReceiveData,
+    .ExchangeData = SPI0_ExchangeData
+};
