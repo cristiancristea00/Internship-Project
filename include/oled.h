@@ -47,9 +47,38 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
+//                             Macros and defines                             //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+#define OLED_CHIP_SELECT      SPI_CS1
+
+#define OLED_DATA_CMD_PORT    PORTD
+#define OLED_DATA_CMD_PIN     PIN0
+
+#define OLED_RESET_PORT       PORTD
+#define OLED_RESET_PIN        PIN7
+
+#define OLED_ENABLE_PORT      PORTD
+#define OLED_ENABLE_PIN       PIN6
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
 //                        Typedefs, enums and structs                         //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
+
+typedef enum OLED_ERROR_CODE
+{
+    OLED_OK              = 0x00,
+    OLED_NULL_POINTER    = 0x01,
+} oled_error_code_t;
+
+typedef struct OLED_DEVICE
+{
+    // SPI device
+    spi_t const * spiDevice;
+} oled_device_t;
 
 
 ////////////////////////////////////////////////////////////////////////////////
