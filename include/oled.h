@@ -51,16 +51,19 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-#define OLED_CHIP_SELECT      SPI_CS1
+#define OLED_CHIP_SELECT         SPI_CS1
 
-#define OLED_DATA_CMD_PORT    PORTD
-#define OLED_DATA_CMD_PIN     PIN0
+#define OLED_DATA_COMMAND_PORT    PORTD
+#define OLED_DATA_COMMAND_PIN     PIN0
 
-#define OLED_RESET_PORT       PORTD
-#define OLED_RESET_PIN        PIN7
+#define OLED_RESET_PORT          PORTD
+#define OLED_RESET_PIN           PIN7
 
-#define OLED_ENABLE_PORT      PORTD
-#define OLED_ENABLE_PIN       PIN6
+#define OLED_ENABLE_PORT         PORTD
+#define OLED_ENABLE_PIN          PIN6
+
+#define OLED_READ_WRITE_PORT     PORTD // TOODO Change
+#define OLED_READ_WRITE_PIN      PIN4  // TOODO Change
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -87,7 +90,10 @@ typedef struct OLED_DEVICE
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-
+/**
+ * TODO
+ */
+void OLED_Initialize(oled_device_t const * const device);
 
 #endif // OLED_H
 
