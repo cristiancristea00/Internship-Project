@@ -43,13 +43,17 @@ __attribute__((always_inline)) inline static void SPI0_Inititialize(void);
 
 /**
  * @brief Enables (active low) chip select on the SPI0 bus.
+ *
+ * @param[in] chipSelect The corresponding chip select pin
  **/
-__attribute__((always_inline)) inline static void SPI0_ClientSelect(void);
+__attribute__((always_inline)) inline static void SPI0_ClientSelect(spi_chip_select_t const chipSelect);
 
 /**
  * @brief Disables (active low) chip select on the SPI0 bus.
+ *
+ * @param[in] chipSelect The corresponding chip select pin
  **/
-__attribute__((always_inline)) inline static void SPI0_ClientDeselect(void);
+__attribute__((always_inline)) inline static void SPI0_ClientDeselect(spi_chip_select_t const chipSelect);
 
 /**
  * @brief Waits for the SPI0 bus to be ready.
@@ -151,8 +155,6 @@ static spi_error_code_t SPI0_SendData(uint8_t const * const dataForSend, uint8_t
     uint8_t length = initialLength;
     uint8_t const * dataPointer = dataForSend;
 
-    SPI0_ClientSelect();
-
     while (length != 0)
     {
         SPI0_SendByte(*dataPointer);
@@ -163,8 +165,6 @@ static spi_error_code_t SPI0_SendData(uint8_t const * const dataForSend, uint8_t
 
         --length;
     }
-
-    SPI0_ClientDeselect();
 
     return SPI_OK;
 }
@@ -179,8 +179,6 @@ static spi_error_code_t SPI0_ReceiveData(uint8_t * const dataForReceive, uint8_t
     uint8_t length = initialLength;
     uint8_t * dataPointer = dataForReceive;
 
-    SPI0_ClientSelect();
-
     while (length != 0)
     {
         *dataPointer = SPI0_ExchangeByte(0x00);
@@ -189,8 +187,6 @@ static spi_error_code_t SPI0_ReceiveData(uint8_t * const dataForReceive, uint8_t
 
         --length;
     }
-
-    SPI0_ClientDeselect();
 
     return SPI_OK;
 }
@@ -205,8 +201,6 @@ static spi_error_code_t SPI0_ExchangeData(uint8_t * const dataForExchange, uint8
     uint8_t length = initialLength;
     uint8_t * dataPointer = dataForExchange;
 
-    SPI0_ClientSelect();
-
     while (length != 0)
     {
         *dataPointer = SPI0_ExchangeByte(*dataPointer);
@@ -216,21 +210,47 @@ static spi_error_code_t SPI0_ExchangeData(uint8_t * const dataForExchange, uint8
         --length;
     }
 
-    SPI0_ClientDeselect();
-
     return SPI_OK;
 }
 
-__attribute__((always_inline)) inline static void SPI0_ClientSelect(void)
+__attribute__((always_inline)) inline static void SPI0_ClientSelect(spi_chip_select_t const chipSelect)
 {
-    PORTA.OUTCLR = PIN7_bm;
+    switch (chipSelect)
+    {
+        case SPI_CS1:
+            PORTA.OUTCLR = PIN7_bm;
+            break;
+        case SPI_CS2:
+            PORTE.OUTCLR = PIN2_bm;
+            break;
+        case SPI_CS3:
+            PORTE.OUTCLR = PIN3_bm;
+            break;
+        default:
+            LOG_WARNING("Invalid SPI chip select pin");
+            break;
+    }
 
     return;
 }
 
-__attribute__((always_inline)) inline static void SPI0_ClientDeselect(void)
+__attribute__((always_inline)) inline static void SPI0_ClientDeselect(spi_chip_select_t const chipSelect)
 {
-    PORTA.OUTSET = PIN7_bm;
+    switch (chipSelect)
+    {
+        case SPI_CS1:
+            PORTA.OUTSET = PIN7_bm;
+            break;
+        case SPI_CS2:
+            PORTE.OUTSET = PIN2_bm;
+            break;
+        case SPI_CS3:
+            PORTE.OUTSET = PIN3_bm;
+            break;
+        default:
+            LOG_WARNING("Invalid SPI chip select pin");
+            break;
+    }
 
     return;
 }
@@ -279,5 +299,7 @@ spi_t const spi_0 = {
     .Initialize = SPI0_Inititialize,
     .SendData = SPI0_SendData,
     .ReceiveData = SPI0_ReceiveData,
-    .ExchangeData = SPI0_ExchangeData
+    .ExchangeData = SPI0_ExchangeData,
+    .ClientSelect = SPI0_ClientSelect,
+    .ClientDeselect = SPI0_ClientDeselect
 };
