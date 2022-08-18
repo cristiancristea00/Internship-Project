@@ -3,7 +3,7 @@
  *  @author Cristian Cristea - M70957
  *  @date August 10, 2022
  *
- *  @brief Main source file for the Host program
+ *  @brief Main source file for the Sensors station
  *
  *  @copyright (c) 2022 Microchip Technology Inc. and its subsidiaries.
  *
@@ -31,6 +31,7 @@
 #include "bme280.h"
 #include "hc-05.h"
 #include "uart.h"
+#include "oled.h"
 
 
 extern uart_t const uart_0;
