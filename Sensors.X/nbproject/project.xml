@@ -3,7 +3,7 @@
     <type>com.microchip.mplab.nbide.embedded.makeproject</type>
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/make-project/1">
-            <name>Host</name>
+            <name>Sensors</name>
             <creation-uuid>15690fba-1ad1-4bbb-85b9-1b1ebf8601cb</creation-uuid>
             <make-project-type>0</make-project-type>
             <c-extensions>c</c-extensions>
@@ -13,10 +13,9 @@
             <sourceEncoding>UTF-8</sourceEncoding>
             <make-dep-projects/>
             <sourceRootList>
-                <sourceRootElem>src</sourceRootElem>
-                <sourceRootElem>include</sourceRootElem>
                 <sourceRootElem>../include</sourceRootElem>
                 <sourceRootElem>../src</sourceRootElem>
+                <sourceRootElem>.</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>
@@ -30,6 +29,8 @@
         </data>
         <spellchecker-wordlist xmlns="http://www.netbeans.org/ns/spellchecker-wordlist/1">
             <word>bme</word>
+            <word>colour</word>
+            <word>colours</word>
             <word>Config</word>
             <word>const</word>
             <word>enums</word>
@@ -39,6 +40,7 @@
             <word>lf</word>
             <word>prescaler</word>
             <word>printf</word>
+            <word>structs</word>
             <word>uart</word>
             <word>uint</word>
         </spellchecker-wordlist>

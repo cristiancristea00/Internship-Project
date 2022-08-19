@@ -1,9 +1,9 @@
 /**
- *  @file spi.h
+ *  @file oled.h
  *  @author Cristian Cristea - M70957
- *  @date 17 August 2022
+ *  @date August 18, 2022
  *
- *  @brief Header file for the SPI module
+ *  @brief Header file for the OLED module
  *
  *  @copyright (c) 2022 Microchip Technology Inc. and its subsidiaries.
  *
@@ -27,8 +27,8 @@
  **/
 
 
-#ifndef SPI_H
-#define	SPI_H
+#ifndef OLED_H
+#define	OLED_H
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -38,13 +38,32 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "config.h"
+#include "spi.h"
 
-#include <avr/io.h>
-
-#include <stdbool.h>
 #include <stddef.h>
+#include <stdbool.h>
 #include <stdint.h>
 
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                             Macros and defines                             //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+#define OLED_CHIP_SELECT          SPI_CS1
+
+#define OLED_DATA_COMMAND_PORT    PORTD
+#define OLED_DATA_COMMAND_PIN     PIN0
+
+#define OLED_RESET_PORT           PORTD
+#define OLED_RESET_PIN            PIN7
+
+#define OLED_ENABLE_PORT          PORTD
+#define OLED_ENABLE_PIN           PIN6
+
+#define OLED_READ_WRITE_PORT      PORTD
+#define OLED_READ_WRITE_PIN       PIN3
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -52,45 +71,40 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-typedef enum SPI_ERROR_CODE
+typedef enum OLED_ERROR_CODE
 {
-    SPI_OK                  = 0x00,
-    SPI_NULL_POINTER        = 0x01
-} spi_error_code_t;
+    OLED_OK              = 0x00,
+    OLED_NULL_POINTER    = 0x01,
+} oled_error_code_t;
 
-typedef enum SPI_CHIP_SELECT
+typedef struct OLED_DEVICE
 {
-    SPI_CS1 = 0x00,
-    SPI_CS2 = 0x01,
-    SPI_CS3 = 0x02
-} spi_chip_select_t;
+    // SPI device
+    spi_t const * spiDevice;
+} oled_device_t;
 
-typedef void (* spi_inititialize_t) (void);
-typedef spi_error_code_t (* spi_send_data_t) (uint8_t const * const, uint8_t const);
-typedef spi_error_code_t (* spi_receive_data_t) (uint8_t * const, uint8_t const);
-typedef spi_error_code_t (* spi_exchange_data_t) (uint8_t * const, uint8_t const);
-typedef void  (* spi_client_t) (spi_chip_select_t const);
+typedef struct OLED_COLOUR
+{
+    uint8_t red;
+    uint8_t green;
+    uint8_t blue;
+} oled_colour_t;
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                                 Public API                                 //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
 
 /**
- * @brief Object struct for the SPI module
- **/
-typedef struct SPI
-{
-    spi_inititialize_t Initialize;
-    spi_send_data_t SendData;
-    spi_receive_data_t ReceiveData;
-    spi_exchange_data_t ExchangeData;
-    spi_client_t ClientSelect;
-    spi_client_t ClientDeselect;
-} spi_t;
+ * TODO
+ */
+void OLED_Initialize(oled_device_t * const device, spi_t const * const spiDevice);
 
-////////////////////////////////////////////////////////////////////////////////
-//                                                                            //
-//                                  Modules                                   //
-//                                                                            //
-////////////////////////////////////////////////////////////////////////////////
 
-extern spi_t const spi_0;
-
-#endif // SPI_H
+/**
+ * TODO
+ */
+void OLED_SetBackground(oled_device_t const * const device, oled_colour_t const colour);
+#endif // OLED_H
 

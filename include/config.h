@@ -60,7 +60,7 @@
 #define LOGGING                    // Uncomment to enable logging
 
 #define PauseMiliseconds(MILIS)          (_delay_ms((MILIS)))
-#define PauseMicroseconds(MICROS)        (_delay_us((MILIS)))
+#define PauseMicroseconds(MICROS)        (_delay_us((MICROS)))
 
 
 ////////////////////////////////////////////////////////////////////////////////
