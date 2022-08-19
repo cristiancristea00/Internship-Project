@@ -493,22 +493,11 @@ __attribute__((always_inline)) inline void OLED_Initialize(oled_device_t * const
     OLED_ClearEnablePin();
     OLED_SetResetPin();
     OLED_SetWriteMode();
-
-    PauseMiliseconds(1);
-
     OLED_ClearResetPin();
-
-    PauseMicroseconds(2);
-
     OLED_SetResetPin();
     OLED_SetEnablePin();
 
-    PauseMiliseconds(1);
-
     OLED_DisableSleepMode(device);
-
-    PauseMiliseconds(200);
-
     OLED_SetColumnAddressBounds(device, 0, OLED_MAX_ADDRESS_BOUND);
     OLED_SetRowAddressBounds(device, 0, OLED_MAX_ADDRESS_BOUND);
     OLED_SetDisplayOptions(device);
