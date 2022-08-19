@@ -72,6 +72,16 @@ __attribute__((always_inline)) inline void OLED_DRAW_Rectangle(oled_device_t con
  **/
 __attribute__((always_inline)) inline void OLED_DRAW_FilledRectangle(oled_device_t const * const device, oled_point_t const startPoint, oled_point_t const endPoint, oled_colour_t const colour);
 
+/**
+ * TODO
+ **/
+__attribute__((always_inline)) inline void OLED_DRAW_Circle(oled_device_t const * const device, oled_point_t const center, uint8_t const radius, uint8_t const width, oled_colour_t const colour);
+
+/**
+ * TODO
+ **/
+__attribute__((always_inline)) inline void OLED_DRAW_Disc(oled_device_t const * const device, oled_point_t const center, uint8_t const radius, oled_colour_t const colour);
+
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
 //                        Private (static) definitions                        //
@@ -135,6 +145,16 @@ __attribute__((always_inline)) inline void OLED_DRAW_FilledRectangle(oled_device
     return;
 }
 
+__attribute__((always_inline)) inline void OLED_DRAW_Circle(oled_device_t const * const device, oled_point_t const center, uint8_t const radius, uint8_t const width, oled_colour_t const colour)
+{
+    // TODO
+}
+
+__attribute__((always_inline)) inline void OLED_DRAW_Disc(oled_device_t const * const device, oled_point_t const center, uint8_t const radius, oled_colour_t const colour)
+{
+    // TODO
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
 //                             Public definitions                             //
@@ -164,6 +184,14 @@ void OLED_SetShape(oled_shape_t * const shape, oled_shape_type_t const type, ole
             shape->parameters.filled_rectangle = parameters->filled_rectangle;
             shape->Draw = OLED_DrawFilledRectangle;
             break;
+        case OLED_SHAPE_CIRCLE:
+            shape->parameters.circle = parameters->circle;
+            shape->Draw = OLED_DrawCircle;
+            break;
+        case OLED_SHAPE_DISC:
+            shape->parameters.disc = parameters->disc;
+            shape->Draw = OLED_DrawDisc;
+            break;
         default:
             LOG_ERROR("Invalid shape in shape creation");
             break;
@@ -181,17 +209,35 @@ void OLED_DrawPoint(oled_device_t const * const device, oled_shape_t const * con
 
 void OLED_DrawLine(oled_device_t const * const device, oled_shape_t const * const shape)
 {
-    // TODO
+    OLED_DRAW_Line(device, shape->parameters.line.start, shape->parameters.line.end, shape->parameters.line.width, OLED_ParseIntegerToRGB(shape->colour));
+    
+    return;
 }
 
 void OLED_DrawRectangle(oled_device_t const * const device, oled_shape_t const * const shape)
 {
     OLED_DRAW_Rectangle(device, shape->parameters.rectangle.start, shape->parameters.rectangle.end, shape->parameters.rectangle.width, OLED_ParseIntegerToRGB(shape->colour));
+    
+    return;
 }
 
 void OLED_DrawFilledRectangle(oled_device_t const * const device, oled_shape_t const * const shape)
 {
     OLED_DRAW_FilledRectangle(device, shape->parameters.filled_rectangle.start, shape->parameters.filled_rectangle.end, OLED_ParseIntegerToRGB(shape->colour));
 
+    return;
+}
+
+void OLED_DrawCircle(oled_device_t const * const device, oled_shape_t const * const shape)
+{
+    OLED_DRAW_Circle(device, shape->parameters.circle.center, shape->parameters.circle.radius, shape->parameters.circle.width, OLED_ParseIntegerToRGB(shape->colour));
+    
+    return;
+}
+
+void OLED_DrawDisc(oled_device_t const * const device, oled_shape_t const * const shape)
+{
+    OLED_DRAW_Disc(device, shape->parameters.disc.center, shape->parameters.disc.radius, OLED_ParseIntegerToRGB(shape->colour));
+    
     return;
 }

@@ -51,8 +51,8 @@ typedef enum OLED_SHAPE_TYPE
     OLED_SHAPE_LINE             = 0x01,
     OLED_SHAPE_RECTANGLE        = 0x02,
     OLED_SHAPE_FILLED_RECTANGLE = 0x03,
-	OLED_SHAPE_CIRCLE           = 0x04,
-	OLED_SHAPE_RING             = 0x05,
+	OLED_SHAPE_DISC             = 0x04,
+	OLED_SHAPE_CIRCLE           = 0x05,
 	OLED_SHAPE_CHARACTER        = 0x06,
 	OLED_SHAPE_STRING           = 0x07,
 	OLED_SHAPE_BITMAP           = 0x08,
@@ -81,10 +81,22 @@ typedef union OLED_SHAPE_PARAMETERS
         oled_point_t end;
         uint8_t width;
     } rectangle;
+    
     struct {
         oled_point_t start;
         oled_point_t end;
     } filled_rectangle;
+    
+    struct {
+        oled_point_t center;
+        uint8_t radius;
+        uint8_t width;
+    } circle;
+    
+    struct {
+        oled_point_t center;
+        uint8_t radius;
+    } disc;
 } oled_shape_parameters_t;
 
 typedef struct OLED_SHAPE
@@ -125,6 +137,16 @@ void OLED_DrawRectangle(oled_device_t const * const device, oled_shape_t const *
  * TODO
  */
 void OLED_DrawFilledRectangle(oled_device_t const * const device, oled_shape_t const * const shape);
+
+/**
+ * TODO
+ */
+void OLED_DrawCircle(oled_device_t const * const device, oled_shape_t const * const shape);
+
+/**
+ * TODO
+ */
+void OLED_DrawDisc(oled_device_t const * const device, oled_shape_t const * const shape);
 
 #endif // OLED_DRAW_H
 
