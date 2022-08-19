@@ -51,8 +51,6 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-#define OLED_MAX_ADDRESS_BOUND    96
-
 #define OLED_CHIP_SELECT          SPI_CS1
 
 #define OLED_DATA_COMMAND_PORT    PORTD
@@ -103,6 +101,40 @@ typedef struct OLED_COLOUR
  */
 void OLED_Initialize(oled_device_t * const device, spi_t const * const spiDevice);
 
+/**
+ * TODO
+ */
+void OLED_StartWritingDisplay(oled_device_t const * const device);
+
+/**
+ * TODO
+ */
+void OLED_StopWritingDisplay(oled_device_t const * const device);
+
+/**
+ * TODO
+ */
+void OLED_SetRowAddressBounds(oled_device_t const * const device, uint8_t const min, uint8_t const max);
+
+/**
+ * TODO
+ */
+uint16_t  OLED_ParseRGBToInteger(oled_colour_t const rgb);
+
+/**
+ * TODO
+ */
+oled_colour_t OLED_ParseIntegerToRGB(uint16_t const rawData);
+
+/**
+ * TODO
+ */
+void OLED_SetColumnAddressBounds(oled_device_t const * const device, uint8_t const min, uint8_t const max);
+
+/**
+ * TODO
+ */
+void OLED_SendColor(oled_device_t const * const device, oled_colour_t const colour);
 
 /**
  * TODO

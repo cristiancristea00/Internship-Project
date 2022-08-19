@@ -45,13 +45,86 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
+typedef enum OLED_SHAPE_TYPE
+{
+    OLED_SHAPE_POINT            = 0x00,
+    OLED_SHAPE_LINE             = 0x01,
+    OLED_SHAPE_RECTANGLE        = 0x02,
+    OLED_SHAPE_FILLED_RECTANGLE = 0x03,
+	OLED_SHAPE_CIRCLE           = 0x04,
+	OLED_SHAPE_RING             = 0x05,
+	OLED_SHAPE_CHARACTER        = 0x06,
+	OLED_SHAPE_STRING           = 0x07,
+	OLED_SHAPE_BITMAP           = 0x08,
+} oled_shape_type_t;
 
+typedef struct OLED_POINT
+{
+    uint8_t x;
+    uint8_t y;
+} oled_point_t;
+
+typedef union OLED_SHAPE_PARAMETERS
+{
+    struct {
+        oled_point_t point;
+    } point;
+    
+    struct {
+        oled_point_t start;
+        oled_point_t end;
+        uint8_t width;
+    } line;
+    
+    struct {
+        oled_point_t start;
+        oled_point_t end;
+        uint8_t width;
+    } rectangle;
+    struct {
+        oled_point_t start;
+        oled_point_t end;
+    } filled_rectangle;
+} oled_shape_parameters_t;
+
+typedef struct OLED_SHAPE
+{
+    uint16_t colour;
+    oled_shape_type_t type;
+    oled_shape_parameters_t parameters;
+    void (* Draw) (oled_device_t const * const, struct OLED_SHAPE *);
+} oled_shape_t;
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
 //                                 Public API                                 //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * TODO
+ */
+void OLED_SetShape(oled_shape_t * const shape, oled_shape_type_t const type, oled_shape_parameters_t const * const parameters, oled_colour_t const colour);
+
+/**
+ * TODO
+ */
+void OLED_DrawPoint(oled_device_t const * const device, oled_shape_t const * const shape);
+
+/**
+ * TODO
+ */
+void OLED_DrawLine(oled_device_t const * const device, oled_shape_t const * const shape);
+
+/**
+ * TODO
+ */
+void OLED_DrawRectangle(oled_device_t const * const device, oled_shape_t const * const shape);
+
+/**
+ * TODO
+ */
+void OLED_DrawFilledRectangle(oled_device_t const * const device, oled_shape_t const * const shape);
 
 #endif // OLED_DRAW_H
 
