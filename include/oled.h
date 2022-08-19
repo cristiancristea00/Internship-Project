@@ -51,19 +51,19 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-#define OLED_CHIP_SELECT         SPI_CS1
+#define OLED_CHIP_SELECT          SPI_CS1
 
 #define OLED_DATA_COMMAND_PORT    PORTD
 #define OLED_DATA_COMMAND_PIN     PIN0
 
-#define OLED_RESET_PORT          PORTD
-#define OLED_RESET_PIN           PIN7
+#define OLED_RESET_PORT           PORTD
+#define OLED_RESET_PIN            PIN7
 
-#define OLED_ENABLE_PORT         PORTD
-#define OLED_ENABLE_PIN          PIN6
+#define OLED_ENABLE_PORT          PORTD
+#define OLED_ENABLE_PIN           PIN6
 
-#define OLED_READ_WRITE_PORT     PORTD // TOODO Change
-#define OLED_READ_WRITE_PIN      PIN4  // TOODO Change
+#define OLED_READ_WRITE_PORT      PORTD
+#define OLED_READ_WRITE_PIN       PIN3
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -83,6 +83,12 @@ typedef struct OLED_DEVICE
     spi_t const * spiDevice;
 } oled_device_t;
 
+typedef struct OLED_COLOUR
+{
+    uint8_t red;
+    uint8_t green;
+    uint8_t blue;
+} oled_colour_t;
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -95,5 +101,10 @@ typedef struct OLED_DEVICE
  */
 void OLED_Initialize(oled_device_t const * const device);
 
+
+/**
+ * TODO
+ */
+void OLED_SetBackground(oled_device_t const * const device, oled_colour_t const colour);
 #endif // OLED_H
 

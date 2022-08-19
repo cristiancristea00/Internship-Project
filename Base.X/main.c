@@ -27,41 +27,64 @@
  **/
 
 
+//#include "config.h"
+//#include "bme280.h"
+//#include "hc-05.h"
+//#include "uart.h"
+//#include "oled.h"
+//
+//
+//extern uart_t const uart_0;
+//extern uart_t const uart_1;
+//
+//static void DisplayData(bme280_data_t * const sensorsData);
+//
+//void main(void)
+//{
+//    SetClockFrequency(CLKCTRL_FRQSEL_24M_gc);
+//
+//    uart_1.Initialize(460800);
+//
+//    hc05_device_t baseStation;
+//    HC05_Initialize(&baseStation, &uart_0);
+//
+//    bme280_data_t sensorsData;
+//
+//    while (true)
+//    {
+//        HC05_ReceiveData(&baseStation, &sensorsData, BME280_StructInterpret);
+//        DisplayData(&sensorsData);
+//    }
+//}
+//
+//static void DisplayData(bme280_data_t * const sensorsData)
+//{
+//    printf("Temperature: %0.2lf °C\n\r", BME280_GetDisplayTemperature(sensorsData));
+//    printf("Pressure: %0.2lf hPa\n\r", BME280_GetDisplayPressure(sensorsData));
+//    printf("Relative humidity: %0.2lf%c\n\r", BME280_GetDisplayHumidity(sensorsData), '%');
+//
+//    return;
+//}
+
 #include "config.h"
-#include "bme280.h"
-#include "hc-05.h"
-#include "uart.h"
 #include "oled.h"
-
-
-extern uart_t const uart_0;
-extern uart_t const uart_1;
-
-static void DisplayData(bme280_data_t * const sensorsData);
 
 void main(void)
 {
-    SetClockFrequency(CLKCTRL_FRQSEL_24M_gc);
+    oled_device_t OLEDC;
 
-    uart_1.Initialize(460800);
+    OLED_Initialize(&OLEDC);
 
-    hc05_device_t baseStation;
-    HC05_Initialize(&baseStation, &uart_0);
+    oled_colour_t const background = {
+        .red = 0XFF,
+        .green = 0x00,
+        .blue = 0x00
+    };
 
-    bme280_data_t sensorsData;
+    OLED_SetBackground(&OLEDC, background);
 
     while (true)
     {
-        HC05_ReceiveData(&baseStation, &sensorsData, BME280_StructInterpret);
-        DisplayData(&sensorsData);
+        TightLoopContents();
     }
-}
-
-static void DisplayData(bme280_data_t * const sensorsData)
-{
-    printf("Temperature: %0.2lf °C\n\r", BME280_GetDisplayTemperature(sensorsData));
-    printf("Pressure: %0.2lf hPa\n\r", BME280_GetDisplayPressure(sensorsData));
-    printf("Relative humidity: %0.2lf%c\n\r", BME280_GetDisplayHumidity(sensorsData), '%');
-
-    return;
 }

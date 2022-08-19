@@ -29,6 +29,8 @@
         </data>
         <spellchecker-wordlist xmlns="http://www.netbeans.org/ns/spellchecker-wordlist/1">
             <word>bme</word>
+            <word>colour</word>
+            <word>colours</word>
             <word>Config</word>
             <word>const</word>
             <word>enums</word>
@@ -38,6 +40,7 @@
             <word>lf</word>
             <word>prescaler</word>
             <word>printf</word>
+            <word>structs</word>
             <word>uart</word>
             <word>uint</word>
         </spellchecker-wordlist>
