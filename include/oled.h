@@ -99,7 +99,7 @@ typedef struct OLED_COLOUR
 /**
  * TODO
  */
-void OLED_Initialize(oled_device_t const * const device);
+void OLED_Initialize(oled_device_t * const device, spi_t const * const spiDevice);
 
 
 /**

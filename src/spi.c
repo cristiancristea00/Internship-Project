@@ -137,10 +137,9 @@ __attribute__((always_inline)) inline static void SPI0_Inititialize(void)
     PORTA.PIN6CTRL &= ~PORT_PULLUPEN_bm;
     PORTA.PIN7CTRL &= ~PORT_PULLUPEN_bm;
 
+    SPI0.CTRLB = SPI_SSD_bm | SPI_MODE_0_gc;
 
     SPI0.CTRLA = SPI_MASTER_bm | SPI_CLK2X_bm | SPI_PRESC_DIV4_gc | SPI_ENABLE_bm;
-
-    SPI0.CTRLB = SPI_SSD_bm | SPI_MODE_0_gc;
 
     return;
 }

@@ -68,18 +68,20 @@
 
 #include "config.h"
 #include "oled.h"
+#include "spi.h"
 
 void main(void)
 {
     oled_device_t OLEDC;
 
-    OLED_Initialize(&OLEDC);
+    OLED_Initialize(&OLEDC, &spi_0);
 
     oled_colour_t const background = {
         .red = 0XFF,
         .green = 0x00,
         .blue = 0x00
     };
+
 
     OLED_SetBackground(&OLEDC, background);
 
