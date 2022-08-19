@@ -1,9 +1,9 @@
 /**
- *  @file oled.h
+ *  @file oled-draw.c
  *  @author Cristian Cristea - M70957
- *  @date August 18, 2022
+ *  @date August 19, 2022
  *
- *  @brief Header file for the OLED module
+ *  @brief Source file for the OLED drawing module
  *
  *  @copyright (c) 2022 Microchip Technology Inc. and its subsidiaries.
  *
@@ -27,22 +27,7 @@
  **/
 
 
-#ifndef OLED_H
-#define	OLED_H
-
-
-////////////////////////////////////////////////////////////////////////////////
-//                                                                            //
-//                                  Includes                                  //
-//                                                                            //
-////////////////////////////////////////////////////////////////////////////////
-
-#include "config.h"
-#include "spi.h"
-
-#include <stddef.h>
-#include <stdbool.h>
-#include <stdint.h>
+#include "oled-draw.h"
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -51,62 +36,26 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-#define OLED_MAX_ADDRESS_BOUND    96
 
-#define OLED_CHIP_SELECT          SPI_CS1
-
-#define OLED_DATA_COMMAND_PORT    PORTD
-#define OLED_DATA_COMMAND_PIN     PIN0
-
-#define OLED_RESET_PORT           PORTD
-#define OLED_RESET_PIN            PIN7
-
-#define OLED_ENABLE_PORT          PORTD
-#define OLED_ENABLE_PIN           PIN6
-
-#define OLED_READ_WRITE_PORT      PORTD
-#define OLED_READ_WRITE_PIN       PIN3
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
-//                        Typedefs, enums and structs                         //
+//                            Private (static) API                            //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-typedef enum OLED_ERROR_CODE
-{
-    OLED_OK              = 0x00,
-    OLED_NULL_POINTER    = 0x01,
-} oled_error_code_t;
 
-typedef struct OLED_DEVICE
-{
-    // SPI device
-    spi_t const * spiDevice;
-} oled_device_t;
-
-typedef struct OLED_COLOUR
-{
-    uint8_t red;
-    uint8_t green;
-    uint8_t blue;
-} oled_colour_t;
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
-//                                 Public API                                 //
+//                        Private (static) definitions                        //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-/**
- * TODO
- */
-void OLED_Initialize(oled_device_t * const device, spi_t const * const spiDevice);
 
 
-/**
- * TODO
- */
-void OLED_SetBackground(oled_device_t const * const device, oled_colour_t const colour);
-#endif // OLED_H
-
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                             Public definitions                             //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////

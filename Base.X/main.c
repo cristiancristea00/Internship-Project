@@ -68,25 +68,47 @@
 
 #include "config.h"
 #include "oled.h"
+#include "oled-draw.h"
 #include "spi.h"
 
 void main(void)
 {
+    SetClockFrequency(CLKCTRL_FRQSEL_24M_gc);
+
     oled_device_t OLEDC;
 
     OLED_Initialize(&OLEDC, &spi_0);
 
-    oled_colour_t const background = {
-        .red = 0XFF,
-        .green = 0x00,
-        .blue = 0x00
-    };
+    PauseMiliseconds(5000);
 
-
-    OLED_SetBackground(&OLEDC, background);
+    oled_colour_t background;
 
     while (true)
     {
-        TightLoopContents();
+        background.red   = 0xFF;
+        background.green = 0x00;
+        background.blue  = 0x00;
+
+        OLED_SetBackground(&OLEDC, background);
+
+        PauseMiliseconds(1000);
+
+
+        background.red   = 0x00;
+        background.green = 0xFF;
+        background.blue  = 0x00;
+
+        OLED_SetBackground(&OLEDC, background);
+
+        PauseMiliseconds(1000);
+
+
+        background.red   = 0x00;
+        background.green = 0x00;
+        background.blue  = 0xFF;
+
+        OLED_SetBackground(&OLEDC, background);
+
+        PauseMiliseconds(1000);
     }
 }

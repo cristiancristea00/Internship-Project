@@ -44,8 +44,6 @@
 #define OLED_CLR_PORT_PIN(PORT, PIN)    (PORT.OUTCLR = (1 << (PIN)))
 #define OLED_OUT_PORT_PIN(PORT, PIN)    (PORT.DIRSET = (1 << (PIN)))
 
-#define OLED_MAX_ADDRESS_BOUND 96
-
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
