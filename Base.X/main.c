@@ -79,42 +79,27 @@ void main(void)
 
     OLED_Initialize(&OLEDC, &spi_0);
 
-    PauseMiliseconds(5000);
-
     oled_colour_t red   = { 0xFF, 0x00, 0x00 };
     oled_colour_t green = { 0x00, 0xFF, 0x00 };
     oled_colour_t blue  = { 0x00, 0x00, 0xFF };
+    oled_colour_t black = { 0x00, 0x00, 0x00 };
+
+    oled_point_t start = { 20, 20 };
+    oled_point_t end = { 80, 80 };
 
     oled_shape_parameters_t squareParameters;
-    oled_point_t start = { 20, 20 };
-    oled_point_t end = { 75, 75 };
-    squareParameters.filled_rectangle.start = start;
-    squareParameters.filled_rectangle.end   = end;
+    squareParameters.rectangle.start = start;
+    squareParameters.rectangle.end   = end;
+    squareParameters.rectangle.width = 2;
 
     oled_shape_t square;
-    OLED_SetShape(&square, OLED_SHAPE_FILLED_RECTANGLE, &squareParameters, green);
+    OLED_SetShape(&square, OLED_SHAPE_RECTANGLE, &squareParameters, red);
+
+    OLED_SetBackground(&OLEDC, black);
+    square.Draw(&OLEDC, &square);
 
     while (true)
     {
-        OLED_SetShape(&square, OLED_SHAPE_FILLED_RECTANGLE, &squareParameters, blue);
-
-        OLED_SetBackground(&OLEDC, red);
-        square.Draw(&OLEDC, &square);
-
-        PauseMiliseconds(5000);
-
-        OLED_SetShape(&square, OLED_SHAPE_FILLED_RECTANGLE, &squareParameters, red);
-
-        OLED_SetBackground(&OLEDC, green);
-        square.Draw(&OLEDC, &square);
-
-        PauseMiliseconds(5000);
-
-        OLED_SetShape(&square, OLED_SHAPE_FILLED_RECTANGLE, &squareParameters, red);
-
-        OLED_SetBackground(&OLEDC, blue);
-        square.Draw(&OLEDC, &square);
-
-        PauseMiliseconds(5000);
+        TightLoopContents();
     }
 }

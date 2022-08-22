@@ -38,6 +38,8 @@
 
 #include "oled.h"
 
+#include <stdlib.h>
+
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -118,35 +120,6 @@ typedef struct OLED_SHAPE
  */
 void OLED_SetShape(oled_shape_t * const shape, oled_shape_type_t const type, oled_shape_parameters_t const * const parameters, oled_colour_t const colour);
 
-/**
- * TODO
- */
-void OLED_DrawPoint(oled_device_t const * const device, oled_shape_t const * const shape);
-
-/**
- * TODO
- */
-void OLED_DrawLine(oled_device_t const * const device, oled_shape_t const * const shape);
-
-/**
- * TODO
- */
-void OLED_DrawRectangle(oled_device_t const * const device, oled_shape_t const * const shape);
-
-/**
- * TODO
- */
-void OLED_DrawFilledRectangle(oled_device_t const * const device, oled_shape_t const * const shape);
-
-/**
- * TODO
- */
-void OLED_DrawCircle(oled_device_t const * const device, oled_shape_t const * const shape);
-
-/**
- * TODO
- */
-void OLED_DrawDisc(oled_device_t const * const device, oled_shape_t const * const shape);
 
 #endif // OLED_DRAW_H
 
