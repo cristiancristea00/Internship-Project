@@ -429,9 +429,9 @@ __attribute__((always_inline)) inline void OLED_StopWritingDisplay(oled_device_t
 
 uint16_t OLED_ParseRGBToInteger(oled_colour_t const rgb)
 {
-    uint8_t const red = rgb.red & 0x1F;
-    uint8_t const green = rgb.green & 0x3F;
-    uint8_t const blue = rgb.blue & 0x1F;
+    uint8_t const red = rgb.red >> 3;
+    uint8_t const green = rgb.green >> 2;
+    uint8_t const blue = rgb.blue >> 3;
 
     uint16_t const mostSignificantByte = ((uint16_t) (red << 3) | (green >> 3));
     uint16_t const leastSignificantByte = (green << 5) | blue;
@@ -444,11 +444,15 @@ oled_colour_t OLED_ParseIntegerToRGB(uint16_t const rawData)
     uint8_t const mostSignificantByte = rawData >> 8;
     uint8_t const leastSignificantByte = rawData & 0x00FF;
 
-    oled_colour_t const parsedColour = {
+    oled_colour_t parsedColour = {
         .red = mostSignificantByte >> 3,
         .green = ((mostSignificantByte & 0x07) << 3) | (leastSignificantByte >> 5),
         .blue = leastSignificantByte & 0x1F
     };
+
+    parsedColour.red <<= 3;
+    parsedColour.green <<= 2;
+    parsedColour.blue <<= 3;
 
     return parsedColour;
 }

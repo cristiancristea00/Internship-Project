@@ -84,6 +84,11 @@ __attribute__((always_inline)) inline void OLED_DRAW_Disc(oled_device_t const * 
 
 /**
  * TODO
+ **/
+__attribute__((always_inline)) inline void OLED_DRAW_Bitmap(oled_device_t const * const device, oled_colour_t const * const bitmap, uint8_t const xSize, uint8_t const ySize, oled_point_t const start);
+
+/**
+ * TODO
  */
 void OLED_DrawPoint(oled_device_t const * const device, oled_shape_t const * const shape);
 
@@ -111,6 +116,11 @@ void OLED_DrawCircle(oled_device_t const * const device, oled_shape_t const * co
  * TODO
  */
 void OLED_DrawDisc(oled_device_t const * const device, oled_shape_t const * const shape);
+
+/**
+ * TODO
+ */
+void OLED_DrawBitmap(oled_device_t const * const device, oled_shape_t const * const shape);
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -209,9 +219,9 @@ __attribute__((always_inline)) inline void OLED_DRAW_FilledRectangle(oled_device
 
     OLED_StartWritingDisplay(device);
 
-    for (uint8_t x = start.x; x <= end.x; ++x)
+    for (uint8_t y = start.y; y <= end.y; ++y)
     {
-        for (uint8_t y = start.y; y <= end.y; ++y)
+        for (uint8_t x = start.x; x <= end.x; ++x)
         {
             OLED_SendColor(device, colour);
         }
@@ -303,6 +313,26 @@ __attribute__((always_inline)) inline void OLED_DRAW_Disc(oled_device_t const * 
     return;
 }
 
+__attribute__((always_inline)) inline void OLED_DRAW_Bitmap(oled_device_t const * const device, oled_colour_t const * const bitmap, uint8_t const xSize, uint8_t const ySize, oled_point_t const start)
+{
+    OLED_SetColumnAddressBounds(device, start.x, start.x + xSize - 1);
+    OLED_SetRowAddressBounds(device, start.y, start.y + ySize - 1);
+
+    OLED_StartWritingDisplay(device);
+
+    for (uint8_t y = 0; y < ySize; ++y)
+    {
+        for (uint8_t x = 0; x < xSize; ++x)
+        {
+            OLED_SendColor(device, bitmap[y * xSize + x]);
+        }
+    }
+
+    OLED_StopWritingDisplay(device);
+
+    return;
+}
+
 void OLED_DrawPoint(oled_device_t const * const device, oled_shape_t const * const shape)
 {
     OLED_DRAW_Point(device, shape->parameters.point.point.x, shape->parameters.point.point.y, OLED_ParseIntegerToRGB(shape->colour));
@@ -345,6 +375,13 @@ void OLED_DrawDisc(oled_device_t const * const device, oled_shape_t const * cons
     return;
 }
 
+void OLED_DrawBitmap(oled_device_t const * const device, oled_shape_t const * const shape)
+{
+    OLED_DRAW_Bitmap(device, shape->parameters.bitmap.data, shape->parameters.bitmap.size_x, shape->parameters.bitmap.size_y, shape->parameters.bitmap.start);
+
+    return;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
 //                             Public definitions                             //
@@ -381,6 +418,10 @@ void OLED_SetShape(oled_shape_t * const shape, oled_shape_type_t const type, ole
         case OLED_SHAPE_DISC:
             shape->parameters.disc = parameters->disc;
             shape->Draw = OLED_DrawDisc;
+            break;
+        case OLED_SHAPE_BITMAP:
+            shape->parameters.bitmap = parameters->bitmap;
+            shape->Draw = OLED_DrawBitmap;
             break;
         default:
             LOG_ERROR("Invalid shape in shape creation");

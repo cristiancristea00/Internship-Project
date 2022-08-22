@@ -69,34 +69,72 @@
 #include "config.h"
 #include "oled.h"
 #include "oled-draw.h"
-#include "spi.h"
+#include "uart.h"
+
+extern uart_t const uart_1;
 
 void main(void)
 {
     SetClockFrequency(CLKCTRL_FRQSEL_24M_gc);
 
+    uart_1.Initialize(460800);
+
     oled_device_t OLEDC;
 
     OLED_Initialize(&OLEDC, &spi_0);
 
-    oled_colour_t red   = { 0xFF, 0x00, 0x00 };
-    oled_colour_t green = { 0x00, 0xFF, 0x00 };
-    oled_colour_t blue  = { 0x00, 0x00, 0xFF };
+    oled_colour_t brown = { 0x3C, 0x0D, 0x07 };
+    oled_colour_t white = { 0xFF, 0xFF, 0xFF };
     oled_colour_t black = { 0x00, 0x00, 0x00 };
 
-    oled_point_t start = { 20, 20 };
-    oled_point_t end = { 80, 80 };
+    oled_colour_t data[576] = {
+        brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, white, white, white, white, white, white, white, white, white, white, white, white,
+        brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, white, white, white, white, white, white, white, white, white, white, white, white,
+        brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, white, white, white, white, white, white, white, white, white, white, white, white,
+        brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, white, white, white, white, white, white, white, white, white, white, white, white,
+        brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, white, white, white, white, white, white, white, white, white, white, white, white,
+        brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, white, white, white, white, white, white, white, white, white, white, white, white,
+        brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, white, white, white, white, white, white, white, white, white, white, white, white,
+        brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, white, white, white, white, white, white, white, white, white, white, white, white,
+        brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, white, white, white, white, white, white, white, white, white, white, white, white,
+        brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, white, white, white, white, white, white, white, white, white, white, white, white,
+        brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, white, white, white, white, white, white, white, white, white, white, white, white,
+        brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, white, white, white, white, white, white, white, white, white, white, white, white,
+        white, white, white, white, white, white, white, white, white, white, white, white, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown,
+        white, white, white, white, white, white, white, white, white, white, white, white, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown,
+        white, white, white, white, white, white, white, white, white, white, white, white, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown,
+        white, white, white, white, white, white, white, white, white, white, white, white, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown,
+        white, white, white, white, white, white, white, white, white, white, white, white, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown,
+        white, white, white, white, white, white, white, white, white, white, white, white, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown,
+        white, white, white, white, white, white, white, white, white, white, white, white, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown,
+        white, white, white, white, white, white, white, white, white, white, white, white, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown,
+        white, white, white, white, white, white, white, white, white, white, white, white, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown,
+        white, white, white, white, white, white, white, white, white, white, white, white, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown,
+        white, white, white, white, white, white, white, white, white, white, white, white, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown,
+        white, white, white, white, white, white, white, white, white, white, white, white, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown, brown,
+    };
 
-    oled_shape_parameters_t squareParameters;
-    squareParameters.rectangle.start = start;
-    squareParameters.rectangle.end   = end;
-    squareParameters.rectangle.width = 2;
+    oled_shape_parameters_t bitmapParameters;
+    bitmapParameters.bitmap.data = data;
+    bitmapParameters.bitmap.size_x = 24;
+    bitmapParameters.bitmap.size_y = 24;
 
-    oled_shape_t square;
-    OLED_SetShape(&square, OLED_SHAPE_RECTANGLE, &squareParameters, red);
+    oled_point_t start;
+    oled_shape_t bitmap;
 
-    OLED_SetBackground(&OLEDC, black);
-    square.Draw(&OLEDC, &square);
+    for (uint8_t row = 0; row < 4; ++row)
+    {
+        for (uint8_t col = 0; col < 4; ++col)
+        {
+            start.x = col * 24;
+            start.y = row * 24;
+            bitmapParameters.bitmap.start = start;
+
+            OLED_SetShape(&bitmap, OLED_SHAPE_BITMAP, &bitmapParameters, black);
+
+            bitmap.Draw(&OLEDC, &bitmap);
+        }
+    }
 
     while (true)
     {
