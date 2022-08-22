@@ -102,10 +102,24 @@ typedef union OLED_SHAPE_PARAMETERS
     
     struct {
         oled_point_t start;
-        oled_colour_t const * data;
         uint8_t size_x;
         uint8_t size_y;
+        oled_colour_t const * data;
     } bitmap;
+    
+    struct {
+        oled_point_t start;
+        uint8_t scale_x;
+        uint8_t scale_y;
+        uint8_t character;
+    } character;
+    
+    struct {
+        oled_point_t start;
+        uint8_t scale_x;
+        uint8_t scale_y;
+        uint8_t const * data;
+    } string;
 } oled_shape_parameters_t;
 
 typedef struct OLED_SHAPE
