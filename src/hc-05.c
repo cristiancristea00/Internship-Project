@@ -179,7 +179,7 @@ __attribute__((always_inline)) inline static void HC05_EndTransmission(void);
 
 static vector_t HC05_BUFFER;
 
-static hc05_status_t transsmitionStatus = HC05_IDLE;
+static volatile hc05_status_t transsmitionStatus = HC05_IDLE;
 
 static hc05_error_code_t HC05_CheckNull(hc05_device_t const * const device)
 {
@@ -405,7 +405,6 @@ hc05_error_code_t HC05_SendData(hc05_device_t const * const device, uint8_t cons
             }
 
             --tryCount;
-            _delay_ms(10);
         }
     }
 

@@ -10,6 +10,7 @@
       <itemPath>../include/hc-05.h</itemPath>
       <itemPath>../include/crc8.h</itemPath>
       <itemPath>../include/vector.h</itemPath>
+      <itemPath>C:/Users/M70957/Documents/Internship-Project/include/i2c.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -25,6 +26,7 @@
       <itemPath>../src/crc8.c</itemPath>
       <itemPath>../src/hc-05.c</itemPath>
       <itemPath>../src/vector.c</itemPath>
+      <itemPath>C:/Users/M70957/Documents/Internship-Project/src/i2c.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -45,7 +47,7 @@
         <targetDevice>AVR128DA48</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool>noID</platformTool>
+        <platformTool>nEdbgTool</platformTool>
         <languageToolchain>XC8</languageToolchain>
         <languageToolchainVersion>2.40</languageToolchainVersion>
         <platform>3</platform>
