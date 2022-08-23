@@ -37,11 +37,10 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "config.h"
 #include "spi.h"
 
-#include <stddef.h>
-#include <stdbool.h>
+#include <avr/io.h>
+
 #include <stdint.h>
 
 
@@ -97,48 +96,77 @@ typedef struct OLED_COLOUR
 ////////////////////////////////////////////////////////////////////////////////
 
 /**
- * TODO
+ * @brief Initializes the OLED device.
+ *
+ * @param[in, out] device OLED device
+ * @param[in]      spiDevice SPI device
  */
 void OLED_Initialize(oled_device_t * const device, spi_t const * const spiDevice);
 
 /**
- * TODO
- */
+ * @brief Enables drawing on the OLED.
+ *
+ * @param[in] device OLED device
+ **/
 void OLED_StartWritingDisplay(oled_device_t const * const device);
 
 /**
- * TODO
- */
+ * @brief Disables drawing on the OLED.
+ *
+ * @param[in] device OLED device
+ **/
 void OLED_StopWritingDisplay(oled_device_t const * const device);
 
 /**
- * TODO
- */
+ * @brief Sets the OLED's row start and stop positions.
+ *
+ * @param[in] device OLED device
+ * @param[in] min Row start position
+ * @param[in] max Row stop position
+ **/
 void OLED_SetRowAddressBounds(oled_device_t const * const device, uint8_t const min, uint8_t const max);
 
 /**
- * TODO
- */
-uint16_t  OLED_ParseRGBToInteger(oled_colour_t const rgb);
-
-/**
- * TODO
- */
-oled_colour_t OLED_ParseIntegerToRGB(uint16_t const rawData);
-
-/**
- * TODO
- */
+ * @brief Sets the OLED's column start and stop positions.
+ *
+ * @param[in] device OLED device
+ * @param[in] min Column start position
+ * @param[in] max Column stop position
+ **/
 void OLED_SetColumnAddressBounds(oled_device_t const * const device, uint8_t const min, uint8_t const max);
 
 /**
- * TODO
- */
+ * @brief Converts a 24-bit RGB colour into an RGB565 16-bit colour value.
+ *
+ * @param[in] rgb RGB 24-bit colour
+ *
+ * @return uint16_t 16-bit colour value
+ **/
+uint16_t  OLED_ParseRGBToInteger(oled_colour_t const rgb);
+
+/**
+ * @brief Converts an RGB565 16-bit colour value into a 24-bit RGB colour.
+ *
+ * @param[in] rawData 16-bit colour value
+ *
+ * @return oled_colour_t RGB 24-bit colour
+ **/
+oled_colour_t OLED_ParseIntegerToRGB(uint16_t const rawData);
+
+/**
+ * @brief Draws a pixel on the OLED at the current OLED's position.
+ *
+ * @param[in] device OLED device
+ * @param[in] colour Colour of the pixel
+ **/
 void OLED_SendColor(oled_device_t const * const device, oled_colour_t const colour);
 
 /**
- * TODO
- */
+ * @brief Sets the same colour on all pixels of the OLED.
+ *
+ * @param[in] device OLED device
+ * @param[in] colour Colour of the pixels
+ **/
 void OLED_SetBackground(oled_device_t const * const device, oled_colour_t const colour);
-#endif // OLED_H
 
+#endif // OLED_H

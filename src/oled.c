@@ -27,7 +27,20 @@
  **/
 
 
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                                  Includes                                  //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
 #include "oled.h"
+
+#include "config.h"
+#include "spi.h"
+
+#include <stddef.h>
+#include <stdbool.h>
+#include <stdint.h>
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -93,93 +106,124 @@ typedef enum OLED_COMMAND
 ////////////////////////////////////////////////////////////////////////////////
 
 /**
- * TODO
- */
+ * @brief Checks if the device and its SPI device are valid.
+ *
+ * @param[in] device OLED device
+ *
+ * @return oled_error_code_t Error code
+ **/
 static oled_error_code_t OLED_CheckNull(oled_device_t const * const device);
 
 /**
- * TODO
- */
+ * @brief Sends a word (16 bits) to the OLED device.
+ *
+ * @param[in] device OLED device
+ * @param[in] word Word to send
+ **/
 __attribute__((always_inline)) inline static void OLED_SendWord(oled_device_t const * const device, uint16_t const word);
 
 /**
- * TODO
- */
+ * @brief Set as output and clear the OLED control pins.
+ **/
 __attribute__((always_inline)) inline static void OLED_InitializePins(void);
 
 /**
- * TODO
- */
+ * @brief Enables OLED data mode.
+ **/
 __attribute__((always_inline)) inline static void OLED_SetDataMode(void);
 
 /**
- * TODO
- */
+ * @brief Enables OLED command mode.
+ **/
 __attribute__((always_inline)) inline static void OLED_SetCommandMode(void);
 
 /**
- * TODO
- */
+ * @brief Enables OLED read mode.
+ **/
 __attribute__((always_inline)) inline static void OLED_SetReadMode(void);
 
 /**
- * TODO
- */
+ * @brief Enables OLED write mode.
+ **/
 __attribute__((always_inline)) inline static void OLED_SetWriteMode(void);
 
 /**
- * TODO
- */
+ * @brief Sets the OLED reset pin.
+ **/
 __attribute__((always_inline)) inline static void OLED_SetResetPin(void);
 
 /**
- * TODO
- */
+ * @brief Clears the OLED reset pin.
+ **/
 __attribute__((always_inline)) inline static void OLED_ClearResetPin(void);
 
 /**
- * TODO
- */
+ * @brief Sets the OLED enable pin.
+ **/
 __attribute__((always_inline)) inline static void OLED_SetEnablePin(void);
 
 /**
- * TODO
- */
+ * @brief Clears the OLED enable pin.
+ **/
 __attribute__((always_inline)) inline static void OLED_ClearEnablePin(void);
 
 /**
- * TODO
- */
+ * @brief Sets the OLED chip select pin.
+ *
+ * @param[in] device OLED device
+ **/
 __attribute__((always_inline)) inline static void OLED_StartTransaction(oled_device_t const * const device);
 
 /**
- * TODO
- */
+ * @brief Clears the OLED chip select pin.
+ *
+ * @param[in] device OLED device
+ **/
 __attribute__((always_inline)) inline static void OLED_EndTransaction(oled_device_t const * const device);
 
 /**
- * TODO
- */
+ * @brief Sends the command to the OLED device that sets the row or column
+ *        address limits for the RAM.
+ *
+ * @param[in] device OLED device
+ * @param[in] command Row or column address command
+ * @param[in] min Minimum address
+ * @param[in] max Maximum address
+ * @param[in] offset RAM offset
+ **/
 __attribute__((always_inline)) inline static void OLED_SetAddressBoundsWithOffset(oled_device_t const * const device, oled_command_t const command, uint8_t const min, uint8_t const max, uint8_t const offset);
 
 /**
- * TODO
- */
+ * @brief Sets the display initial set-up options.
+ *
+ * @param[in] device OLED device
+ **/
 __attribute__((always_inline)) inline static void OLED_SetDisplayOptions(oled_device_t const * const device);
 
 /**
- * TODO
- */
+ * @brief Enables the OLED sleep mode.
+ *
+ * @param[in] device OLED device
+ **/
 __attribute__((always_inline)) inline static void OLED_EnableSleepMode(oled_device_t const * const device);
 
 /**
- * TODO
- */
+ * @brief Disables the OLED sleep mode.
+ *
+ * @param[in] device OLED device
+ **/
 __attribute__((always_inline)) inline static void OLED_DisableSleepMode(oled_device_t const * const device);
 
 /**
- * TODO
- */
+ * @brief Sends a command to the OLED device.
+ *
+ * @param[in] device OLED device
+ * @param[in] command Command to send
+ * @param[in] payload Command payload
+ * @param[in] payloadSize Command payload size
+ *
+ * @return oled_error_code_t Error code
+ **/
 static oled_error_code_t OLED_SendCommand(oled_device_t const * const device, oled_command_t const command, uint8_t const * const payload, uint8_t const payloadSize);
 
 
@@ -402,8 +446,6 @@ __attribute__((always_inline)) inline void OLED_Initialize(oled_device_t * const
     OLED_SetEnablePin();
 
     OLED_DisableSleepMode(device);
-    OLED_SetColumnAddressBounds(device, OLED_MIN_ADDRESS_BOUND, OLED_MAX_ADDRESS_BOUND);
-    OLED_SetRowAddressBounds(device, OLED_MIN_ADDRESS_BOUND, OLED_MAX_ADDRESS_BOUND);
     OLED_SetDisplayOptions(device);
 
     return;

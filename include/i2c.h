@@ -37,11 +37,8 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <avr/io.h>
-
-#include <stddef.h>
-#include <stdbool.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -93,5 +90,14 @@ typedef struct I2C
     i2c_end_transaction_t EndTransaction;
     i2c_client_available_t ClientAvailable;
 } i2c_t;
+
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                                  Modules                                   //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+extern i2c_t const i2c_0;
 
 #endif // I2C_H

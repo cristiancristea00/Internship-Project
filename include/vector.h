@@ -39,9 +39,7 @@
 
 #include "config.h"
 
-#include <stdbool.h>
 #include <stdint.h>
-#include <string.h>
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -50,7 +48,7 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-#define MAX_BUFFER_SIZE 64
+#define VECTOR_MAX_BUFFER_SIZE    64
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -62,7 +60,7 @@
 typedef struct VECTOR
 {
     // Internal buffer
-    uint8_t internalBuffer[MAX_BUFFER_SIZE];
+    uint8_t internalBuffer[VECTOR_MAX_BUFFER_SIZE];
 
     // Current buffer size
     uint8_t bufferSize;

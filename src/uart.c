@@ -27,7 +27,24 @@
  **/
 
 
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                                  Includes                                  //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
 #include "uart.h"
+
+#include "config.h"
+
+#include <avr/interrupt.h>
+#include <util/atomic.h>
+#include <avr/io.h>
+
+#include <stddef.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
 
 
 ////////////////////////////////////////////////////////////////////////////////

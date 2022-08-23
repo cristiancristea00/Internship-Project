@@ -37,12 +37,6 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "config.h"
-
-#include <avr/io.h>
-
-#include <stdbool.h>
-#include <stddef.h>
 #include <stdint.h>
 
 
@@ -83,6 +77,7 @@ typedef struct SPI
     spi_client_t ClientSelect;
     spi_client_t ClientDeselect;
 } spi_t;
+
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //

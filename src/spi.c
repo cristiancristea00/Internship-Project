@@ -27,7 +27,21 @@
  **/
 
 
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                                  Includes                                  //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
 #include "spi.h"
+
+#include "config.h"
+
+#include <avr/io.h>
+
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #pragma switch speed
 

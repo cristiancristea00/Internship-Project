@@ -39,14 +39,7 @@
 
 #include "config.h"
 
-#include <avr/interrupt.h>
-#include <util/atomic.h>
-#include <avr/io.h>
-
-#include <stddef.h>
-#include <stdbool.h>
 #include <stdint.h>
-#include <stdio.h>
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -74,5 +67,16 @@ typedef struct UART
     uart_print_t Print;
     uart_register_callback_t RegisterCallback;
 } uart_t;
+
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                                  Modules                                   //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+extern uart_t const uart_0;
+
+extern uart_t const uart_1;
 
 #endif // UART_H

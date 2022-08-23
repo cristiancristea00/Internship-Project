@@ -38,8 +38,6 @@
 
 #include "oled.h"
 
-#include <stdlib.h>
-
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -81,49 +79,49 @@ typedef union OLED_SHAPE_PARAMETERS
     struct {
         oled_point_t point;
     } point;
-    
+
     struct {
         oled_point_t start;
         oled_point_t end;
         uint8_t width;
     } line;
-    
+
     struct {
         oled_point_t start;
         oled_point_t end;
         uint8_t width;
     } rectangle;
-    
+
     struct {
         oled_point_t start;
         oled_point_t end;
     } filled_rectangle;
-    
+
     struct {
         oled_point_t center;
         uint8_t radius;
         uint8_t width;
     } circle;
-    
+
     struct {
         oled_point_t center;
         uint8_t radius;
     } disc;
-    
+
     struct {
         oled_point_t start;
         uint8_t size_x;
         uint8_t size_y;
         oled_colour_t const * data;
     } bitmap;
-    
+
     struct {
         oled_point_t start;
         uint8_t scale_x;
         uint8_t scale_y;
         uint8_t character;
     } character;
-    
+
     struct {
         oled_point_t start;
         uint8_t scale_x;
@@ -137,7 +135,7 @@ typedef struct OLED_SHAPE
     uint16_t colour;
     oled_shape_type_t type;
     oled_shape_parameters_t parameters;
-    void (* Draw) (oled_device_t const * const, struct OLED_SHAPE *);
+    void (* Draw) (oled_device_t const * const, struct OLED_SHAPE const * const);
 } oled_shape_t;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -147,10 +145,15 @@ typedef struct OLED_SHAPE
 ////////////////////////////////////////////////////////////////////////////////
 
 /**
- * TODO
- */
+ * @brief Initializes the OLED shape with its corresponding type, parameters,
+ *        colour and drawing function.
+ *
+ * @param[in, out] shape The shape to initialize
+ * @param[in]      type Shape type
+ * @param[in]      parameters Shape's parameters
+ * @param[in]      colour Shape's colour
+ **/
 void OLED_SetShape(oled_shape_t * const shape, oled_shape_type_t const type, oled_shape_parameters_t const * const parameters, oled_colour_t const colour);
 
 
 #endif // OLED_DRAW_H
-

@@ -35,17 +35,13 @@
 #include "crc8.h"
 #include "i2c.h"
 
-#include <avr/cpufunc.h>
+#include <avr/io.h>
+#include <util/delay.h>
 
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 
-
-extern uart_t const uart_0;
-extern uart_t const uart_1;
-extern i2c_t const i2c_0;
-extern bme280_handler_t const BME280_I2C0_Handler;
 
 static void BusScan(void);
 static void SensorRead(bme280_device_t * const device);
@@ -98,7 +94,7 @@ static void SensorRead(bme280_device_t * const device)
 
     printf("Temperature: %0.2lf °C\n\r", BME280_GetDisplayTemperature(&sensorData));
     printf("Pressure: %0.2lf hPa\n\r", BME280_GetDisplayPressure(&sensorData));
-    printf("Relative humidity: %0.2lf%c\n\r", BME280_GetDisplayHumidity(&sensorData), '%');
+    printf("Relative humidity: %0.2lf %c\n\r", BME280_GetDisplayHumidity(&sensorData), '%');
 
     return;
 }

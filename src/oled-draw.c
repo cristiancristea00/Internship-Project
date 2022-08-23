@@ -27,7 +27,21 @@
  **/
 
 
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                                  Includes                                  //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
 #include "oled-draw.h"
+
+#include "config.h"
+#include "oled.h"
+
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdlib.h>
+
 
 #pragma switch speed
 
@@ -48,93 +62,173 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 /**
- * TODO
+ * @brief Draws a point on the OLED screen.
+ *
+ * @param[in] device OLED device
+ * @param[in] x Column position
+ * @param[in] y Row position
+ * @param[in] colour Colour of the point
  **/
 __attribute__((always_inline)) inline void OLED_DRAW_Point(oled_device_t const * const device, uint8_t const x, uint8_t const y, oled_colour_t const colour);
 
 /**
- * TODO
+ * @brief Draws a line on the OLED screen.
+ *
+ * @param[in] device OLED device
+ * @param[in] start Start position
+ * @param[in] end End position
+ * @param[in] width Width of the line
+ * @param[in] colour Colour of the line
  **/
 __attribute__((always_inline)) inline void OLED_DRAW_Line(oled_device_t const * const device, oled_point_t const start, oled_point_t const end, uint8_t const width, oled_colour_t const colour);
 
 /**
- * TODO
+ * @brief Draws a rectangle on the OLED screen.
+ *
+ * @param[in] device OLED device
+ * @param[in] start Start position (top left corner)
+ * @param[in] end End position (bottom right corner)
+ * @param[in] width Width of the border
+ * @param[in] colour Colour of the border
  **/
 __attribute__((always_inline)) inline void OLED_DRAW_Rectangle(oled_device_t const * const device, oled_point_t const start, oled_point_t const end, uint8_t const width, oled_colour_t const colour);
 
 /**
- * TODO
+ * @brief Draws a filled rectangle on the OLED screen.
+ *
+ * @param[in] device OLED device
+ * @param[in] startPoint Start position (top left corner)
+ * @param[in] endPoint End position (bottom right corner)
+ * @param[in] colour Colour of the rectangle
  **/
 __attribute__((always_inline)) inline void OLED_DRAW_FilledRectangle(oled_device_t const * const device, oled_point_t const startPoint, oled_point_t const endPoint, oled_colour_t const colour);
 
 /**
- * TODO
+ * @brief Draws a circle on the OLED screen.
+ *
+ * @param[in] device OLED device
+ * @param[in] center Center position of the circle
+ * @param[in] radius Radius of the circle
+ * @param[in] width Width of the border
+ * @param[in] colour Colour of the border
  **/
 __attribute__((always_inline)) inline void OLED_DRAW_Circle(oled_device_t const * const device, oled_point_t const center, uint8_t const radius, uint8_t const width, oled_colour_t const colour);
 
 /**
- * TODO
+ * @brief Draws a disc on the OLED screen.
+ *
+ * @param[in] device OLED device
+ * @param[in] center Center position of the disc
+ * @param[in] radius Radius of the disc
+ * @param[in] colour Colour of the disc
  **/
 __attribute__((always_inline)) inline void OLED_DRAW_Disc(oled_device_t const * const device, oled_point_t const center, uint8_t const radius, oled_colour_t const colour);
 
 /**
- * TODO
+ * @brief Draws a 24-bit RGB colour bitmap on the OLED screen.
+ *
+ * @param[in] device OLED device
+ * @param[in] bitmap Bitmap to draw
+ * @param[in] xSize Horizontal size of the bitmap
+ * @param[in] ySize Vertical size of the bitmap
+ * @param[in] start Start position (top left corner)
  **/
 __attribute__((always_inline)) inline void OLED_DRAW_Bitmap(oled_device_t const * const device, oled_colour_t const * const bitmap, uint8_t const xSize, uint8_t const ySize, oled_point_t const start);
 
 /**
- * TODO
+ * @brief Draws a character on the OLED screen.
+ *
+ * @param[in] device OLED device
+ * @param[in] start Start position (top left corner)
+ * @param[in] xScale Horizontal scale of the character
+ * @param[in] yScale Vertical scale of the character
+ * @param[in] character Character to draw
+ * @param[in] colour Colour of the character
  **/
 __attribute__((always_inline)) inline void OLED_DRAW_Character(oled_device_t const * const device, oled_point_t const start, uint8_t const xScale, uint8_t const yScale, uint8_t const character, oled_colour_t const colour);
 
 /**
- * TODO
+ * @brief Draws a string on the OLED screen.
+ *
+ * @param[in] device OLED device
+ * @param[in] start Start position (top left corner)
+ * @param[in] xScale Horizontal scale of the characters
+ * @param[in] yScale Vertical scale of the characters
+ * @param[in] data String to draw
+ * @param[in] colour Colour of the characters
  **/
 __attribute__((always_inline)) inline void OLED_DRAW_String(oled_device_t const * const device, oled_point_t const start, uint8_t const xScale, uint8_t const yScale, uint8_t const * const data, oled_colour_t const colour);
 
 /**
- * TODO
- */
+ * @brief Unified API to draw a point on the OLED screen.
+ *
+ * @param[in] device OLED device
+ * @param[in] shape Point to draw
+ **/
 void OLED_DrawPoint(oled_device_t const * const device, oled_shape_t const * const shape);
 
 /**
- * TODO
- */
+ * @brief Unified API to draw a line on the OLED screen.
+ *
+ * @param[in] device OLED device
+ * @param[in] shape Line to draw
+ **/
 void OLED_DrawLine(oled_device_t const * const device, oled_shape_t const * const shape);
 
 /**
- * TODO
- */
+ * @brief Unified API to draw a rectangle on the OLED screen.
+ *
+ * @param[in] device OLED device
+ * @param[in] shape Rectangle to draw
+ **/
 void OLED_DrawRectangle(oled_device_t const * const device, oled_shape_t const * const shape);
 
 /**
- * TODO
- */
+ * @brief Unified API to draw a filled rectangle on the OLED screen.
+ *
+ * @param[in] device OLED device
+ * @param[in] shape Filled rectangle to draw
+ **/
 void OLED_DrawFilledRectangle(oled_device_t const * const device, oled_shape_t const * const shape);
 
 /**
- * TODO
- */
+ * @brief Unified API to draw a circle on the OLED screen.
+ *
+ * @param[in] device OLED device
+ * @param[in] shape Circle to draw
+ **/
 void OLED_DrawCircle(oled_device_t const * const device, oled_shape_t const * const shape);
 
 /**
- * TODO
- */
+ * @brief Unified API to draw a disc on the OLED screen.
+ *
+ * @param[in] device OLED device
+ * @param[in] shape Disc to draw
+ **/
 void OLED_DrawDisc(oled_device_t const * const device, oled_shape_t const * const shape);
 
 /**
- * TODO
- */
+ * @brief Unified API to draw a bitmap on the OLED screen.
+ *
+ * @param[in] device OLED device
+ * @param[in] shape Bitmap to draw
+ **/
 void OLED_DrawBitmap(oled_device_t const * const device, oled_shape_t const * const shape);
 
 /**
- * TODO
- */
+ * @brief Unified API to draw a character on the OLED screen.
+ *
+ * @param[in] device OLED device
+ * @param[in] shape Character to draw
+ **/
 void OLED_DrawCharacter(oled_device_t const * const device, oled_shape_t const * const shape);
 
 /**
- * TODO
- */
+ * @brief Unified API to draw a string on the OLED screen.
+ *
+ * @param[in] device OLED device
+ * @param[in] shape String to draw
+ **/
 void OLED_DrawString(oled_device_t const * const device, oled_shape_t const * const shape);
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -205,7 +299,6 @@ __attribute__((always_inline)) inline void OLED_DRAW_Line(oled_device_t const * 
         }
         if (currentError < length_y)
         {
-
             error += length_x;
             y += delta_y;
         }

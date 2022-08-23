@@ -27,7 +27,18 @@
  **/
 
 
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                                  Includes                                  //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
 #include "vector.h"
+
+#include "config.h"
+
+#include <stdbool.h>
+#include <stdint.h>
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -116,7 +127,7 @@ static void Vector_CheckAvailableSpace(vector_t * const vector, uint8_t const nu
 
 static void Vector_CheckAvailableSpace(vector_t * const vector, uint8_t const numberBytes)
 {
-    if ((vector->bufferSize + numberBytes) > MAX_BUFFER_SIZE)
+    if ((vector->bufferSize + numberBytes) > VECTOR_MAX_BUFFER_SIZE)
     {
         LOG_WARNING_PRINTF("Failed to add %d bytes to vector. Clearing the vector...", numberBytes);
         Vector_Clear(vector);

@@ -37,14 +37,9 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "config.h"
 #include "vector.h"
-#include "uart.h"
 #include "i2c.h"
 
-#include <util/delay.h>
-
-#include <stddef.h>
 #include <stdint.h>
 
 
@@ -322,5 +317,14 @@ void BME280_StructInterpret(void * const data, vector_t * const vector);
  * @param[out] buffer Buffer to fill
  **/
 void BME280_SerializeSensorData(bme280_device_t const * const device, uint8_t * const buffer);
+
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                                  Modules                                   //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+extern bme280_handler_t const BME280_I2C0_Handler;
 
 #endif // BME280_H

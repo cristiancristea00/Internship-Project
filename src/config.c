@@ -27,7 +27,20 @@
  **/
 
 
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                                  Includes                                  //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
 #include "config.h"
+
+#include "uart.h"
+
+#include <util/delay.h>
+#include <avr/io.h>
+
+#include <stdint.h>
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -35,8 +48,6 @@
 //                             Public definitions                             //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
-
-extern uart_t const uart_1;
 
 __attribute__((always_inline)) inline void SetClockFrequencyWithPrescaler(uint8_t const frequency, uint8_t const prescaler)
 {

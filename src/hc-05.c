@@ -27,7 +27,26 @@
  **/
 
 
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                                  Includes                                  //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
 #include "hc-05.h"
+
+#include "config.h"
+#include "vector.h"
+#include "uart.h"
+#include "crc8.h"
+
+#include <util/delay.h>
+
+#include <stddef.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <string.h>
+#include <stdlib.h>
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -36,10 +55,10 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-#define UINT8(X)          ((uint8_t) (X))
+#define UINT8(X)               ((uint8_t) (X))
 
-#define ACK_NACK_SIZE     UINT8(3)
-#define ACK_NACK_BYTES    UINT8(1)
+#define HC05_ACK_NACK_SIZE     UINT8(3)
+#define HC05_ACK_NACK_BYTES    UINT8(1)
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -232,13 +251,13 @@ static hc05_response_t HC05_WaitForConfirmation(void)
 
 static hc05_response_t HC05_GetResponseReceived(void)
 {
-    uint8_t response[ACK_NACK_SIZE] = { 0 };
+    uint8_t response[HC05_ACK_NACK_SIZE] = { 0 };
 
     response[2] = Vector_RemoveByte(&HC05_BUFFER);
     response[1] = Vector_RemoveByte(&HC05_BUFFER);
     response[0] = Vector_RemoveByte(&HC05_BUFFER);
 
-    if (HC05_VerifyChecksum(response, ACK_NACK_BYTES, response[2]) == HC05_OK)
+    if (HC05_VerifyChecksum(response, HC05_ACK_NACK_BYTES, response[2]) == HC05_OK)
     {
         return (hc05_response_t) response[1];
     }
@@ -316,13 +335,13 @@ static void HC05_SendNotAcknowledge(hc05_device_t const * const device)
 
 __attribute__((always_inline)) inline static void HC05_SendResponse(hc05_device_t const * const device, hc05_response_t const response)
 {
-    uint8_t packet[ACK_NACK_SIZE] = { 0 };
+    uint8_t packet[HC05_ACK_NACK_SIZE] = { 0 };
 
-    packet[0] = ACK_NACK_BYTES;
+    packet[0] = HC05_ACK_NACK_BYTES;
     packet[1] = UINT8(response);
-    packet[2] = HC05_ComputeChecksum(packet, ACK_NACK_BYTES);
+    packet[2] = HC05_ComputeChecksum(packet, HC05_ACK_NACK_BYTES);
 
-    device->uartDevice->SendData(packet, ACK_NACK_SIZE);
+    device->uartDevice->SendData(packet, HC05_ACK_NACK_SIZE);
 
     return;
 }
