@@ -37,18 +37,10 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "config.h"
 #include "vector.h"
 #include "uart.h"
-#include "crc8.h"
 
-#include <util/delay.h>
-
-#include <stddef.h>
-#include <stdbool.h>
 #include <stdint.h>
-#include <string.h>
-#include <stdlib.h>
 
 
 ////////////////////////////////////////////////////////////////////////////////

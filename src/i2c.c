@@ -26,8 +26,19 @@
  *  DIRECTLY TO MICROCHIP FOR THIS SOFTWARE.
  **/
 
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                                  Includes                                  //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
 
 #include "i2c.h"
+
+#include <avr/io.h>
+
+#include <stddef.h>
+#include <stdbool.h>
+#include <stdint.h>
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -125,7 +136,6 @@ static i2c_error_code_t I2C0_ReceiveData(uint8_t const address, uint8_t * dataFo
 
 /**
  * @brief Ends the I2C communication by sending a stop condition.
- *
  **/
 __attribute__((always_inline)) inline static void I2C0_EndTransation(void);
 

@@ -1,9 +1,9 @@
 /**
- *  @file i2c.h
+ *  @file oled-draw.h
  *  @author Cristian Cristea - M70957
- *  @date 22 July 2022
+ *  @date August 19, 2022
  *
- *  @brief Header file for the I2C module
+ *  @brief Header file for the OLED module
  *
  *  @copyright (c) 2022 Microchip Technology Inc. and its subsidiaries.
  *
@@ -27,9 +27,8 @@
  **/
 
 
-#ifndef I2C_H
-#define	I2C_H
-
+#ifndef OLED_DRAW_H
+#define	OLED_DRAW_H
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -37,8 +36,7 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <stdint.h>
-#include <stdbool.h>
+#include "oled.h"
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -47,8 +45,8 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-#define I2C_ADRESS_MIN    UINT8(0x00)
-#define I2C_ADRESS_MAX    UINT8(0x7F)
+#define OLED_DRAW_FONT_WIDTH       5
+#define OLED_DRAW_FONT_HEIGHT      8
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -57,47 +55,105 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-typedef enum I2C_ERROR_CODE
+typedef enum OLED_SHAPE_TYPE
 {
-    I2C_OK                  = 0x00,
-    I2C_NULL_POINTER        = 0x01,
-    I2C_INVALID_ADDRESS     = 0x02,
-    I2C_NACK_OF_ADDRESS     = 0x03,
-    I2C_COMMUNICATION_ERROR = 0x04
-} i2c_error_code_t;
+    OLED_SHAPE_POINT            = 0x00,
+    OLED_SHAPE_LINE             = 0x01,
+    OLED_SHAPE_RECTANGLE        = 0x02,
+    OLED_SHAPE_FILLED_RECTANGLE = 0x03,
+	OLED_SHAPE_DISC             = 0x04,
+	OLED_SHAPE_CIRCLE           = 0x05,
+ 	OLED_SHAPE_BITMAP           = 0x06,
+	OLED_SHAPE_CHARACTER        = 0x07,
+	OLED_SHAPE_STRING           = 0x08,
+} oled_shape_type_t;
 
-typedef enum I2C_MODE
+typedef struct OLED_POINT
 {
-    I2C_STANDARD_MODE  = 101,
-    I2C_FAST_MODE      = 21,
-    I2C_FAST_MODE_PLUS = 6
-} i2c_mode_t;
+    uint8_t x;
+    uint8_t y;
+} oled_point_t;
 
-typedef void (* i2c_initialize_t) (i2c_mode_t const);
-typedef i2c_error_code_t (* i2c_send_data_t) (uint8_t const, uint8_t const *, uint8_t);
-typedef i2c_error_code_t (* i2c_receive_data_t) (uint8_t const, uint8_t *, uint8_t);
-typedef void (* i2c_end_transaction_t) (void);
-typedef bool (* i2c_client_available_t) (uint8_t const);
+typedef union OLED_SHAPE_PARAMETERS
+{
+    struct {
+        oled_point_t point;
+    } point;
+
+    struct {
+        oled_point_t start;
+        oled_point_t end;
+        uint8_t width;
+    } line;
+
+    struct {
+        oled_point_t start;
+        oled_point_t end;
+        uint8_t width;
+    } rectangle;
+
+    struct {
+        oled_point_t start;
+        oled_point_t end;
+    } filled_rectangle;
+
+    struct {
+        oled_point_t center;
+        uint8_t radius;
+        uint8_t width;
+    } circle;
+
+    struct {
+        oled_point_t center;
+        uint8_t radius;
+    } disc;
+
+    struct {
+        oled_point_t start;
+        uint8_t size_x;
+        uint8_t size_y;
+        oled_colour_t const * data;
+    } bitmap;
+
+    struct {
+        oled_point_t start;
+        uint8_t scale_x;
+        uint8_t scale_y;
+        uint8_t character;
+    } character;
+
+    struct {
+        oled_point_t start;
+        uint8_t scale_x;
+        uint8_t scale_y;
+        uint8_t const * data;
+    } string;
+} oled_shape_parameters_t;
+
+typedef struct OLED_SHAPE
+{
+    uint16_t colour;
+    oled_shape_type_t type;
+    oled_shape_parameters_t parameters;
+    void (* Draw) (oled_device_t const * const, struct OLED_SHAPE const * const);
+} oled_shape_t;
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                                 Public API                                 //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
 
 /**
- * @brief Object struct for the I2C module
+ * @brief Initializes the OLED shape with its corresponding type, parameters,
+ *        colour and drawing function.
+ *
+ * @param[in, out] shape The shape to initialize
+ * @param[in]      type Shape type
+ * @param[in]      parameters Shape's parameters
+ * @param[in]      colour Shape's colour
  **/
-typedef struct I2C
-{
-    i2c_initialize_t Initialize;
-    i2c_send_data_t SendData;
-    i2c_receive_data_t ReceiveData;
-    i2c_end_transaction_t EndTransaction;
-    i2c_client_available_t ClientAvailable;
-} i2c_t;
+void OLED_SetShape(oled_shape_t * const shape, oled_shape_type_t const type, oled_shape_parameters_t const * const parameters, oled_colour_t const colour);
 
 
-////////////////////////////////////////////////////////////////////////////////
-//                                                                            //
-//                                  Modules                                   //
-//                                                                            //
-////////////////////////////////////////////////////////////////////////////////
-
-extern i2c_t const i2c_0;
-
-#endif // I2C_H
+#endif // OLED_DRAW_H

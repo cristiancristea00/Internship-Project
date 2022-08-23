@@ -1,9 +1,9 @@
 /**
- *  @file uart.h
+ *  @file spi.h
  *  @author Cristian Cristea - M70957
- *  @date July 20, 2022
+ *  @date 17 August 2022
  *
- *  @brief Header file for the UART module
+ *  @brief Header file for the SPI module
  *
  *  @copyright (c) 2022 Microchip Technology Inc. and its subsidiaries.
  *
@@ -27,8 +27,8 @@
  **/
 
 
-#ifndef UART_H
-#define	UART_H
+#ifndef SPI_H
+#define	SPI_H
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -36,8 +36,6 @@
 //                                  Includes                                  //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
-
-#include "config.h"
 
 #include <stdint.h>
 
@@ -48,25 +46,37 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-typedef void (* uart_callback_t) (uint8_t const);
-typedef void (* uart_initialize_t) (uint32_t const);
-typedef void (* uart_initialize_receive_t) (uint32_t const, uart_callback_t const);
-typedef void (* uart_send_byte_t) (uint8_t const);
-typedef void (* uart_send_data_t) (uint8_t const * const, uint8_t const);
-typedef void (* uart_print_char_t) (char const);
-typedef void (* uart_print_t) (char const * const);
-typedef void (* uart_register_callback_t) (uart_callback_t const);
-
-typedef struct UART
+typedef enum SPI_ERROR_CODE
 {
-    uart_initialize_t Initialize;
-    uart_initialize_receive_t InitializeWithReceive;
-    uart_send_byte_t SendByte;
-    uart_send_data_t SendData;
-    uart_print_char_t PrintChar;
-    uart_print_t Print;
-    uart_register_callback_t RegisterCallback;
-} uart_t;
+    SPI_OK                  = 0x00,
+    SPI_NULL_POINTER        = 0x01
+} spi_error_code_t;
+
+typedef enum SPI_CHIP_SELECT
+{
+    SPI_CS1 = 0x00,
+    SPI_CS2 = 0x01,
+    SPI_CS3 = 0x02
+} spi_chip_select_t;
+
+typedef void (* spi_inititialize_t) (void);
+typedef spi_error_code_t (* spi_send_data_t) (uint8_t const * const, uint8_t const);
+typedef spi_error_code_t (* spi_receive_data_t) (uint8_t * const, uint8_t const);
+typedef spi_error_code_t (* spi_exchange_data_t) (uint8_t * const, uint8_t const);
+typedef void  (* spi_client_t) (spi_chip_select_t const);
+
+/**
+ * @brief Object struct for the SPI module
+ **/
+typedef struct SPI
+{
+    spi_inititialize_t Initialize;
+    spi_send_data_t SendData;
+    spi_receive_data_t ReceiveData;
+    spi_exchange_data_t ExchangeData;
+    spi_client_t ClientSelect;
+    spi_client_t ClientDeselect;
+} spi_t;
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -75,8 +85,7 @@ typedef struct UART
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-extern uart_t const uart_0;
+extern spi_t const spi_0;
 
-extern uart_t const uart_1;
+#endif // SPI_H
 
-#endif // UART_H
