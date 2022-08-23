@@ -29,6 +29,8 @@
 
 #include "spi.h"
 
+#pragma switch speed
+
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -226,7 +228,7 @@ __attribute__((always_inline)) inline static void SPI0_ClientSelect(spi_chip_sel
             PORTE.OUTCLR = PIN3_bm;
             break;
         default:
-            LOG_WARNING("Invalid SPI chip select pin");
+            LOG_ERROR("Invalid SPI chip select pin");
             break;
     }
 

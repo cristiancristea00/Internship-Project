@@ -44,7 +44,9 @@
 #define OLED_CLR_PORT_PIN(PORT, PIN)    (PORT.OUTCLR = (1 << (PIN)))
 #define OLED_OUT_PORT_PIN(PORT, PIN)    (PORT.DIRSET = (1 << (PIN)))
 
-#define OLED_MAX_ADDRESS_BOUND 96
+#define OLED_MIN_ADDRESS_BOUND          0
+#define OLED_MAX_ADDRESS_BOUND          96
+
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -99,16 +101,6 @@ static oled_error_code_t OLED_CheckNull(oled_device_t const * const device);
  * TODO
  */
 __attribute__((always_inline)) inline static void OLED_SendWord(oled_device_t const * const device, uint16_t const word);
-
-/**
- * TODO
- */
-static uint16_t  OLED_ParseRGBToInteger(oled_colour_t const rgb);
-
-/**
- * TODO
- */
-static oled_colour_t OLED_ParseIntegerToRGB(uint8_t const rawData);
 
 /**
  * TODO
@@ -168,16 +160,6 @@ __attribute__((always_inline)) inline static void OLED_EndTransaction(oled_devic
 /**
  * TODO
  */
-__attribute__((always_inline)) inline static void OLED_SetRowAddressBounds(oled_device_t const * const device, uint8_t const min, uint8_t const max);
-
-/**
- * TODO
- */
-__attribute__((always_inline)) inline static void OLED_SetColumnAddressBounds(oled_device_t const * const device, uint8_t const min, uint8_t const max);
-
-/**
- * TODO
- */
 __attribute__((always_inline)) inline static void OLED_SetAddressBoundsWithOffset(oled_device_t const * const device, oled_command_t const command, uint8_t const min, uint8_t const max, uint8_t const offset);
 
 /**
@@ -200,20 +182,6 @@ __attribute__((always_inline)) inline static void OLED_DisableSleepMode(oled_dev
  */
 static oled_error_code_t OLED_SendCommand(oled_device_t const * const device, oled_command_t const command, uint8_t const * const payload, uint8_t const payloadSize);
 
-/**
- * TODO
- */
-__attribute__((always_inline)) inline static void OLED_StartWritingDisplay(oled_device_t const * const device);
-
-/**
- * TODO
- */
-__attribute__((always_inline)) inline static void OLED_StopWritingDisplay(oled_device_t const * const device);
-
-/**
- * TODO
- */
-__attribute__((always_inline)) inline static void OLED_SendColor(oled_device_t const * const device, oled_colour_t const colour);
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -239,32 +207,6 @@ __attribute__((always_inline)) inline static void OLED_SendWord(oled_device_t co
     uint8_t const dataBuffer[2] = { (word >> 8), (word & 0x00FF) };
 
     device->spiDevice->SendData(dataBuffer, 2);
-}
-
-static uint16_t  OLED_ParseRGBToInteger(oled_colour_t const rgb)
-{
-    uint8_t const red = rgb.red & 0x1F;
-    uint8_t const green = rgb.green & 0x3F;
-    uint8_t const blue = rgb.blue & 0x1F;
-
-    uint16_t const mostSignificantByte = ((uint16_t) ((red << 3) | (green >> 3))) << 8;
-    uint16_t const leastSignificantByte = (green << 5) | blue;
-
-    return mostSignificantByte | leastSignificantByte;
-}
-
-static oled_colour_t OLED_ParseIntegerToRGB(uint8_t const rawData)
-{
-    uint8_t const mostSignificantByte = rawData >> 8;
-    uint8_t const leastSignificantByte = rawData & 0x00FF;
-
-    oled_colour_t const parsedColour = {
-        .red = mostSignificantByte >> 3,
-        .green = ((mostSignificantByte & 0x07) << 3) | (leastSignificantByte >> 5),
-        .blue = leastSignificantByte & 0x1F
-    };
-
-    return parsedColour;
 }
 
 __attribute__((always_inline)) inline static void OLED_InitializePins(void)
@@ -354,20 +296,6 @@ __attribute__((always_inline)) inline static void OLED_EndTransaction(oled_devic
     return;
 }
 
-__attribute__((always_inline)) inline static void OLED_SetRowAddressBounds(oled_device_t const * const device, uint8_t const min, uint8_t const max)
-{
-    OLED_SetAddressBoundsWithOffset(device, OLED_SET_ROW_ADDRESS, min, max, 0);
-
-    return;
-}
-
-__attribute__((always_inline)) inline static void OLED_SetColumnAddressBounds(oled_device_t const * const device, uint8_t const min, uint8_t const max)
-{
-    OLED_SetAddressBoundsWithOffset(device, OLED_SET_COLUMN_ADDRESS, min, max, 16);
-
-    return;
-}
-
 __attribute__((always_inline)) inline static void OLED_SetAddressBoundsWithOffset(oled_device_t const * const device, oled_command_t const command, uint8_t const min, uint8_t const max, uint8_t const offset)
 {
     uint8_t payload[2];
@@ -452,30 +380,6 @@ static oled_error_code_t OLED_SendCommand(oled_device_t const * const device, ol
     return sendCommandResult;
 }
 
-__attribute__((always_inline)) inline static void OLED_StartWritingDisplay(oled_device_t const * const device)
-{
-    OLED_SendCommand(device, OLED_WRITE_RAM, NULL, 0);
-
-    OLED_StartTransaction(device);
-    OLED_SetDataMode();
-
-    return;
-}
-
-__attribute__((always_inline)) inline static void OLED_StopWritingDisplay(oled_device_t const * const device)
-{
-    OLED_EndTransaction(device);
-    OLED_SetCommandMode();
-
-    return;
-}
-
-__attribute__((always_inline)) inline static void OLED_SendColor(oled_device_t const * const device, oled_colour_t const colour)
-{
-    OLED_SendWord(device, OLED_ParseRGBToInteger(colour));
-
-    return;
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -498,15 +402,87 @@ __attribute__((always_inline)) inline void OLED_Initialize(oled_device_t * const
     OLED_SetEnablePin();
 
     OLED_DisableSleepMode(device);
-    OLED_SetColumnAddressBounds(device, 0, OLED_MAX_ADDRESS_BOUND);
-    OLED_SetRowAddressBounds(device, 0, OLED_MAX_ADDRESS_BOUND);
+    OLED_SetColumnAddressBounds(device, OLED_MIN_ADDRESS_BOUND, OLED_MAX_ADDRESS_BOUND);
+    OLED_SetRowAddressBounds(device, OLED_MIN_ADDRESS_BOUND, OLED_MAX_ADDRESS_BOUND);
     OLED_SetDisplayOptions(device);
+
+    return;
+}
+
+__attribute__((always_inline)) inline void OLED_StartWritingDisplay(oled_device_t const * const device)
+{
+    OLED_SendCommand(device, OLED_WRITE_RAM, NULL, 0);
+
+    OLED_StartTransaction(device);
+    OLED_SetDataMode();
+
+    return;
+}
+
+__attribute__((always_inline)) inline void OLED_StopWritingDisplay(oled_device_t const * const device)
+{
+    OLED_EndTransaction(device);
+    OLED_SetCommandMode();
+
+    return;
+}
+
+uint16_t OLED_ParseRGBToInteger(oled_colour_t const rgb)
+{
+    uint8_t const red = rgb.red >> 3;
+    uint8_t const green = rgb.green >> 2;
+    uint8_t const blue = rgb.blue >> 3;
+
+    uint16_t const mostSignificantByte = ((uint16_t) (red << 3) | (green >> 3));
+    uint16_t const leastSignificantByte = (green << 5) | blue;
+
+    return (mostSignificantByte << 8) | leastSignificantByte;
+}
+
+oled_colour_t OLED_ParseIntegerToRGB(uint16_t const rawData)
+{
+    uint8_t const mostSignificantByte = rawData >> 8;
+    uint8_t const leastSignificantByte = rawData & 0x00FF;
+
+    oled_colour_t parsedColour = {
+        .red = mostSignificantByte >> 3,
+        .green = ((mostSignificantByte & 0x07) << 3) | (leastSignificantByte >> 5),
+        .blue = leastSignificantByte & 0x1F
+    };
+
+    parsedColour.red <<= 3;
+    parsedColour.green <<= 2;
+    parsedColour.blue <<= 3;
+
+    return parsedColour;
+}
+
+__attribute__((always_inline)) inline void OLED_SendColor(oled_device_t const * const device, oled_colour_t const colour)
+{
+    OLED_SendWord(device, OLED_ParseRGBToInteger(colour));
+
+    return;
+}
+
+__attribute__((always_inline)) inline void OLED_SetRowAddressBounds(oled_device_t const * const device, uint8_t const min, uint8_t const max)
+{
+    OLED_SetAddressBoundsWithOffset(device, OLED_SET_ROW_ADDRESS, min, max, 0);
+
+    return;
+}
+
+__attribute__((always_inline)) inline void OLED_SetColumnAddressBounds(oled_device_t const * const device, uint8_t const min, uint8_t const max)
+{
+    OLED_SetAddressBoundsWithOffset(device, OLED_SET_COLUMN_ADDRESS, min, max, 16);
 
     return;
 }
 
 void OLED_SetBackground(oled_device_t const * const device, oled_colour_t const colour)
 {
+    OLED_SetColumnAddressBounds(device, OLED_MIN_ADDRESS_BOUND, OLED_MAX_ADDRESS_BOUND);
+    OLED_SetRowAddressBounds(device, OLED_MIN_ADDRESS_BOUND, OLED_MAX_ADDRESS_BOUND);
+
     OLED_StartWritingDisplay(device);
 
     for (uint8_t x = 0; x <= OLED_MAX_ADDRESS_BOUND; ++x)

@@ -1,7 +1,7 @@
 /**
- *  @file oled.h
+ *  @file oled-draw.h
  *  @author Cristian Cristea - M70957
- *  @date August 18, 2022
+ *  @date August 19, 2022
  *
  *  @brief Header file for the OLED module
  *
@@ -27,9 +27,8 @@
  **/
 
 
-#ifndef OLED_H
-#define	OLED_H
-
+#ifndef OLED_DRAW_H
+#define	OLED_DRAW_H
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -37,12 +36,9 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "config.h"
-#include "spi.h"
+#include "oled.h"
 
-#include <stddef.h>
-#include <stdbool.h>
-#include <stdint.h>
+#include <stdlib.h>
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -51,19 +47,9 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-#define OLED_CHIP_SELECT          SPI_CS1
+#define OLED_DRAW_FONT_WIDTH       5
+#define OLED_DRAW_FONT_HEIGHT      8
 
-#define OLED_DATA_COMMAND_PORT    PORTD
-#define OLED_DATA_COMMAND_PIN     PIN0
-
-#define OLED_RESET_PORT           PORTD
-#define OLED_RESET_PIN            PIN7
-
-#define OLED_ENABLE_PORT          PORTD
-#define OLED_ENABLE_PIN           PIN6
-
-#define OLED_READ_WRITE_PORT      PORTD
-#define OLED_READ_WRITE_PIN       PIN3
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -71,24 +57,88 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-typedef enum OLED_ERROR_CODE
+typedef enum OLED_SHAPE_TYPE
 {
-    OLED_OK              = 0x00,
-    OLED_NULL_POINTER    = 0x01,
-} oled_error_code_t;
+    OLED_SHAPE_POINT            = 0x00,
+    OLED_SHAPE_LINE             = 0x01,
+    OLED_SHAPE_RECTANGLE        = 0x02,
+    OLED_SHAPE_FILLED_RECTANGLE = 0x03,
+	OLED_SHAPE_DISC             = 0x04,
+	OLED_SHAPE_CIRCLE           = 0x05,
+ 	OLED_SHAPE_BITMAP           = 0x06,
+	OLED_SHAPE_CHARACTER        = 0x07,
+	OLED_SHAPE_STRING           = 0x08,
+} oled_shape_type_t;
 
-typedef struct OLED_DEVICE
+typedef struct OLED_POINT
 {
-    // SPI device
-    spi_t const * spiDevice;
-} oled_device_t;
+    uint8_t x;
+    uint8_t y;
+} oled_point_t;
 
-typedef struct OLED_COLOUR
+typedef union OLED_SHAPE_PARAMETERS
 {
-    uint8_t red;
-    uint8_t green;
-    uint8_t blue;
-} oled_colour_t;
+    struct {
+        oled_point_t point;
+    } point;
+    
+    struct {
+        oled_point_t start;
+        oled_point_t end;
+        uint8_t width;
+    } line;
+    
+    struct {
+        oled_point_t start;
+        oled_point_t end;
+        uint8_t width;
+    } rectangle;
+    
+    struct {
+        oled_point_t start;
+        oled_point_t end;
+    } filled_rectangle;
+    
+    struct {
+        oled_point_t center;
+        uint8_t radius;
+        uint8_t width;
+    } circle;
+    
+    struct {
+        oled_point_t center;
+        uint8_t radius;
+    } disc;
+    
+    struct {
+        oled_point_t start;
+        uint8_t size_x;
+        uint8_t size_y;
+        oled_colour_t const * data;
+    } bitmap;
+    
+    struct {
+        oled_point_t start;
+        uint8_t scale_x;
+        uint8_t scale_y;
+        uint8_t character;
+    } character;
+    
+    struct {
+        oled_point_t start;
+        uint8_t scale_x;
+        uint8_t scale_y;
+        uint8_t const * data;
+    } string;
+} oled_shape_parameters_t;
+
+typedef struct OLED_SHAPE
+{
+    uint16_t colour;
+    oled_shape_type_t type;
+    oled_shape_parameters_t parameters;
+    void (* Draw) (oled_device_t const * const, struct OLED_SHAPE *);
+} oled_shape_t;
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -99,46 +149,8 @@ typedef struct OLED_COLOUR
 /**
  * TODO
  */
-void OLED_Initialize(oled_device_t * const device, spi_t const * const spiDevice);
+void OLED_SetShape(oled_shape_t * const shape, oled_shape_type_t const type, oled_shape_parameters_t const * const parameters, oled_colour_t const colour);
 
-/**
- * TODO
- */
-void OLED_StartWritingDisplay(oled_device_t const * const device);
 
-/**
- * TODO
- */
-void OLED_StopWritingDisplay(oled_device_t const * const device);
-
-/**
- * TODO
- */
-void OLED_SetRowAddressBounds(oled_device_t const * const device, uint8_t const min, uint8_t const max);
-
-/**
- * TODO
- */
-uint16_t  OLED_ParseRGBToInteger(oled_colour_t const rgb);
-
-/**
- * TODO
- */
-oled_colour_t OLED_ParseIntegerToRGB(uint16_t const rawData);
-
-/**
- * TODO
- */
-void OLED_SetColumnAddressBounds(oled_device_t const * const device, uint8_t const min, uint8_t const max);
-
-/**
- * TODO
- */
-void OLED_SendColor(oled_device_t const * const device, oled_colour_t const colour);
-
-/**
- * TODO
- */
-void OLED_SetBackground(oled_device_t const * const device, oled_colour_t const colour);
-#endif // OLED_H
+#endif // OLED_DRAW_H
 
