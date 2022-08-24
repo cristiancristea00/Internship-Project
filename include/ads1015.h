@@ -157,7 +157,7 @@ typedef struct ADS1015_DEVICE
 
     // Handler
     ads1015_handler_t const * handler;
-    
+
     // Configuration
     uint16_t configuration;
 
@@ -170,45 +170,87 @@ typedef struct ADS1015_DEVICE
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-/*
- * TODO
- */
+/**
+ * @brief Initializes the ADS1015 device.
+ *
+ * @param[in, out] device ADS1015 device
+ * @param[in]      handler Read and write operations handler
+ * @param[in]      i2cDevice I2C device
+ * @param[in]      i2cAddress I2C device address
+ * @param[in]      configuration The configuration to set
+ *
+ * @return ads1015_error_code_t Error code
+ **/
 ads1015_error_code_t ADS1015_Initialize(ads1015_device_t * const device, ads1015_handler_t const * const handler, i2c_t const * const i2cDevice,  uint8_t const i2cAddress, uint16_t const configuration);
 
-/*
- * TODO
- */
+/**
+ * @brief Sets the configuration of the ADS1015 device.
+ *
+ * @param[in] device ADS1015 device
+ * @param[in] configuration The configuration to set
+ *
+ * @return ads1015_error_code_t Error code
+ **/
 ads1015_error_code_t ADS1015_SetConfiguration(ads1015_device_t * const device, uint16_t const configuration);
 
-/*
- * TODO
- */
+/**
+ * @brief Reads the configuration from the ADS1015 device.
+ *
+ * @param[in]  device ADS1015 device
+ * @param[out] configuration The configuration read
+ *
+ * @return ads1015_error_code_t Error code
+ **/
 ads1015_error_code_t ADS1015_GetConfiguration(ads1015_device_t const * const device, uint16_t * const configuration);
 
-/*
- * TODO
- */
+/**
+ * @brief Sets the comparator's low threshold.
+ *
+ * @param[in] device ADS1015 device
+ * @param[in] lowThreshold The low threshold to set
+ *
+ * @return ads1015_error_code_t Error code
+ **/
 ads1015_error_code_t ADS1015_SetLowThreshold(ads1015_device_t const * const device, uint16_t const lowThreshold);
 
-/*
- * TODO
- */
+/**
+ * @brief Reads the comparator's low threshold.
+ *
+ * @param[in]  device ADS1015 device
+ * @param[out] lowThreshold The low threshold read
+ *
+ * @return ads1015_error_code_t Error code
+ **/
 ads1015_error_code_t ADS1015_GetLowThreshold(ads1015_device_t const * const device, uint16_t * const lowThreshold);
 
-/*
- * TODO
- */
+/**
+ * @brief Sets the comparator's high threshold.
+ *
+ * @param[in] device ADS1015 device
+ * @param[in] highThreshold The high threshold to set
+ *
+ * @return ads1015_error_code_t
+ **/
 ads1015_error_code_t ADS1015_SetHighThreshold(ads1015_device_t const * const device, uint16_t const highThreshold);
 
-/*
- * TODO
- */
+/**
+ * @brief Reads the comparator's high threshold.
+ *
+ * @param[in] device ADS1015 device
+ * @param[out] highThreshold The high threshold read
+ *
+ * @return ads1015_error_code_t
+ **/
 ads1015_error_code_t ADS1015_GetHighThreshold(ads1015_device_t const * const device, uint16_t * const highThreshold);
 
-/*
- * TODO
- */
+/**
+ * @brief Reads the conversion value from the ADS1015 device.
+ *
+ * @param[in]  device ADS1015 device
+ * @param[out] conversion The conversion read
+ *
+ * @return ads1015_error_code_t
+ **/
 ads1015_error_code_t ADS1015_GetConversion(ads1015_device_t const * const device, uint16_t * const conversion);
 
 #endif // ADS1015_H
-

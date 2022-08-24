@@ -57,11 +57,11 @@
 static ads1015_error_code_t ADS1015_CheckNull(ads1015_device_t const * const device);
 
 /**
- * @brief TODO
+ * @brief Reads a register by selecting it with the help of the Pointer.
  *
  * @param[in]  i2c The I2C device to use
  * @param[in]  address The address of the device
- * @param[in]  pointerRegister TODO
+ * @param[in]  pointerRegister The register to read
  * @param[out] dataBuffer The buffer to store the data in
  * @param[in]  bufferLength The number of bytes to read
  *
@@ -70,11 +70,11 @@ static ads1015_error_code_t ADS1015_CheckNull(ads1015_device_t const * const dev
 static ads1015_error_code_t ADS1015_I2C_ReadRegister(i2c_t const * const i2c, uint8_t const address, ads1015_pointer_register_t const pointerRegister, uint8_t * const dataBuffer, uint8_t const bufferLength);
 
 /**
- * @brief TODO
+ * @brief Writes a register by selecting it with the help of the Pointer.
  *
  * @param[in] i2c The I2C device to use
  * @param[in] address The address of the device
- * @param[in] pointerRegister TODO
+ * @param[in] pointerRegister The register to write
  * @param[in] dataBuffer The buffer containing the data to write
  * @param[in] bufferLength The number of bytes to write
  *
@@ -82,14 +82,26 @@ static ads1015_error_code_t ADS1015_I2C_ReadRegister(i2c_t const * const i2c, ui
  **/
 static ads1015_error_code_t ADS1015_I2C_WriteRegister(i2c_t const * const i2c, uint8_t const address, ads1015_pointer_register_t const pointerRegister, uint8_t const * const dataBuffer, uint8_t const bufferLength);
 
-/*
- * TODO
- */
+/**
+ * @brief Sets a word (16 bits) value in the specified register.
+ *
+ * @param[in] device ADS1015 device
+ * @param[in] word The word to set
+ * @param[in] pointer Register to set
+ *
+ * @return ads1015_error_code_t Error code
+ **/
 __attribute__((always_inline)) inline static ads1015_error_code_t ADS1015_SetWordValue(ads1015_device_t const * const device, uint16_t const word, ads1015_pointer_register_t const pointer);
 
-/*
- * TODO
- */
+/**
+ * @brief Gets a word (16 bits) value from the specified register.
+ *
+ * @param[in] device ADS1015 device
+ * @param[in] word The word to get
+ * @param[in] pointer Register to get
+ *
+ * @return ads1015_error_code_t Error code
+ **/
 __attribute__((always_inline)) inline static ads1015_error_code_t ADS1015_GetWordValue(ads1015_device_t const * const device, uint16_t * const word, ads1015_pointer_register_t const pointer);
 
 

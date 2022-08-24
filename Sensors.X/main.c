@@ -63,7 +63,7 @@ void main(void)
         .standbyTime = BME280_STANDBY_TIME_500_MS
     };
 
-    BME280_Initialize(&weatherClick, &BME280_I2C0_Handler, &i2c_0, BME280_I2C_ADDRESS, &settings);
+    BME280_Init(&weatherClick, &BME280_I2C0_Handler, &i2c_0, BME280_I2C_ADDRESS, &settings);
 
     hc05_device_t sensorStation;
     HC05_Initialize(&sensorStation, &uart_0);
