@@ -158,7 +158,7 @@ typedef struct BME280_UNCOMPENSATED_DATA
  *
  * @return bme280_error_code_t Error code
  **/
-static bme280_error_code_t BME280_CheckNull(bme280_device_t const * const device);
+__attribute__((always_inline)) inline static bme280_error_code_t BME280_CheckNull(bme280_device_t const * const device);
 
 /**
  * @brief Reads a number of one byte registers from the device using I2C and
@@ -374,7 +374,7 @@ static bme280_error_code_t BME280_SetSensorSettings(bme280_device_t * const devi
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-static bme280_error_code_t BME280_CheckNull(bme280_device_t const * const device)
+__attribute__((always_inline)) inline static bme280_error_code_t BME280_CheckNull(bme280_device_t const * const device)
 {
     if (device == NULL || device->handler == NULL || device->i2cDevice == NULL)
     {
@@ -433,8 +433,6 @@ static bme280_error_code_t BME280_GetRegisters(bme280_device_t const * const dev
 {
     bme280_error_code_t getResult = BME280_OK;
 
-    getResult = BME280_CheckNull(device);
-
     if (getResult == BME280_OK && dataBuffer != NULL)
     {
         if (device->handler->I2C_Read(device->i2cDevice, device->i2cAddress, registerAddress, dataBuffer, bufferLength) != BME280_OK)
@@ -453,8 +451,6 @@ static bme280_error_code_t BME280_GetRegisters(bme280_device_t const * const dev
 static bme280_error_code_t BME280_SetRegisters(bme280_device_t const * const device, uint8_t const * const registerAddresses, uint8_t const * const dataBuffer, uint8_t const bufferLength)
 {
     bme280_error_code_t setResult = BME280_OK;
-
-    setResult = BME280_CheckNull(device);
 
     if (setResult == BME280_OK && dataBuffer != NULL && registerAddresses != NULL)
     {
@@ -482,8 +478,6 @@ static bme280_error_code_t BME280_SetRegisters(bme280_device_t const * const dev
 static bme280_error_code_t BME280_SoftReset(bme280_device_t const * const device)
 {
     bme280_error_code_t resetResult = BME280_OK;
-
-    resetResult = BME280_CheckNull(device);
 
     LOG_INFO("Started BME280 soft reset");
 
@@ -713,8 +707,6 @@ static bme280_error_code_t BME280_CompensateData(bme280_device_t * const device,
 {
     bme280_error_code_t compensationResult = BME280_OK;
 
-    compensationResult = BME280_CheckNull(device);
-
     if (uncompensatedData != NULL)
     {
         device->data.temperature = BME280_CompensateTemperature(uncompensatedData, &device->calibrationData);
@@ -874,8 +866,6 @@ static bme280_error_code_t BME280_SetSensorPowerMode(bme280_device_t * const dev
 {
     bme280_error_code_t modeResult = BME280_OK;
 
-    modeResult = BME280_CheckNull(device);
-
     if (modeResult == BME280_OK)
     {
         modeResult = BME280_WritePowerMode(device, settings->powerMode);
@@ -897,24 +887,19 @@ static bme280_error_code_t BME280_SetSensorSettings(bme280_device_t * const devi
 {
     bme280_error_code_t settingsResult = BME280_OK;
 
-    settingsResult = BME280_CheckNull(device);
+    if (settingsResult == BME280_OK)
+    {
+        settingsResult = BME280_SetOversamplingSettings(device, settings);
+    }
 
     if (settingsResult == BME280_OK)
     {
-        if (settingsResult == BME280_OK)
-        {
-            settingsResult = BME280_SetOversamplingSettings(device, settings);
-        }
+        settingsResult = BME280_SetFilterStandbySettings(device, settings);
+    }
 
-        if (settingsResult == BME280_OK)
-        {
-            settingsResult = BME280_SetFilterStandbySettings(device, settings);
-        }
-
-        if (settingsResult == BME280_OK)
-        {
-            settingsResult = BME280_SetSensorPowerMode(device, settings);
-        }
+    if (settingsResult == BME280_OK)
+    {
+        settingsResult = BME280_SetSensorPowerMode(device, settings);
     }
 
     if (settingsResult == BME280_OK)
@@ -937,7 +922,7 @@ static bme280_error_code_t BME280_SetSensorSettings(bme280_device_t * const devi
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-bme280_error_code_t BME280_Init(bme280_device_t * const device, bme280_handler_t const * const handler, i2c_t const * const i2cDevice, uint8_t const i2cAddress, bme280_settings_t const * const settings)
+bme280_error_code_t BME280_Initialize(bme280_device_t * const device, bme280_handler_t const * const handler, i2c_t const * const i2cDevice, uint8_t const i2cAddress, bme280_settings_t const * const settings)
 {
     device->i2cDevice = i2cDevice;
     device->i2cAddress = i2cAddress;
@@ -1000,7 +985,7 @@ bme280_error_code_t BME280_Init(bme280_device_t * const device, bme280_handler_t
         LOG_ERROR("Couldn't finish the BME280 initialization");
     }
 
-    _delay_ms(100);
+    PauseMiliseconds(100);
 
     return initResult;
 }
@@ -1008,8 +993,6 @@ bme280_error_code_t BME280_Init(bme280_device_t * const device, bme280_handler_t
 bme280_error_code_t BME280_GetSensorData(bme280_device_t * const device)
 {
     bme280_error_code_t acquisitionResult = BME280_OK;
-
-    acquisitionResult = BME280_CheckNull(device);
 
     if (acquisitionResult == BME280_OK)
     {

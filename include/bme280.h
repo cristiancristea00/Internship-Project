@@ -233,7 +233,7 @@ typedef struct BME280_DEVICE
  *
  * @return bme280_error_code_t Error code
  **/
-bme280_error_code_t BME280_Init(bme280_device_t * const device, bme280_handler_t const * const handler, i2c_t const * const i2cDevice, uint8_t const i2cAddress, bme280_settings_t const * const settings);
+bme280_error_code_t BME280_Initialize(bme280_device_t * const device, bme280_handler_t const * const handler, i2c_t const * const i2cDevice, uint8_t const i2cAddress, bme280_settings_t const * const settings);
 
 /**
  * @brief Reads the sensor data from the device and stores it in the sensor data
