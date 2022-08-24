@@ -43,7 +43,6 @@
 #include <stdio.h>
 
 
-static void BusScan(void);
 static void SensorRead(bme280_device_t * const device);
 
 void main(void)
