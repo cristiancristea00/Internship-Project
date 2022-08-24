@@ -11,6 +11,7 @@
       <itemPath>../include/crc8.h</itemPath>
       <itemPath>../include/vector.h</itemPath>
       <itemPath>C:/Users/M70957/Documents/Internship-Project/include/i2c.h</itemPath>
+      <itemPath>C:/Users/M70957/Documents/Internship-Project/include/ads1015.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -27,6 +28,7 @@
       <itemPath>../src/hc-05.c</itemPath>
       <itemPath>../src/vector.c</itemPath>
       <itemPath>C:/Users/M70957/Documents/Internship-Project/src/i2c.c</itemPath>
+      <itemPath>C:/Users/M70957/Documents/Internship-Project/src/ads1015.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
