@@ -34,6 +34,7 @@
 #include "uart.h"
 #include "crc8.h"
 #include "i2c.h"
+#include "ads1015.h"
 
 #include <avr/io.h>
 #include <util/delay.h>
