@@ -27,6 +27,8 @@
  **/
 
 
+#include "mics-6814.h"
+#include "ads1015.h"
 #include "config.h"
 #include "vector.h"
 #include "bme280.h"
@@ -34,7 +36,6 @@
 #include "uart.h"
 #include "crc8.h"
 #include "i2c.h"
-#include "ads1015.h"
 
 #include <avr/io.h>
 #include <util/delay.h>
@@ -44,7 +45,64 @@
 #include <stdio.h>
 
 
-static void SensorRead(bme280_device_t * const device);
+//static void SensorRead(bme280_device_t * const device);
+//
+//void main(void)
+//{
+//    SetClockFrequency(CLKCTRL_FRQSEL_24M_gc);
+//
+//    uart_1.Initialize(460800);
+//
+//    bme280_device_t weatherClick;
+//    bme280_settings_t settings = {
+//        .temperatureOversampling = BME280_OVERSAMPLING_16X,
+//        .pressureOversampling = BME280_OVERSAMPLING_16X,
+//        .humidityOversampling = BME280_OVERSAMPLING_16X,
+//        .iirFilterCoefficients = BME280_IIR_FILTER_8,
+//        .powerMode = BME280_NORMAL_MODE,
+//        .standbyTime = BME280_STANDBY_TIME_500_MS
+//    };
+//    BME280_Initialize(&weatherClick, &BME280_I2C0_Handler, &i2c_0, BME280_I2C_ADDRESS, &settings);
+//
+//    ads1015_device_t airQualityClickADC;
+//    mics6814_device_t airQualityClick;
+//    MICS6814_Initialize(&airQualityClick, &airQualityClickADC, &i2c_0);
+//
+//    hc05_device_t sensorStation;
+//    HC05_Initialize(&sensorStation, &uart_0);
+//
+//    uint8_t serializedSensorData[BME280_SERIALIZED_SIZE] = { 0 };
+//
+//    PauseMiliseconds(5000);
+//
+//    while (true)
+//    {
+//        SensorRead(&weatherClick);
+//        BME280_SerializeSensorData(&weatherClick, &serializedSensorData);
+//        HC05_SendData(&sensorStation, &serializedSensorData, BME280_SERIALIZED_SIZE);
+//        PauseMiliseconds(5000);
+//    }
+//}
+//
+//static void SensorRead(bme280_device_t * const device)
+//{
+//    bme280_error_code_t readResult = BME280_GetSensorData(device);
+//
+//    if (readResult != BME280_OK)
+//    {
+//        return;
+//    }
+//
+//    bme280_data_t sensorData = device->data;
+//
+//    printf("Temperature: %0.2lf °C\n\r", BME280_GetDisplayTemperature(&sensorData));
+//    printf("Pressure: %0.2lf hPa\n\r", BME280_GetDisplayPressure(&sensorData));
+//    printf("Relative humidity: %0.2lf %c\n\r", BME280_GetDisplayHumidity(&sensorData), '%');
+//
+//    return;
+//}
+
+void BusScan(void);
 
 void main(void)
 {
@@ -52,49 +110,42 @@ void main(void)
 
     uart_1.Initialize(460800);
 
-    bme280_device_t weatherClick;
-
-    bme280_settings_t settings = {
-        .temperatureOversampling = BME280_OVERSAMPLING_16X,
-        .pressureOversampling = BME280_OVERSAMPLING_16X,
-        .humidityOversampling = BME280_OVERSAMPLING_16X,
-        .iirFilterCoefficients = BME280_IIR_FILTER_8,
-        .powerMode = BME280_NORMAL_MODE,
-        .standbyTime = BME280_STANDBY_TIME_500_MS
-    };
-
-    BME280_Initialize(&weatherClick, &BME280_I2C0_Handler, &i2c_0, BME280_I2C_ADDRESS, &settings);
-
-    hc05_device_t sensorStation;
-    HC05_Initialize(&sensorStation, &uart_0);
-
-    uint8_t serializedSensorData[BME280_SERIALIZED_SIZE] = { 0 };
+    ads1015_device_t airQualityClickADC;
+    mics6814_device_t airQualityClick;
+    MICS6814_Initialize(&airQualityClick, &airQualityClickADC, &i2c_0);
 
     PauseMiliseconds(5000);
 
     while (true)
     {
-        SensorRead(&weatherClick);
-        BME280_SerializeSensorData(&weatherClick, &serializedSensorData);
-        HC05_SendData(&sensorStation, &serializedSensorData, BME280_SERIALIZED_SIZE);
+        MICS6814_SetInputCarbonMonoxide(&airQualityClick);
+        printf("CO: %d\n\r", MICS6814_ReadValue(&airQualityClick));
+
+        MICS6814_SetInputNitrogenDioxide(&airQualityClick);
+        printf("NO2: %d\n\r", MICS6814_ReadValue(&airQualityClick));
+
+        MICS6814_SetInputAmmonia(&airQualityClick);
+        printf("NH3: %d\n\r", MICS6814_ReadValue(&airQualityClick));
+
         PauseMiliseconds(5000);
     }
 }
 
-static void SensorRead(bme280_device_t * const device)
+void BusScan(void)
 {
-    bme280_error_code_t readResult = BME280_GetSensorData(device);
+    i2c_0.Initialize(I2C_FAST_MODE_PLUS);
 
-    if (readResult != BME280_OK)
+    uart_1.Print("\n\rI2C Scan started from 0x00 to 0x7F");
+
+    for (uint8_t clientAddress = I2C_ADRESS_MIN; clientAddress <= I2C_ADRESS_MAX; ++clientAddress)
     {
-        return;
+        printf("\n\rScanning client address: 0x%02X", clientAddress);
+        if (i2c_0.ClientAvailable(clientAddress))
+        {
+            uart_1.Print(" --> client ACKED");
+        }
     }
-
-    bme280_data_t sensorData = device->data;
-
-    printf("Temperature: %0.2lf °C\n\r", BME280_GetDisplayTemperature(&sensorData));
-    printf("Pressure: %0.2lf hPa\n\r", BME280_GetDisplayPressure(&sensorData));
-    printf("Relative humidity: %0.2lf %c\n\r", BME280_GetDisplayHumidity(&sensorData), '%');
+    uart_1.Print("\n\rI2C Scan ended\n\r");
 
     return;
 }

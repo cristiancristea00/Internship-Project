@@ -419,7 +419,7 @@ static bme280_error_code_t BME280_I2C_WriteRegisters(i2c_t const * const i2c, ui
         interleavedDataBuffer[2 * registerIdx + 1] = dataBuffer[registerIdx];
     }
 
-    if (i2c->SendData(address, &interleavedDataBuffer, interleavdBufferLength) != I2C_OK)
+    if (i2c->SendData(address, interleavedDataBuffer, interleavdBufferLength) != I2C_OK)
     {
         writeResult = BME280_COMMUNICATION_ERROR;
     }
@@ -928,7 +928,7 @@ bme280_error_code_t BME280_Initialize(bme280_device_t * const device, bme280_han
     device->i2cAddress = i2cAddress;
     device->handler = handler;
 
-    device->i2cDevice->Initialize(I2C_FAST_MODE_PLUS);
+    device->i2cDevice->Initialize(I2C_FAST_MODE);
 
     bme280_error_code_t initResult = BME280_OK;
 

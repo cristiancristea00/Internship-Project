@@ -55,8 +55,8 @@
 
 // Principal and secondary I2C addresses of the chip
 
-#define ADS1015_I2C_ADDRESS                UINT8(0x24)
-#define ADS1015_I2C_ADDRESS_SEC            UINT8(0x25)
+#define ADS1015_I2C_ADDRESS                UINT8(0x48)
+#define ADS1015_I2C_ADDRESS_SEC            UINT8(0x49)
 
 // Input multiplexer configuration
 
@@ -157,10 +157,6 @@ typedef struct ADS1015_DEVICE
 
     // Handler
     ads1015_handler_t const * handler;
-
-    // Configuration
-    uint16_t configuration;
-
 } ads1015_device_t;
 
 
@@ -252,5 +248,14 @@ ads1015_error_code_t ADS1015_GetHighThreshold(ads1015_device_t const * const dev
  * @return ads1015_error_code_t
  **/
 ads1015_error_code_t ADS1015_GetConversion(ads1015_device_t const * const device, uint16_t * const conversion);
+
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                                  Modules                                   //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+extern ads1015_handler_t const ADS1015_I2C0_Handler;
 
 #endif // ADS1015_H
