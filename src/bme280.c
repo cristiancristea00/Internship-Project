@@ -928,8 +928,6 @@ bme280_error_code_t BME280_Initialize(bme280_device_t * const device, bme280_han
     device->i2cAddress = i2cAddress;
     device->handler = handler;
 
-    device->i2cDevice->Initialize(I2C_FAST_MODE);
-
     bme280_error_code_t initResult = BME280_OK;
 
     LOG_INFO("Started BME280 initialization");
@@ -962,7 +960,7 @@ bme280_error_code_t BME280_Initialize(bme280_device_t * const device, bme280_han
             LOG_WARNING("Failed to find BME280. Trying again...");
 
             --tryCount;
-            _delay_ms(1);
+            _delay_ms(500);
         }
 
         if (tryCount == 0)
@@ -984,8 +982,6 @@ bme280_error_code_t BME280_Initialize(bme280_device_t * const device, bme280_han
     {
         LOG_ERROR("Couldn't finish the BME280 initialization");
     }
-
-    PauseMiliseconds(100);
 
     return initResult;
 }

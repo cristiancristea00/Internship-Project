@@ -208,8 +208,6 @@ ads1015_error_code_t ADS1015_Initialize(ads1015_device_t * const device, ads1015
     device->i2cAddress = i2cAddress;
     device->handler = handler;
 
-    device->i2cDevice->Initialize(I2C_FAST_MODE);
-
     ads1015_error_code_t initResult = ADS1015_OK;
 
     LOG_INFO("Started ADS1015 initialization");

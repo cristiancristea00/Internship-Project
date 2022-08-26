@@ -45,97 +45,73 @@
 #include <stdio.h>
 
 
-//static void SensorRead(bme280_device_t * const device);
-//
-//void main(void)
-//{
-//    SetClockFrequency(CLKCTRL_FRQSEL_24M_gc);
-//
-//    uart_1.Initialize(460800);
-//
-//    bme280_device_t weatherClick;
-//    bme280_settings_t settings = {
-//        .temperatureOversampling = BME280_OVERSAMPLING_16X,
-//        .pressureOversampling = BME280_OVERSAMPLING_16X,
-//        .humidityOversampling = BME280_OVERSAMPLING_16X,
-//        .iirFilterCoefficients = BME280_IIR_FILTER_8,
-//        .powerMode = BME280_NORMAL_MODE,
-//        .standbyTime = BME280_STANDBY_TIME_500_MS
-//    };
-//    BME280_Initialize(&weatherClick, &BME280_I2C0_Handler, &i2c_0, BME280_I2C_ADDRESS, &settings);
-//
-//    ads1015_device_t airQualityClickADC;
-//    mics6814_device_t airQualityClick;
-//    MICS6814_Initialize(&airQualityClick, &airQualityClickADC, &i2c_0);
-//
-//    hc05_device_t sensorStation;
-//    HC05_Initialize(&sensorStation, &uart_0);
-//
-//    uint8_t serializedSensorData[BME280_SERIALIZED_SIZE] = { 0 };
-//
-//    PauseMiliseconds(5000);
-//
-//    while (true)
-//    {
-//        SensorRead(&weatherClick);
-//        BME280_SerializeSensorData(&weatherClick, &serializedSensorData);
-//        HC05_SendData(&sensorStation, &serializedSensorData, BME280_SERIALIZED_SIZE);
-//        PauseMiliseconds(5000);
-//    }
-//}
-//
-//static void SensorRead(bme280_device_t * const device)
-//{
-//    bme280_error_code_t readResult = BME280_GetSensorData(device);
-//
-//    if (readResult != BME280_OK)
-//    {
-//        return;
-//    }
-//
-//    bme280_data_t sensorData = device->data;
-//
-//    printf("Temperature: %0.2lf °C\n\r", BME280_GetDisplayTemperature(&sensorData));
-//    printf("Pressure: %0.2lf hPa\n\r", BME280_GetDisplayPressure(&sensorData));
-//    printf("Relative humidity: %0.2lf %c\n\r", BME280_GetDisplayHumidity(&sensorData), '%');
-//
-//    return;
-//}
-
-void BusScan(void);
+__attribute__((always_inline)) inline static void BusScan(void);
+__attribute__((always_inline)) inline static void SensorRead(bme280_device_t * const weatherClick, mics6814_device_t * const airQualityClick);
 
 void main(void)
 {
     SetClockFrequency(CLKCTRL_FRQSEL_24M_gc);
 
     uart_1.Initialize(460800);
+    i2c_0.Initialize(I2C_MODE_FAST_PLUS);
+
+    BusScan();
+
+    bme280_device_t weatherClick;
+    bme280_settings_t settings = {
+        .temperatureOversampling = BME280_OVERSAMPLING_16X,
+        .pressureOversampling = BME280_OVERSAMPLING_16X,
+        .humidityOversampling = BME280_OVERSAMPLING_16X,
+        .iirFilterCoefficients = BME280_IIR_FILTER_16,
+        .powerMode = BME280_NORMAL_MODE,
+        .standbyTime = BME280_STANDBY_TIME_250_MS
+    };
+    BME280_Initialize(&weatherClick, &BME280_I2C0_Handler, &i2c_0, BME280_I2C_ADDRESS, &settings);
 
     ads1015_device_t airQualityClickADC;
     mics6814_device_t airQualityClick;
     MICS6814_Initialize(&airQualityClick, &airQualityClickADC, &i2c_0);
 
+    hc05_device_t sensorStation;
+    HC05_Initialize(&sensorStation, &uart_0);
+
+    uint8_t serializedSensorData[BME280_SERIALIZED_SIZE] = { 0 };
+
     PauseMiliseconds(5000);
 
     while (true)
     {
-        MICS6814_SetInputCarbonMonoxide(&airQualityClick);
-        printf("CO: %d\n\r", MICS6814_ReadValue(&airQualityClick));
-
-        MICS6814_SetInputNitrogenDioxide(&airQualityClick);
-        printf("NO2: %d\n\r", MICS6814_ReadValue(&airQualityClick));
-
-        MICS6814_SetInputAmmonia(&airQualityClick);
-        printf("NH3: %d\n\r", MICS6814_ReadValue(&airQualityClick));
-
+        SensorRead(&weatherClick, &airQualityClick);
+        BME280_SerializeSensorData(&weatherClick, &serializedSensorData);
+        HC05_SendData(&sensorStation, &serializedSensorData, BME280_SERIALIZED_SIZE);
         PauseMiliseconds(5000);
     }
 }
 
-void BusScan(void)
+__attribute__((always_inline)) inline static void SensorRead(bme280_device_t * const weatherClick, mics6814_device_t * const airQualityClick)
 {
-    i2c_0.Initialize(I2C_FAST_MODE_PLUS);
+    BME280_GetSensorData(weatherClick);
+    bme280_data_t sensorData = weatherClick->data;
 
-    uart_1.Print("\n\rI2C Scan started from 0x00 to 0x7F");
+    printf("Temperature: %0.2lf °C\n\r", BME280_GetDisplayTemperature(&sensorData));
+    printf("Pressure: %0.2lf hPa\n\r", BME280_GetDisplayPressure(&sensorData));
+    printf("Relative humidity: %0.2lf %c\n\r", BME280_GetDisplayHumidity(&sensorData), '%');
+
+    printf("Carbon monoxide (CO): %0.2lf ppm\n\r", MICS6814_GetCarbonMonoxide(airQualityClick));
+    printf("Nitrogen dioxide (NO2): %0.2lf ppm\n\r", MICS6814_GetNitrogenDioxide(airQualityClick));
+    printf("Ethanol (C2H5OH): %0.2lf ppm\n\r", MICS6814_GetEthanol(airQualityClick));
+    printf("Hydrogen (H2): %0.2lf ppm\n\r", MICS6814_GetHydrogen(airQualityClick));
+    printf("Ammonia (NH3): %0.2lf ppm\n\r", MICS6814_GetAmmonia(airQualityClick));
+    printf("Methane (CH4): %0.2lf ppm\n\r", MICS6814_GetMethane(airQualityClick));
+    printf("Propane (C3H8): %0.2lf ppm\n\r", MICS6814_GetPropane(airQualityClick));
+    printf("Isobutane (C4H10): %0.2lf ppm\n\r", MICS6814_GetIsobutane(airQualityClick));
+
+    return;
+}
+
+__attribute__((always_inline)) inline static void BusScan(void)
+{
+    printf("\n\rI2C Scan started from 0x%02X to 0x%02X:", I2C_ADRESS_MIN, I2C_ADRESS_MAX);
 
     for (uint8_t clientAddress = I2C_ADRESS_MIN; clientAddress <= I2C_ADRESS_MAX; ++clientAddress)
     {

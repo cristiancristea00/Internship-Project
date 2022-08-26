@@ -41,6 +41,7 @@
 #include <util/delay.h>
 
 #include <stdint.h>
+#include <math.h>
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -49,9 +50,35 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-#define MICS6814_CHANNEL_NO2    ADS1015_AIN0_GND
-#define MICS6814_CHANNEL_NH3    ADS1015_AIN1_GND
-#define MICS6814_CHANNEL_CO     ADS1015_AIN2_GND
+#define MICS6814_BASE_RESISTANCE_RED    1 // TODO: Change
+#define MICS6814_BASE_RESISTANCE_OX     1 // TODO: Change
+#define MICS6814_BASE_RESISTANCE_NH3    1 // TODO: Change
+
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                        Typedefs, enums and structs                         //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+typedef enum MICS6814_CHANNEL
+{
+    MICS6814_CHANNEL_OX_SENSOR = ADS1015_AIN0_GND,
+    MICS6814_CHANNEL_NH3_SENSOR = ADS1015_AIN1_GND,
+    MICS6814_CHANNEL_RED_SENSOR = ADS1015_AIN2_GND
+} mics6814_channel_t;
+
+typedef enum MICS6814_GAS
+{
+    MICS6814_CARBON_MONOXIDE  = 0x00,
+    MICS6814_NITROGEN_DIOXIDE = 0x01,
+    MICS6814_ETHANOL          = 0x02,
+    MICS6814_HYDROGEN         = 0x03,
+    MICS6814_AMMONIA          = 0x04,
+    MICS6814_METHANE          = 0x05,
+    MICS6814_PROPANE          = 0x06,
+    MICS6814_ISOBUTANE        = 0x07
+} mics6814_gas_t;
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -70,13 +97,94 @@
 __attribute__((always_inline)) inline static mics6814_error_code_t MICS6814_CheckNull(mics6814_device_t const * const device);
 
 /**
- * @brief TODO
+ * @brief Initializes the ADC device.
  *
- * @param device
+ * @param device MiCS-6814 device
+ * @param i2cDevice I2C device
  *
- * @return mics6814_error_code_t
- */
+ * @return mics6814_error_code_t Error code
+ **/
 __attribute__((always_inline)) inline static mics6814_error_code_t MICS6814_ConfigureADC(mics6814_device_t * const device, i2c_t const * const i2cDevice);
+
+/**
+ * @brief Sets the MiCS-6814's ADC input to the RED channel.
+ *
+ * @param device MiCS-6814 device
+ **/
+static void MICS6814_SetADCInputToRED(mics6814_device_t const * const device);
+
+/**
+ * @brief Sets the MiCS-6814's ADC input to the OX channel.
+ *
+ * @param device MiCS-6814 device
+ **/
+static void MICS6814_SetADCInputToOX(mics6814_device_t const * const device);
+
+/**
+ * @brief Sets the MiCS-6814's ADC input to the NH3 channel.
+ *
+ * @param device MiCS-6814 device
+ **/
+static void MICS6814_SetADCInputToNH3(mics6814_device_t const * const device);
+
+/**
+ * @brief Reads the MiCS-6814's current ADC input.
+ *
+ * @param device MiCS-6814 device
+ *
+ * @return uint16_t ADC value
+ **/
+static uint16_t MICS6814_ReadValue(mics6814_device_t const * const device);
+
+/*
+ * TODO
+ */
+static double MICS6814_GetResistanceRatio(mics6814_device_t const * const device, mics6814_channel_t const channel);
+
+/*
+ * TODO
+ */
+static double MICS6814_Measure(mics6814_device_t const * const device, mics6814_gas_t const gas);
+
+/*
+ * TODO
+ */
+__attribute__((always_inline)) inline static double MICS6814_ComputeCarbonMonoxide(double const ratio_RED);
+
+/*
+ * TODO
+ */
+__attribute__((always_inline)) inline static double MICS6814_ComputeNitrogenDioxide(double const ratio_OX);
+
+/*
+ * TODO
+ */
+__attribute__((always_inline)) inline static double MICS6814_ComputeEthanol(double const ratio_RED, double const ratio_NH3);
+
+/*
+ * TODO
+ */
+__attribute__((always_inline)) inline static double MICS6814_ComputeHydrogen(double const ratio_RED, double const ratio_NH3);
+
+/*
+ * TODO
+ */
+__attribute__((always_inline)) inline static double MICS6814_ComputeAmmonia(double const ratio_RED, double const ratio_NH3);
+
+/*
+ * TODO
+ */
+__attribute__((always_inline)) inline static double MICS6814_ComputeMethane(double const ratio_RED);
+
+/*
+ * TODO
+ */
+__attribute__((always_inline)) inline static double MICS6814_ComputePropane(double const ratio_RED, double const ratio_NH3);
+
+/*
+ * TODO
+ */
+__attribute__((always_inline)) inline static double MICS6814_ComputeIsobutane(double const ratio_RED, double const ratio_NH3);
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -100,7 +208,7 @@ __attribute__((always_inline)) inline static mics6814_error_code_t MICS6814_Chec
 
 __attribute__((always_inline)) inline static mics6814_error_code_t MICS6814_ConfigureADC(mics6814_device_t * const device, i2c_t const * const i2cDevice)
 {
-    uint16_t const adcConfiguration = ADS1015_PGA_2_048V | ADS1015_CONTINUOUS_MODE | ADS1015_DATA_RATE_128_SPS | ADS1015_COMPARATOR_DISABLE;
+    uint16_t const adcConfiguration = ADS1015_PGA_2_048V | ADS1015_CONTINUOUS_MODE | ADS1015_DATA_RATE_250_SPS | ADS1015_COMPARATOR_DISABLE;
 
     if (ADS1015_Initialize(&device->adc, &ADS1015_I2C0_Handler, i2cDevice, ADS1015_I2C_ADDRESS, adcConfiguration) == ADS1015_OK)
     {
@@ -110,6 +218,356 @@ __attribute__((always_inline)) inline static mics6814_error_code_t MICS6814_Conf
     {
         return MICS6814_FAIL_CONFIGURATION;
     }
+}
+
+static void MICS6814_SetADCInputToRED(mics6814_device_t const * const device)
+{
+    uint16_t configuration = 0;
+    ADS1015_GetConfiguration(&device->adc, &configuration);
+    configuration &= ~(MICS6814_CHANNEL_OX_SENSOR | MICS6814_CHANNEL_NH3_SENSOR);
+    configuration |= MICS6814_CHANNEL_RED_SENSOR;
+
+    // For whatever reason this doesn't work with a single function call
+    ADS1015_SetConfiguration(&device->adc, configuration);
+    ADS1015_SetConfiguration(&device->adc, configuration);
+
+    PauseMicroseconds(ADS1015_DATA_RATE_250_SPS_DELAY);
+
+    return;
+}
+
+static void MICS6814_SetADCInputToOX(mics6814_device_t const * const device)
+{
+    uint16_t configuration = 0;
+    ADS1015_GetConfiguration(&device->adc, &configuration);
+    configuration &= ~(MICS6814_CHANNEL_RED_SENSOR | MICS6814_CHANNEL_NH3_SENSOR);
+    configuration |= MICS6814_CHANNEL_OX_SENSOR;
+
+    // For whatever reason this doesn't work with a single function call
+    ADS1015_SetConfiguration(&device->adc, configuration);
+    ADS1015_SetConfiguration(&device->adc, configuration);
+
+    PauseMicroseconds(ADS1015_DATA_RATE_250_SPS_DELAY);
+
+    return;
+}
+
+static void MICS6814_SetADCInputToNH3(mics6814_device_t const * const device)
+{
+    uint16_t configuration = 0;
+    ADS1015_GetConfiguration(&device->adc, &configuration);
+    configuration &= ~(MICS6814_CHANNEL_RED_SENSOR | MICS6814_CHANNEL_OX_SENSOR);
+    configuration |= MICS6814_CHANNEL_NH3_SENSOR;
+
+    // For whatever reason this doesn't work with a single function call
+    ADS1015_SetConfiguration(&device->adc, configuration);
+    ADS1015_SetConfiguration(&device->adc, configuration);
+
+    PauseMicroseconds(ADS1015_DATA_RATE_250_SPS_DELAY);
+
+    return;
+}
+
+static uint16_t MICS6814_ReadValue(mics6814_device_t const * const device)
+{
+    uint16_t value = 0;
+    if (ADS1015_GetConversion(&device->adc, &value) == ADS1015_OK)
+    {
+        return value;
+    }
+    else
+    {
+        LOG_WARNING("Couldn't read MiCS-6814 value");
+        return 0;
+    }
+}
+
+static double MICS6814_GetResistanceRatio(mics6814_device_t const * const device, mics6814_channel_t const channel)
+{
+    uint16_t readValue = 0;
+
+    switch (channel)
+    {
+        case MICS6814_CHANNEL_RED_SENSOR:
+            MICS6814_SetADCInputToRED(device);
+            readValue = MICS6814_ReadValue(device);
+            LOG_DEBUG_PRINTF("RED: %d", readValue);
+            // TODO: Formula for resistance
+            return readValue / MICS6814_BASE_RESISTANCE_RED;
+        case MICS6814_CHANNEL_OX_SENSOR:
+            MICS6814_SetADCInputToOX(device);
+            readValue = MICS6814_ReadValue(device);
+            LOG_DEBUG_PRINTF("OX: %d", readValue);
+            // TODO: Formula for resistance
+            return readValue / MICS6814_BASE_RESISTANCE_OX;
+        case MICS6814_CHANNEL_NH3_SENSOR:
+            MICS6814_SetADCInputToNH3(device);
+            readValue = MICS6814_ReadValue(device);
+            LOG_DEBUG_PRINTF("NH3: %d", readValue);
+            // TODO: Formula for resistance
+            return readValue / MICS6814_BASE_RESISTANCE_NH3;
+        default:
+            LOG_ERROR("Invalid channel type in MiCS-6814 selection");
+            return 0;
+    }
+}
+
+static double MICS6814_Measure(mics6814_device_t const * const device, mics6814_gas_t const gas)
+{
+    double const ratio_RED = MICS6814_GetResistanceRatio(device, MICS6814_CHANNEL_RED_SENSOR);
+    double const ratio_OX  = MICS6814_GetResistanceRatio(device, MICS6814_CHANNEL_OX_SENSOR);
+    double const ratio_NH3 = MICS6814_GetResistanceRatio(device, MICS6814_CHANNEL_NH3_SENSOR);
+
+    switch (gas)
+    {
+        case MICS6814_CARBON_MONOXIDE:
+            return MICS6814_ComputeCarbonMonoxide(ratio_RED);
+        case MICS6814_NITROGEN_DIOXIDE:
+            return MICS6814_ComputeNitrogenDioxide(ratio_OX);
+        case MICS6814_ETHANOL:
+            return MICS6814_ComputeEthanol(ratio_RED, ratio_NH3);
+        case MICS6814_HYDROGEN:
+            return MICS6814_ComputeHydrogen(ratio_RED, ratio_NH3);
+        case MICS6814_AMMONIA:
+            return MICS6814_ComputeAmmonia(ratio_RED, ratio_NH3);
+        case MICS6814_METHANE:
+            return MICS6814_ComputeMethane(ratio_RED);
+        case MICS6814_PROPANE:
+            return MICS6814_ComputePropane(ratio_RED, ratio_NH3);
+        case MICS6814_ISOBUTANE:
+            return MICS6814_ComputeIsobutane(ratio_RED, ratio_NH3);
+        default:
+            LOG_ERROR("Invalid gas type in MiCS-6814 selection");
+            return 0;
+    }
+}
+
+__attribute__((always_inline)) inline static double MICS6814_ComputeCarbonMonoxide(double const ratio_RED)
+{
+    double result = 0;
+
+    if (ratio_RED > 4  || ratio_RED < 0.01)
+    {
+        result = 0;
+    }
+    else
+    {
+        result = pow(ratio_RED, -1.177) * 4.4638;
+
+        if (result < 1 || result > 1000)
+        {
+            result = 0;
+        }
+    }
+
+    return result;
+}
+
+__attribute__((always_inline)) inline static double MICS6814_ComputeNitrogenDioxide(double const ratio_OX)
+{
+    double result = 0;
+
+    if (ratio_OX > 40 || ratio_OX < 0.06)
+    {
+        result = 0;
+    }
+    else
+    {
+        result = pow(ratio_OX, 0.9979) * 0.1516;
+
+        if (result < 0.01 || result > 7)
+        {
+            result = 0;
+        }
+    }
+
+    return result;
+}
+
+__attribute__((always_inline)) inline static double MICS6814_ComputeEthanol(double const ratio_RED, double const ratio_NH3)
+{
+    double result = 0;
+
+    if (ratio_RED > 1.05 || ratio_RED < 0.03)
+    {
+        if (ratio_NH3 < 0.8 && ratio_NH3 > 0.06)
+        {
+            result = pow(ratio_NH3, -2.781) * 0.2068;
+
+            if (result < 1 || result > 250)
+            {
+                result = 0;
+            }
+        }
+        else
+        {
+            result = 0;
+        }
+    }
+    else
+    {
+        result = pow(ratio_RED, -1.58) * 1.363;
+
+        if (result < 1.5 || result > 250)
+        {
+            result = 0;
+        }
+    }
+
+    return result;
+}
+
+__attribute__((always_inline)) inline static double MICS6814_ComputeHydrogen(double const ratio_RED, double const ratio_NH3)
+{
+    double result = 0;
+
+    if (ratio_RED > 1 || ratio_RED < 0.035)
+    {
+        if (ratio_NH3 < 2 && ratio_NH3 > 0.3)
+        {
+            result = pow(ratio_NH3, -2.948) * 8.0074;
+
+            if (result < 1 || result > 200)
+            {
+                result = 0;
+            }
+        }
+        else
+        {
+            result = 0;
+        }
+    }
+    else
+    {
+        result = pow(ratio_RED, -1.781) * 0.828;
+
+        if (result < 1 || result > 200)
+        {
+            result = 0;
+        }
+    }
+
+    return result;
+}
+
+__attribute__((always_inline)) inline static double MICS6814_ComputeAmmonia(double const ratio_RED, double const ratio_NH3)
+{
+    double result = 0;
+
+    if (ratio_NH3 > 0.9 || ratio_NH3 < 0.05)
+    {
+        if (ratio_RED < 1 && ratio_RED > 0.3)
+        {
+            result = pow(ratio_RED, -4.33) * 0.974;
+
+            if (result < 1 || result > 160)
+            {
+                result = 0;
+            }
+        }
+        else
+        {
+            result = 0;
+        }
+    }
+    else
+    {
+        result = pow(ratio_NH3, -1.903) * 0.6151;
+
+        if (result < 1 || result > 160)
+        {
+            result = 0;
+        }
+    }
+
+    return result;
+}
+
+__attribute__((always_inline)) inline static double MICS6814_ComputeMethane(double const ratio_RED)
+{
+    double result = 0;
+
+    if (ratio_RED > 0.8  || ratio_RED < 0.45)
+    {
+        result = 0;
+    }
+    else
+    {
+        result = pow(ratio_RED, -4.093) * 837.38;
+
+        if (result < 3000 || result > 10500)
+        {
+            result = 0;
+        }
+    }
+
+    return result;
+}
+
+__attribute__((always_inline)) inline static double MICS6814_ComputePropane(double const ratio_RED, double const ratio_NH3)
+{
+    double result = 0;
+
+    if (ratio_NH3 > 0.9 || ratio_NH3 < 0.2)
+    {
+        if (ratio_RED < 0.18 && ratio_RED > 0.05)
+        {
+            result = pow(ratio_RED, -1.316) * 323.64;
+
+            if (result < 3000 || result > 10500)
+            {
+                result = 0;
+            }
+        }
+        else
+        {
+            result = 0;
+        }
+    }
+    else
+    {
+        result = pow(ratio_NH3, -2.492) * 569.56;
+
+        if (result < 1000 || result > 30000)
+        {
+            result = 0;
+        }
+    }
+
+    return result;
+}
+
+__attribute__((always_inline)) inline static double MICS6814_ComputeIsobutane(double const ratio_RED, double const ratio_NH3)
+{
+    double result = 0;
+
+    if (ratio_NH3 > 0.8 || ratio_NH3 < 0.1)
+    {
+        if (ratio_RED < 0.07 && ratio_RED > 0.05)
+        {
+            result = 44680 - (556000 * ratio_RED);
+
+            if (result < 3000 || result > 10500)
+            {
+                result = 0;
+            }
+        }
+        else
+        {
+            result = 0;
+        }
+    }
+    else
+    {
+        result = pow(ratio_NH3, -1.888) * 503.2;
+
+        if (result < 1000 || result > 30000)
+        {
+            result = 0;
+        }
+    }
+
+    return result;
 }
 
 
@@ -146,64 +604,42 @@ mics6814_error_code_t MICS6814_Initialize(mics6814_device_t * const device, ads1
     return initResult;
 }
 
-void MICS6814_SetInputCarbonMonoxide(mics6814_device_t const * const device)
+__attribute__((always_inline)) inline double MICS6814_GetCarbonMonoxide(mics6814_device_t * const device)
 {
-    uint16_t configuration = 0;
-    ADS1015_GetConfiguration(&device->adc, &configuration);
-    configuration &= ~(MICS6814_CHANNEL_NO2 | MICS6814_CHANNEL_NH3);
-    configuration |= MICS6814_CHANNEL_CO;
-
-    // For whatever reason this doesn't work with a single function call
-    ADS1015_SetConfiguration(&device->adc, configuration);
-    ADS1015_SetConfiguration(&device->adc, configuration);
-
-    PauseMiliseconds(100);
-
-    return;
+    return MICS6814_Measure(device, MICS6814_CARBON_MONOXIDE);
 }
 
-void MICS6814_SetInputNitrogenDioxide(mics6814_device_t const * const device)
+__attribute__((always_inline)) inline double MICS6814_GetNitrogenDioxide(mics6814_device_t * const device)
 {
-    uint16_t configuration = 0;
-    ADS1015_GetConfiguration(&device->adc, &configuration);
-    configuration &= ~(MICS6814_CHANNEL_CO | MICS6814_CHANNEL_NH3);
-    configuration |= MICS6814_CHANNEL_NO2;
-
-    // For whatever reason this doesn't work with a single function call
-    ADS1015_SetConfiguration(&device->adc, configuration);
-    ADS1015_SetConfiguration(&device->adc, configuration);
-
-    PauseMiliseconds(1000);
-
-    return;
+    return MICS6814_Measure(device, MICS6814_NITROGEN_DIOXIDE);
 }
 
-void MICS6814_SetInputAmmonia(mics6814_device_t const * const device)
+__attribute__((always_inline)) inline double MICS6814_GetEthanol(mics6814_device_t * const device)
 {
-    uint16_t configuration = 0;
-    ADS1015_GetConfiguration(&device->adc, &configuration);
-    configuration &= ~(MICS6814_CHANNEL_CO | MICS6814_CHANNEL_NO2);
-    configuration |= MICS6814_CHANNEL_NH3;
-
-    // For whatever reason this doesn't work with a single function call
-    ADS1015_SetConfiguration(&device->adc, configuration);
-    ADS1015_SetConfiguration(&device->adc, configuration);
-
-    PauseMiliseconds(1000);
-
-    return;
+    return MICS6814_Measure(device, MICS6814_ETHANOL);
 }
 
-uint16_t MICS6814_ReadValue(mics6814_device_t const * const device)
+__attribute__((always_inline)) inline double MICS6814_GetHydrogen(mics6814_device_t * const device)
 {
-    uint16_t value = 0;
-    if (ADS1015_GetConversion(&device->adc, &value) == ADS1015_OK)
-    {
-        return value;
-    }
-    else
-    {
-        LOG_WARNING("Couldn't read MiCS-6814 value");
-        return 0;
-    }
+    return MICS6814_Measure(device, MICS6814_HYDROGEN);
+}
+
+__attribute__((always_inline)) inline double MICS6814_GetAmmonia(mics6814_device_t * const device)
+{
+    return MICS6814_Measure(device, MICS6814_AMMONIA);
+}
+
+__attribute__((always_inline)) inline double MICS6814_GetMethane(mics6814_device_t * const device)
+{
+    return MICS6814_Measure(device, MICS6814_METHANE);
+}
+
+__attribute__((always_inline)) inline double MICS6814_GetPropane(mics6814_device_t * const device)
+{
+    return MICS6814_Measure(device, MICS6814_PROPANE);
+}
+
+__attribute__((always_inline)) inline double MICS6814_GetIsobutane(mics6814_device_t * const device)
+{
+    return MICS6814_Measure(device, MICS6814_ISOBUTANE);
 }
