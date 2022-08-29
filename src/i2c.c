@@ -169,7 +169,7 @@ __attribute__((always_inline)) inline static void I2C0_Inititialize(i2c_mode_t c
     TWI0.MBAUD = (uint8_t) mode;
 
     // Enable Fast Mode Plus
-    if (mode == I2C_FAST_MODE_PLUS)
+    if (mode == I2C_MODE_FAST_PLUS)
     {
         TWI0.CTRLA = TWI_FMPEN_ON_gc;
     }

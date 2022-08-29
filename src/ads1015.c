@@ -54,7 +54,7 @@
  *
  * @return ads1015_error_code_t Error code
  **/
-static ads1015_error_code_t ADS1015_CheckNull(ads1015_device_t const * const device);
+__attribute__((always_inline)) inline static ads1015_error_code_t ADS1015_CheckNull(ads1015_device_t const * const device);
 
 /**
  * @brief Reads a register by selecting it with the help of the Pointer.
@@ -111,7 +111,7 @@ __attribute__((always_inline)) inline static ads1015_error_code_t ADS1015_GetWor
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-static ads1015_error_code_t ADS1015_CheckNull(ads1015_device_t const * const device)
+__attribute__((always_inline)) inline static ads1015_error_code_t ADS1015_CheckNull(ads1015_device_t const * const device)
 {
     if (device == NULL || device->handler == NULL || device->i2cDevice == NULL)
     {
@@ -149,12 +149,17 @@ static ads1015_error_code_t ADS1015_I2C_WriteRegister(i2c_t const * const i2c, u
 {
     ads1015_error_code_t writeResult = ADS1015_OK;
 
-    if (i2c->SendData(address, &pointerRegister, 1) != I2C_OK)
+    uint8_t const newBufferLength = bufferLength + 1;
+    uint8_t newDataBuffer[newBufferLength];
+
+    newDataBuffer[0] = (uint8_t) pointerRegister;
+
+    for (uint8_t registerIdx = 1; registerIdx < newBufferLength; ++registerIdx)
     {
-        writeResult = ADS1015_COMMUNICATION_ERROR;
+        newDataBuffer[registerIdx] = dataBuffer[registerIdx - 1];
     }
 
-    if (i2c->SendData(address, dataBuffer, bufferLength) != I2C_OK)
+    if (i2c->SendData(address, newDataBuffer, newBufferLength) != I2C_OK)
     {
         writeResult = ADS1015_COMMUNICATION_ERROR;
     }
@@ -203,8 +208,6 @@ ads1015_error_code_t ADS1015_Initialize(ads1015_device_t * const device, ads1015
     device->i2cAddress = i2cAddress;
     device->handler = handler;
 
-    device->i2cDevice->Initialize(I2C_FAST_MODE_PLUS);
-
     ads1015_error_code_t initResult = ADS1015_OK;
 
     LOG_INFO("Started ADS1015 initialization");
@@ -230,14 +233,7 @@ ads1015_error_code_t ADS1015_Initialize(ads1015_device_t * const device, ads1015
 
 ads1015_error_code_t ADS1015_SetConfiguration(ads1015_device_t * const device, uint16_t const configuration)
 {
-    ads1015_error_code_t setSettingsResult = ADS1015_SetWordValue(device, configuration, ADS1015_POINTER_CONFIG);
-
-    if (setSettingsResult == ADS1015_OK)
-    {
-        device->configuration = configuration;
-    }
-
-    return setSettingsResult;
+    return ADS1015_SetWordValue(device, configuration, ADS1015_POINTER_CONFIG);
 }
 
 ads1015_error_code_t ADS1015_GetConfiguration(ads1015_device_t const * const device, uint16_t * const configuration)

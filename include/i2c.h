@@ -47,7 +47,7 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-#define I2C_ADRESS_MIN    UINT8(0x00)
+#define I2C_ADRESS_MIN    UINT8(0x01)
 #define I2C_ADRESS_MAX    UINT8(0x7F)
 
 
@@ -68,9 +68,9 @@ typedef enum I2C_ERROR_CODE
 
 typedef enum I2C_MODE
 {
-    I2C_STANDARD_MODE  = 101,
-    I2C_FAST_MODE      = 21,
-    I2C_FAST_MODE_PLUS = 6
+    I2C_MODE_STANDARD  = 101,
+    I2C_MODE_FAST      = 21,
+    I2C_MODE_FAST_PLUS = 6
 } i2c_mode_t;
 
 typedef void (* i2c_initialize_t) (i2c_mode_t const);

@@ -50,70 +50,80 @@
 
 // Integer macros
 
-#define UINT8(X)                           ((uint8_t) (X))
-#define UINT16(X)                          ((uint16_t) (X))
+#define UINT8(X)                            ((uint8_t) (X))
+#define UINT16(X)                           ((uint16_t) (X))
 
 // Principal and secondary I2C addresses of the chip
 
-#define ADS1015_I2C_ADDRESS                UINT8(0x24)
-#define ADS1015_I2C_ADDRESS_SEC            UINT8(0x25)
+#define ADS1015_I2C_ADDRESS                 UINT8(0x48)
+#define ADS1015_I2C_ADDRESS_SEC             UINT8(0x49)
 
 // Input multiplexer configuration
 
-#define ADS1015_AIN0_AIN1                  UINT16(0x0000)
-#define ADS1015_AIN0_AIN3                  UINT16(0x1000)
-#define ADS1015_AIN1_AIN3                  UINT16(0x2000)
-#define ADS1015_AIN2_AIN3                  UINT16(0x3000)
-#define ADS1015_AIN0_GND                   UINT16(0x4000)
-#define ADS1015_AIN1_GND                   UINT16(0x5000)
-#define ADS1015_AIN2_GND                   UINT16(0x6000)
-#define ADS1015_AIN3_GND                   UINT16(0x7000)
+#define ADS1015_AIN0_AIN1                   UINT16(0x0000)
+#define ADS1015_AIN0_AIN3                   UINT16(0x1000)
+#define ADS1015_AIN1_AIN3                   UINT16(0x2000)
+#define ADS1015_AIN2_AIN3                   UINT16(0x3000)
+#define ADS1015_AIN0_GND                    UINT16(0x4000)
+#define ADS1015_AIN1_GND                    UINT16(0x5000)
+#define ADS1015_AIN2_GND                    UINT16(0x6000)
+#define ADS1015_AIN3_GND                    UINT16(0x7000)
 
 // Programmable gain amplifier configuration
 
-#define ADS1015_PGA_6_144V                 UINT16(0x0000)
-#define ADS1015_PGA_4_096V                 UINT16(0x0200)
-#define ADS1015_PGA_2_048V                 UINT16(0x0400)
-#define ADS1015_PGA_1_024V                 UINT16(0x0600)
-#define ADS1015_PGA_0_512V                 UINT16(0x0800)
-#define ADS1015_PGA_0_256V                 UINT16(0x0A00)
+#define ADS1015_PGA_6_144V                  UINT16(0x0000)
+#define ADS1015_PGA_4_096V                  UINT16(0x0200)
+#define ADS1015_PGA_2_048V                  UINT16(0x0400)
+#define ADS1015_PGA_1_024V                  UINT16(0x0600)
+#define ADS1015_PGA_0_512V                  UINT16(0x0800)
+#define ADS1015_PGA_0_256V                  UINT16(0x0A00)
 
 // Configuration mode
 
-#define ADS1015_CONTINUOUS_MODE            UINT16(0x0000)
-#define ADS1015_SINGLE_SHOT_MODE           UINT16(0x0100)
+#define ADS1015_CONTINUOUS_MODE             UINT16(0x0000)
+#define ADS1015_SINGLE_SHOT_MODE            UINT16(0x0100)
 
 // Data rate
 
-#define ADS1015_DATA_RATE_128_SPS          UINT16(0x0000)
-#define ADS1015_DATA_RATE_250_SPS          UINT16(0x0020)
-#define ADS1015_DATA_RATE_490_SPS          UINT16(0x0040)
-#define ADS1015_DATA_RATE_920_SPS          UINT16(0x0060)
-#define ADS1015_DATA_RATE_1600_SPS         UINT16(0x0080)
-#define ADS1015_DATA_RATE_2400_SPS         UINT16(0x00A0)
-#define ADS1015_DATA_RATE_3300_SPS         UINT16(0x00C0)
+#define ADS1015_DATA_RATE_128_SPS           UINT16(0x0000)
+#define ADS1015_DATA_RATE_250_SPS           UINT16(0x0020)
+#define ADS1015_DATA_RATE_490_SPS           UINT16(0x0040)
+#define ADS1015_DATA_RATE_920_SPS           UINT16(0x0060)
+#define ADS1015_DATA_RATE_1600_SPS          UINT16(0x0080)
+#define ADS1015_DATA_RATE_2400_SPS          UINT16(0x00A0)
+#define ADS1015_DATA_RATE_3300_SPS          UINT16(0x00C0)
 
 // Comparator mode
 
-#define ADS1015_COMPARATOR_TRADITIONAL     UINT16(0x0000)
-#define ADS1015_COMPARATOR_WINDOW          UINT16(0x0010)
+#define ADS1015_COMPARATOR_TRADITIONAL      UINT16(0x0000)
+#define ADS1015_COMPARATOR_WINDOW           UINT16(0x0010)
 
 // Comparator polarity
 
-#define ADS1015_COMPARATOR_ACTIVE_LOW      UINT16(0x0000)
-#define ADS1015_COMPARATOR_ACTIVE_HIGH     UINT16(0x0008)
+#define ADS1015_COMPARATOR_ACTIVE_LOW       UINT16(0x0000)
+#define ADS1015_COMPARATOR_ACTIVE_HIGH      UINT16(0x0008)
 
 // Latching comparator
 
-#define ADS1015_COMPARATOR_NON_LATCHING    UINT16(0x0000)
-#define ADS1015_COMPARATOR_LATCHING        UINT16(0x0004)
+#define ADS1015_COMPARATOR_NON_LATCHING     UINT16(0x0000)
+#define ADS1015_COMPARATOR_LATCHING         UINT16(0x0004)
 
 // Comparator queue and disable
 
-#define ADS1015_COMPARATOR_QUEUE_1_CONV    UINT16(0x0000)
-#define ADS1015_COMPARATOR_QUEUE_2_CONV    UINT16(0x0001)
-#define ADS1015_COMPARATOR_QUEUE_4_CONV    UINT16(0x0002)
-#define ADS1015_COMPARATOR_DISABLE         UINT16(0x0003)
+#define ADS1015_COMPARATOR_QUEUE_1_CONV     UINT16(0x0000)
+#define ADS1015_COMPARATOR_QUEUE_2_CONV     UINT16(0x0001)
+#define ADS1015_COMPARATOR_QUEUE_4_CONV     UINT16(0x0002)
+#define ADS1015_COMPARATOR_DISABLE          UINT16(0x0003)
+
+// Data rate delay
+
+#define ADS1015_DATA_RATE_128_SPS_DELAY     10000
+#define ADS1015_DATA_RATE_250_SPS_DELAY     8000
+#define ADS1015_DATA_RATE_490_SPS_DELAY     5000
+#define ADS1015_DATA_RATE_920_SPS_DELAY     3000
+#define ADS1015_DATA_RATE_1600_SPS_DELAY    2000
+#define ADS1015_DATA_RATE_2400_SPS_DELAY    1500
+#define ADS1015_DATA_RATE_3300_SPS_DELAY    1000         
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -157,10 +167,6 @@ typedef struct ADS1015_DEVICE
 
     // Handler
     ads1015_handler_t const * handler;
-
-    // Configuration
-    uint16_t configuration;
-
 } ads1015_device_t;
 
 
@@ -252,5 +258,14 @@ ads1015_error_code_t ADS1015_GetHighThreshold(ads1015_device_t const * const dev
  * @return ads1015_error_code_t
  **/
 ads1015_error_code_t ADS1015_GetConversion(ads1015_device_t const * const device, uint16_t * const conversion);
+
+
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+//                                  Modules                                   //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+extern ads1015_handler_t const ADS1015_I2C0_Handler;
 
 #endif // ADS1015_H
