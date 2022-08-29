@@ -50,9 +50,9 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-#define MICS6814_BASE_RESISTANCE_RED    1 // TODO: Change
-#define MICS6814_BASE_RESISTANCE_OX     1 // TODO: Change
-#define MICS6814_BASE_RESISTANCE_NH3    1 // TODO: Change
+#define MICS6814_BASE_RESISTANCE_RED    800.0f // TODO: Find a fucking correct value
+#define MICS6814_BASE_RESISTANCE_OX     10.0f  // TODO: The same problem
+#define MICS6814_BASE_RESISTANCE_NH3    755.0f // TODO: Once again I am asking for mercy
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -291,20 +291,17 @@ static double MICS6814_GetResistanceRatio(mics6814_device_t const * const device
         case MICS6814_CHANNEL_RED_SENSOR:
             MICS6814_SetADCInputToRED(device);
             readValue = MICS6814_ReadValue(device);
-            LOG_DEBUG_PRINTF("RED: %d", readValue);
-            // TODO: Formula for resistance
+            readValue = ((double) (1000UL * readValue)) / ((double) (2047 - readValue));
             return readValue / MICS6814_BASE_RESISTANCE_RED;
         case MICS6814_CHANNEL_OX_SENSOR:
             MICS6814_SetADCInputToOX(device);
             readValue = MICS6814_ReadValue(device);
-            LOG_DEBUG_PRINTF("OX: %d", readValue);
-            // TODO: Formula for resistance
+            readValue = ((double) (15UL * readValue)) / ((double) (2047 - readValue));
             return readValue / MICS6814_BASE_RESISTANCE_OX;
         case MICS6814_CHANNEL_NH3_SENSOR:
             MICS6814_SetADCInputToNH3(device);
             readValue = MICS6814_ReadValue(device);
-            LOG_DEBUG_PRINTF("NH3: %d", readValue);
-            // TODO: Formula for resistance
+            readValue = ((double) (1000UL * readValue)) / ((double) (2047 - readValue));
             return readValue / MICS6814_BASE_RESISTANCE_NH3;
         default:
             LOG_ERROR("Invalid channel type in MiCS-6814 selection");
