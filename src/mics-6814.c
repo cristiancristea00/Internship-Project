@@ -50,9 +50,9 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-#define MICS6814_BASE_RESISTANCE_RED    800.0f // TODO: Find a fucking correct value
-#define MICS6814_BASE_RESISTANCE_OX     10.0f  // TODO: The same problem
-#define MICS6814_BASE_RESISTANCE_NH3    755.0f // TODO: Once again I am asking for mercy
+#define MICS6814_BASE_RESISTANCE_RED    200.0f  // TODO: Find a fucking correct value
+#define MICS6814_BASE_RESISTANCE_OX     10.0f   // TODO: The same problem
+#define MICS6814_BASE_RESISTANCE_NH3    100.0f  // TODO: Once again I am asking for mercy
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -63,7 +63,7 @@
 
 typedef enum MICS6814_CHANNEL
 {
-    MICS6814_CHANNEL_OX_SENSOR = ADS1015_AIN0_GND,
+    MICS6814_CHANNEL_OX_SENSOR  = ADS1015_AIN0_GND,
     MICS6814_CHANNEL_NH3_SENSOR = ADS1015_AIN1_GND,
     MICS6814_CHANNEL_RED_SENSOR = ADS1015_AIN2_GND
 } mics6814_channel_t;
@@ -99,8 +99,8 @@ __attribute__((always_inline)) inline static mics6814_error_code_t MICS6814_Chec
 /**
  * @brief Initializes the ADC device.
  *
- * @param device MiCS-6814 device
- * @param i2cDevice I2C device
+ * @param[in, out] device MiCS-6814 device
+ * @param[in]      i2cDevice I2C device
  *
  * @return mics6814_error_code_t Error code
  **/
@@ -109,81 +109,129 @@ __attribute__((always_inline)) inline static mics6814_error_code_t MICS6814_Conf
 /**
  * @brief Sets the MiCS-6814's ADC input to the RED channel.
  *
- * @param device MiCS-6814 device
+ * @param[in] device MiCS-6814 device
  **/
 static void MICS6814_SetADCInputToRED(mics6814_device_t const * const device);
 
 /**
  * @brief Sets the MiCS-6814's ADC input to the OX channel.
  *
- * @param device MiCS-6814 device
+ * @param[in] device MiCS-6814 device
  **/
 static void MICS6814_SetADCInputToOX(mics6814_device_t const * const device);
 
 /**
  * @brief Sets the MiCS-6814's ADC input to the NH3 channel.
  *
- * @param device MiCS-6814 device
+ * @param[in] device MiCS-6814 device
  **/
 static void MICS6814_SetADCInputToNH3(mics6814_device_t const * const device);
 
 /**
  * @brief Reads the MiCS-6814's current ADC input.
  *
- * @param device MiCS-6814 device
+ * @param[in] device MiCS-6814 device
  *
  * @return uint16_t ADC value
  **/
 static uint16_t MICS6814_ReadValue(mics6814_device_t const * const device);
 
-/*
- * TODO
- */
+/**
+ * @brief Computes the resistance ratio according to the base resistance and the
+ *        current read value.
+ *
+ * @param[in] device MiCS-6814 device
+ * @param[in] channel Channel to be read
+ *
+ * @return double Computed ratio
+ **/
 static double MICS6814_GetResistanceRatio(mics6814_device_t const * const device, mics6814_channel_t const channel);
 
-/*
- * TODO
- */
+/**
+ * @brief Measures the speciefied gas concentration in ppm.
+ *
+ * @param[in] device MiCS-6814 device
+ * @param[in] gas Gas to be measured
+ *
+ * @return double Gas concentration in ppm
+ **/
 static double MICS6814_Measure(mics6814_device_t const * const device, mics6814_gas_t const gas);
 
-/*
- * TODO
- */
+/**
+ * @brief Computes the Carbon Monoxide (CO) concentration in ppm.
+ *
+ * @param[in] ratio_RED Resistance ratio of the RED channel
+ *
+ * @return double CO concentration in ppm
+ **/
 __attribute__((always_inline)) inline static double MICS6814_ComputeCarbonMonoxide(double const ratio_RED);
 
-/*
- * TODO
- */
+/**
+ * @brief Computes the Nitrogen Dioxide (NO2) concentration in ppm.
+ *
+ * @param[in] ratio_OX Resistance ratio of the OX channel
+ *
+ * @return double NO2 concentration in ppm
+ **/
 __attribute__((always_inline)) inline static double MICS6814_ComputeNitrogenDioxide(double const ratio_OX);
 
-/*
- * TODO
- */
+/**
+ * @brief Computes the Ethanol (C2H5OH) concentration in ppm.
+ *
+ * @param[in] ratio_RED Resistance ratio of the RED channel
+ * @param[in] ratio_NH3 Resistance ratio of the NH3 channel
+ *
+ * @return double C2H5OH concentration in ppm
+ **/
 __attribute__((always_inline)) inline static double MICS6814_ComputeEthanol(double const ratio_RED, double const ratio_NH3);
 
-/*
- * TODO
- */
+/**
+ * @brief Computes the Hydrogen (H2) concentration in ppm.
+ *
+ * @param[in] ratio_RED Resistance ratio of the RED channel
+ * @param[in] ratio_NH3 Resistance ratio of the NH3 channel
+ *
+ * @return double H2 concentration in ppm
+ **/
 __attribute__((always_inline)) inline static double MICS6814_ComputeHydrogen(double const ratio_RED, double const ratio_NH3);
 
-/*
- * TODO
- */
+/**
+ * @brief Computes the Ammonia (NH3) concentration in ppm.
+ *
+ * @param[in] ratio_RED Resistance ratio of the RED channel
+ * @param[in] ratio_NH3 Resistance ratio of the NH3 channel
+ *
+ * @return double NH3 concentration in ppm
+ **/
 __attribute__((always_inline)) inline static double MICS6814_ComputeAmmonia(double const ratio_RED, double const ratio_NH3);
 
-/*
- * TODO
- */
+/**
+ * @brief Computes the Methane (CH4) concentration in ppm.
+ *
+ * @param[in] ratio_RED Resistance ratio of the RED channel
+ *
+ * @return double CH4 concentration in ppm
+ **/
 __attribute__((always_inline)) inline static double MICS6814_ComputeMethane(double const ratio_RED);
 
-/*
- * TODO
- */
+/**
+ * @brief Computes the Propane (C3H8) concentration in ppm.
+ *
+ * @param[in] ratio_RED Resistance ratio of the RED channel
+ * @param[in] ratio_NH3 Resistance ratio of the NH3 channel
+ *
+ * @return double C3H8 concentration in ppm
+ **/
 __attribute__((always_inline)) inline static double MICS6814_ComputePropane(double const ratio_RED, double const ratio_NH3);
 
-/*
- * TODO
- */
+/**
+ * @brief Computes the Isobutane (C4H10) concentration in ppm.
+ *
+ * @param[in] ratio_RED Resistance ratio of the RED channel
+ * @param[in] ratio_NH3 Resistance ratio of the NH3 channel
+ *
+ * @return double C4H10 concentration in ppm
+ **/
 __attribute__((always_inline)) inline static double MICS6814_ComputeIsobutane(double const ratio_RED, double const ratio_NH3);
 
 

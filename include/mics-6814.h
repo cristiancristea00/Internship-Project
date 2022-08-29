@@ -71,9 +71,9 @@ typedef struct MICS6814_DEVICE
 /**
  * @brief Initializes the MiCS-6814 module.
  *
- * @param device MiCS-6814 device
- * @param adcDevice Analog to Digital Converter device
- * @param i2cDevice I2C device
+ * @param[in, out] device MiCS-6814 device
+ * @param[in]      adcDevice Analog to Digital Converter device
+ * @param[in]      i2cDevice I2C device
  *
  * @return mics6814_error_code_t Error code
  **/
@@ -83,7 +83,7 @@ mics6814_error_code_t MICS6814_Initialize(mics6814_device_t * const device, ads1
  * @brief Reads the Carbon Monoxide (CO) concentration from the MiCS-6814 module
  *        and returns the value in ppm.
  *
- * @param device MiCS-6814 device
+ * @param[in] device MiCS-6814 device
  *
  * @return double CO concentration in ppm
  **/
@@ -93,7 +93,7 @@ double MICS6814_GetCarbonMonoxide(mics6814_device_t * const device);
  * @brief Reads the Nitrogen Dioxide (NO2) concentration from the MiCS-6814
  *        module and returns the value in ppm.
  *
- * @param device MiCS-6814 device
+ * @param[in] device MiCS-6814 device
  *
  * @return double NO2 concentration in ppm
  **/
@@ -103,7 +103,7 @@ double MICS6814_GetNitrogenDioxide(mics6814_device_t * const device);
  * @brief Reads the Ethanol (C2H5OH) concentration from the MiCS-6814 module and
  *        returns the value in ppm.
  *
- * @param device MiCS-6814 device
+ * @param[in] device MiCS-6814 device
  *
  * @return double C2H5OH concentration in ppm
  **/
@@ -113,7 +113,7 @@ double MICS6814_GetEthanol(mics6814_device_t * const device);
  * @brief Reads the Hydrogen (H2) concentration from the MiCS-6814 module and
  *        returns the value in ppm.
  *
- * @param device MiCS-6814 device
+ * @param[in] device MiCS-6814 device
  *
  * @return double H2 concentration in ppm
  **/
@@ -123,7 +123,7 @@ double MICS6814_GetHydrogen(mics6814_device_t * const device);
  * @brief Reads the Ammonia (NH3) concentration from the MiCS-6814 module and
  *        returns the value in ppm.
  *
- * @param device MiCS-6814 device
+ * @param[in] device MiCS-6814 device
  *
  * @return double NH3 concentration in ppm
  **/
@@ -133,7 +133,7 @@ double MICS6814_GetAmmonia(mics6814_device_t * const device);
  * @brief Reads the Methane (CH4) concentration from the MiCS-6814 module and
  *        returns the value in ppm.
  *
- * @param device MiCS-6814 device
+ * @param[in] device MiCS-6814 device
  *
  * @return double CH4 concentration in ppm
  **/
@@ -143,7 +143,7 @@ double MICS6814_GetMethane(mics6814_device_t * const device);
  * @brief Reads the Propane (C3H8) concentration from the MiCS-6814 module and
  *        returns the value in ppm.
  *
- * @param device MiCS-6814 device
+ * @param[in] device MiCS-6814 device
  *
  * @return double C3H8 concentration in ppm
  **/
@@ -153,7 +153,7 @@ double MICS6814_GetPropane(mics6814_device_t * const device);
  * @brief Reads the Isobutane (C4H10) concentration from the MiCS-6814 module
  *        and returns the value in ppm.
  *
- * @param device MiCS-6814 device
+ * @param[in] device MiCS-6814 device
  *
  * @return double C4H10 concentration in ppm
  **/
