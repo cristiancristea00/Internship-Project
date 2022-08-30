@@ -40,14 +40,14 @@
 static oled_colour_t red = { 0xFF, 0x00, 0x00 };
 static oled_colour_t black = { 0x00, 0x00, 0x00 };
 
-static void DisplaySetup(oled_device_t const * const oled);
-static void DisplayData(bme280_data_t * const sensorsData, oled_device_t const * const oled);
+inline static void SystemInitialize(void);
+inline static void DisplaySetup(oled_device_t const * const oled);
+inline static void ClearLineOfText(oled_device_t const * const oled, oled_point_t const start);
+inline static void DisplayData(bme280_data_t * const sensorsData, oled_device_t const * const oled);
 
 void main(void)
 {
-    SetClockFrequency(CLKCTRL_FRQSEL_24M_gc);
-
-    uart_1.Initialize(460800);
+    SystemInitialize();
 
     hc05_device_t baseStation;
     HC05_Initialize(&baseStation, &uart_0);
@@ -67,7 +67,18 @@ void main(void)
     }
 }
 
-static void DisplaySetup(oled_device_t const * const oled)
+inline static void SystemInitialize(void)
+{
+    SetClockFrequency(CLKCTRL_FRQSEL_24M_gc);
+
+    uart_1.Initialize(460800);
+    uart_0.InitializeWithReceive(460800, HC05_ReceiveCallback);
+    spi_0.Initialize();
+
+    return;
+}
+
+inline static void DisplaySetup(oled_device_t const * const oled)
 {
     oled_shape_parameters_t textParameters;
     oled_shape_t text;
@@ -101,7 +112,7 @@ static void DisplaySetup(oled_device_t const * const oled)
     return;
 }
 
-static void ClearLineOfText(oled_device_t const * const oled, oled_point_t const start)
+inline static void ClearLineOfText(oled_device_t const * const oled, oled_point_t const start)
 {
     oled_shape_parameters_t clearBoxParameters;
     oled_shape_t clearBox;
@@ -170,11 +181,12 @@ static void DisplayData(bme280_data_t * const sensorsData, oled_device_t const *
     OLED_SetShape(&humidityText, OLED_SHAPE_STRING, &humidityTextParameters, red);
 
     ClearLineOfText(oled, temperatureTextStart);
-    ClearLineOfText(oled, pressureTextStart);
-    ClearLineOfText(oled, humidityTextStart);
-
     temperatureText.Draw(oled, &temperatureText);
+
+    ClearLineOfText(oled, pressureTextStart);
     pressureText.Draw(oled, &pressureText);
+
+    ClearLineOfText(oled, humidityTextStart);
     humidityText.Draw(oled, &humidityText);
 
     printf("Temperature: %0.2lf °C\n\r", temperature);

@@ -110,14 +110,6 @@ static hc05_response_t HC05_WaitForConfirmation(void);
 static hc05_response_t HC05_GetResponseReceived(void);
 
 /**
- * @brief Callback function for the UART device that that stores received data
- *        in the vector.
- *
- * @param[in] data Byte received
- **/
-static void HC05_ReceiveCallback(uint8_t const data);
-
-/**
  * @brief Checks if the received byte is the last byte of the packet.
  *
  * @return true The byte is the last byte of the packet
@@ -267,25 +259,6 @@ static hc05_response_t HC05_GetResponseReceived(void)
     }
 }
 
-static void HC05_ReceiveCallback(uint8_t const data)
-{
-    if ((transsmitionStatus == HC05_IDLE) && (data != 0))
-    {
-        transsmitionStatus = HC05_IN_PROGRESS;
-        Vector_AddByte(&HC05_BUFFER, data);
-    }
-    else if (transsmitionStatus == HC05_IN_PROGRESS)
-    {
-        if (HC05_IsLastByte())
-        {
-            transsmitionStatus = HC05_FINISHED;
-        }
-        Vector_AddByte(&HC05_BUFFER, data);
-    }
-
-    return;
-}
-
 __attribute__((always_inline)) inline static bool HC05_IsLastByte(void)
 {
     return HC05_GetNumberOfBytesToReceive() == HC05_BUFFER.bufferSize;
@@ -372,7 +345,6 @@ hc05_error_code_t HC05_Initialize(hc05_device_t * const device, uart_t const * c
 
     Vector_Initialize(&HC05_BUFFER);
 
-    uartDevice->InitializeWithReceive(460800, HC05_ReceiveCallback);
     device->uartDevice = uartDevice;
 
     hc05_error_code_t initResult = HC05_CheckNull(device);
@@ -477,4 +449,23 @@ hc05_error_code_t HC05_ReceiveData(hc05_device_t const * const device, void * co
     HC05_EndTransmission();
 
     return receiveResult;
+}
+
+void HC05_ReceiveCallback(uint8_t const data)
+{
+    if ((transsmitionStatus == HC05_IDLE) && (data != 0))
+    {
+        transsmitionStatus = HC05_IN_PROGRESS;
+        Vector_AddByte(&HC05_BUFFER, data);
+    }
+    else if (transsmitionStatus == HC05_IN_PROGRESS)
+    {
+        if (HC05_IsLastByte())
+        {
+            transsmitionStatus = HC05_FINISHED;
+        }
+        Vector_AddByte(&HC05_BUFFER, data);
+    }
+
+    return;
 }

@@ -435,7 +435,6 @@ __attribute__((always_inline)) inline void OLED_Initialize(oled_device_t * const
 {
     OLED_InitializePins();
 
-    spiDevice->Initialize();
     device->spiDevice = spiDevice;
 
     OLED_ClearEnablePin();

@@ -123,4 +123,12 @@ hc05_error_code_t HC05_ReceiveData(hc05_device_t const * const device, void * co
  **/
 hc05_error_code_t HC05_SendData(hc05_device_t const * const device, uint8_t const * const buffer, uint8_t const bufferSize);
 
+/**
+ * @brief Callback function for the UART device that that stores received data
+ *        in the vector.
+ *
+ * @param[in] data Byte received
+ **/
+void HC05_ReceiveCallback(uint8_t const data);
+
 #endif // HC05_H

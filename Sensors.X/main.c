@@ -42,15 +42,12 @@
 #include <stdint.h>
 #include <stdio.h>
 
-
-static void BusScan(void);
-static void SensorRead(bme280_device_t * const device);
+inline static void SystemInitialize(void);
+inline static void SensorRead(bme280_device_t * const device);
 
 void main(void)
 {
-    SetClockFrequency(CLKCTRL_FRQSEL_24M_gc);
-
-    uart_1.Initialize(460800);
+    SystemInitialize();
 
     bme280_device_t weatherClick;
 
@@ -81,7 +78,18 @@ void main(void)
     }
 }
 
-static void SensorRead(bme280_device_t * const device)
+inline static void SystemInitialize(void)
+{
+    SetClockFrequency(CLKCTRL_FRQSEL_24M_gc);
+
+    uart_1.Initialize(460800);
+    uart_0.InitializeWithReceive(460800, HC05_ReceiveCallback);
+    i2c_0.Initialize(I2C_FAST_MODE_PLUS);
+
+    return;
+}
+
+inline static void SensorRead(bme280_device_t * const device)
 {
     bme280_error_code_t readResult = BME280_GetSensorData(device);
 

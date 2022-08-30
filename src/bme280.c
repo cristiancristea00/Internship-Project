@@ -943,8 +943,6 @@ bme280_error_code_t BME280_Init(bme280_device_t * const device, bme280_handler_t
     device->i2cAddress = i2cAddress;
     device->handler = handler;
 
-    device->i2cDevice->Initialize(I2C_FAST_MODE_PLUS);
-
     bme280_error_code_t initResult = BME280_OK;
 
     LOG_INFO("Started BME280 initialization");
