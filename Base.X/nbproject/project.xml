@@ -15,7 +15,8 @@
             <sourceRootList>
                 <sourceRootElem>../src</sourceRootElem>
                 <sourceRootElem>../include</sourceRootElem>
-                <sourceRootElem>.</sourceRootElem>
+                <sourceRootElem>./src</sourceRootElem>
+                <sourceRootElem>./include</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>

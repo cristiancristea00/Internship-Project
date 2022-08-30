@@ -241,7 +241,6 @@ __attribute__((always_inline)) inline void OLED_DRAW_Point(oled_device_t const *
 {
     if ((x > OLED_DRAW_MAX_DIMENSION) || (y > OLED_DRAW_MAX_DIMENSION))
     {
-
         return;
     }
 
@@ -334,7 +333,6 @@ __attribute__((always_inline)) inline void OLED_DRAW_FilledRectangle(oled_device
     {
         for (uint8_t x = start.x; x <= end.x; ++x)
         {
-
             OLED_SendColor(device, colour);
         }
     }
@@ -407,7 +405,6 @@ __attribute__((always_inline)) inline void OLED_DRAW_Disc(oled_device_t const * 
             {
                 for (int8_t yCurr = xCurr; yCurr < y; ++yCurr)
                 {
-
                     OLED_DRAW_Point(device, center.x + xCurr, center.y + yCurr,  colour);
                     OLED_DRAW_Point(device, center.x + xCurr, center.y - yCurr,  colour);
                     OLED_DRAW_Point(device, center.x - xCurr, center.y + yCurr,  colour);
@@ -438,7 +435,6 @@ __attribute__((always_inline)) inline void OLED_DRAW_Bitmap(oled_device_t const 
     {
         for (uint8_t x = 0; x < xSize; ++x)
         {
-
             OLED_SendColor(device, bitmap[y * xSize + x]);
         }
     }

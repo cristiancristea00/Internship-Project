@@ -52,7 +52,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #define UART_PRINTF                // Uncomment to enable printf functionality on UART.
-#define LOGGING                    // Uncomment to enable logging
+// #define LOGGING                 // Uncomment to enable logging
 
 #define PauseMiliseconds(MILIS)          (_delay_ms((MILIS)))
 #define PauseMicroseconds(MICROS)        (_delay_us((MICROS)))
